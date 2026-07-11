@@ -10,11 +10,14 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "auth:generate": "npx auth@latest generate --config ./auth.cli.ts --output ./db/schema.ts --yes",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply student-manager-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply student-manager-db --remote"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.6.23",
+    "better-auth": "^1.6.23",
     "drizzle-orm": "^0.45.2",
     "next": "16.2.10",
     "react": "19.2.4",
