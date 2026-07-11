@@ -5,6 +5,12 @@ node_modules/
 .next/
 out/
 
+# OpenNext and Wrangler
+.open-next/
+.wrangler/
+.dev.vars*
+!.dev.vars.example
+
 # production builds
 build/
 dist/
