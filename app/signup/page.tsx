@@ -5,37 +5,38 @@ import { redirect } from "next/navigation";
 import { AuthPage } from "@/components/auth-page";
 import { requireRole } from "@/lib/auth/server";
 
-import { LoginForm } from "./login-form";
+import { SignupForm } from "./signup-form";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("Login");
+  const t = await getTranslations("Signup");
   return { title: t("metaTitle"), description: t("metaDescription") };
 }
 
-export default async function LoginPage() {
+export default async function SignupPage() {
   const session = await requireRole("teacher");
   if ("session" in session) redirect("/");
 
-  const t = await getTranslations("Login");
+  const t = await getTranslations("Signup");
   const copy = {
+    nameLabel: t("nameLabel"),
+    namePlaceholder: t("namePlaceholder"),
     emailLabel: t("emailLabel"),
     emailPlaceholder: t("emailPlaceholder"),
     passwordLabel: t("passwordLabel"),
     passwordPlaceholder: t("passwordPlaceholder"),
     showPassword: t("showPassword"),
     hidePassword: t("hidePassword"),
-    rememberMe: t("rememberMe"),
     continue: t("continue"),
     loading: t("loading"),
-    invalidCredentials: t("invalidCredentials"),
-    notTeacher: t("notTeacher"),
+    signupFailed: t("signupFailed"),
+    invalidName: t("invalidName"),
     invalidEmail: t("invalidEmail"),
     passwordTooShort: t("passwordTooShort"),
   };
 
   return (
     <AuthPage eyebrow={t("eyebrow")} title={t("title")}>
-      <LoginForm copy={copy} />
+      <SignupForm copy={copy} />
     </AuthPage>
   );
 }

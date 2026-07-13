@@ -22,6 +22,26 @@
     "invalidEmail": "Enter a valid email address.",
     "passwordTooShort": "Your password must contain at least 8 characters."
   },
+  "Signup": {
+    "metaTitle": "Set up your teacher workspace — Orbit",
+    "metaDescription": "Create your Orbit teacher workspace.",
+    "eyebrow": "Teacher workspace",
+    "title": "Set up your teaching studio",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your full name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Create a password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "continue": "Create account",
+    "loading": "Creating account…",
+    "signupFailed": "We couldn't create your account. Please try again.",
+    "invalidName": "Enter your name.",
+    "invalidEmail": "Enter a valid email address.",
+    "passwordTooShort": "Your password must contain at least 8 characters."
+  },
   "Dashboard": {
     "headerLabel": "Orbit header",
     "studio": "Student studio",

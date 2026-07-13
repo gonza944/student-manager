@@ -206,8 +206,8 @@
     @apply min-h-dvh bg-background text-foreground;
   }
 
-  .login-form input:autofill,
-  .login-form input:-webkit-autofill {
+  .auth-form input:autofill,
+  .auth-form input:-webkit-autofill {
     color: var(--orbit-ink);
     -webkit-text-fill-color: var(--orbit-ink);
     caret-color: var(--orbit-ink);

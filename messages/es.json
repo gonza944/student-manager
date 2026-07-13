@@ -22,6 +22,26 @@
     "invalidEmail": "Ingresa un correo electrónico válido.",
     "passwordTooShort": "La contraseña debe tener al menos 8 caracteres."
   },
+  "Signup": {
+    "metaTitle": "Configura tu espacio docente — Orbit",
+    "metaDescription": "Crea tu espacio docente de Orbit.",
+    "eyebrow": "Espacio docente",
+    "title": "Configura tu espacio docente",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "Tu nombre completo",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "tu@correo.com",
+    "passwordLabel": "Contraseña",
+    "passwordPlaceholder": "Crea una contraseña",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "continue": "Crear cuenta",
+    "loading": "Creando cuenta…",
+    "signupFailed": "No pudimos crear tu cuenta. Inténtalo de nuevo.",
+    "invalidName": "Ingresa tu nombre.",
+    "invalidEmail": "Ingresa un correo electrónico válido.",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres."
+  },
   "Dashboard": {
     "headerLabel": "Encabezado de Orbit",
     "studio": "Gestión de estudiantes",
