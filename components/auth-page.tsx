@@ -17,7 +17,7 @@ export function AuthPage({
   children: ReactNode;
 }) {
   return (
-    <main className="relative grid min-h-dvh place-items-center overflow-hidden bg-orbit-paper px-5 py-12 text-orbit-ink dark:bg-(--dark-background)">
+    <main className="relative flex min-h-dvh items-end overflow-x-clip bg-orbit-paper text-orbit-ink sm:grid sm:place-items-center sm:px-5 sm:py-12 dark:bg-(--dark-background)">
       <div className="pointer-events-none absolute inset-0">
         <div className="size-full dark:hidden">
           <RippleGrid
@@ -53,7 +53,7 @@ export function AuthPage({
         </div>
       </div>
       <AnimatedContent
-        className="relative w-full max-w-md"
+        className="relative w-full sm:max-w-md"
         distance={100}
         direction="vertical"
         reverse={false}
@@ -64,7 +64,7 @@ export function AuthPage({
         scale={0.7}
         threshold={0.1}>
         <Card
-          className="gap-0 rounded-(--radius) border-orbit-ink/20 bg-blue-gray-400 py-0 text-orbit-ink shadow-[0_24px_80px_rgb(23_25_29/18%)]"
+          className="gap-0 rounded-b-none rounded-t-(--radius) border-x-0 border-b-0 border-orbit-ink/20 bg-blue-gray-400 py-0 text-orbit-ink shadow-[0_24px_80px_rgb(23_25_29/18%)] sm:rounded-(--radius) sm:border"
           aria-labelledby="auth-title">
           <CardHeader className="px-7 pb-0 pt-7 sm:px-9 sm:pt-9">
             <div className="mb-6 flex items-center gap-3">
@@ -80,18 +80,25 @@ export function AuthPage({
                 </p>
               </div>
             </div>
-            <TextType
-              id="auth-title"
-              as="h1"
-              text={title}
-              loop={true}
-              deletingSpeed={60}
-              pauseDuration={2800}
-              aria-label={title}
-              className="text-3xl font-black text-orbit-ink tracking-[-0.065em]"
-            />
+            <div className="relative">
+              <h1
+                aria-hidden="true"
+                className="pointer-events-none select-none whitespace-pre-wrap text-3xl font-black text-orbit-ink opacity-0 tracking-[-0.065em]">
+                {title}
+              </h1>
+              <TextType
+                id="auth-title"
+                as="h1"
+                text={title}
+                loop={true}
+                deletingSpeed={60}
+                pauseDuration={2800}
+                aria-label={title}
+                className="absolute inset-0 w-full text-3xl font-black text-orbit-ink tracking-[-0.065em]"
+              />
+            </div>
           </CardHeader>
-          <CardContent className="px-7 pb-7 pt-8 sm:px-9 sm:pb-9">
+          <CardContent className="px-7 pb-[calc(1.75rem+env(safe-area-inset-bottom))] pt-8 sm:px-9 sm:pb-9">
             {children}
           </CardContent>
         </Card>

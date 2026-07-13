@@ -8,6 +8,7 @@ import {
   ViewOffIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
@@ -32,6 +33,8 @@ type Copy = {
   invalidName: string;
   invalidEmail: string;
   passwordTooShort: string;
+  loginPrompt: string;
+  loginLink: string;
 };
 
 type FieldErrors = Partial<Record<"name" | "email" | "password", string>>;
@@ -221,6 +224,16 @@ export function SignupForm({ copy }: { copy: Copy }) {
         className="h-12 w-full rounded-xl bg-orbit-ink px-4 text-sm font-black text-orbit-paper-strong transition-transform hover:-translate-y-px focus-visible:ring-4 focus-visible:ring-orbit-ink/30 disabled:cursor-wait">
         {pending ? copy.loading : copy.continue}
       </Button>
+
+      <p className="text-center text-sm font-semibold text-orbit-ink/80">
+        {copy.loginPrompt}
+        <Button
+          asChild
+          variant="link"
+          className="h-auto px-1 py-0 text-orbit-ink underline-offset-2">
+          <Link href="/login">{copy.loginLink}</Link>
+        </Button>
+      </p>
     </form>
   );
 }

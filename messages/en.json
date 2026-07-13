@@ -20,7 +20,9 @@
     "invalidCredentials": "Check your email and password, then try again.",
     "notTeacher": "This account does not have teacher access.",
     "invalidEmail": "Enter a valid email address.",
-    "passwordTooShort": "Your password must contain at least 8 characters."
+    "passwordTooShort": "Your password must contain at least 8 characters.",
+    "signupPrompt": "New to Orbit?",
+    "signupLink": "Create a teacher account"
   },
   "Signup": {
     "metaTitle": "Set up your teacher workspace — Orbit",
@@ -40,7 +42,9 @@
     "signupFailed": "We couldn't create your account. Please try again.",
     "invalidName": "Enter your name.",
     "invalidEmail": "Enter a valid email address.",
-    "passwordTooShort": "Your password must contain at least 8 characters."
+    "passwordTooShort": "Your password must contain at least 8 characters.",
+    "loginPrompt": "Already using Orbit?",
+    "loginLink": "Sign in"
   },
   "Dashboard": {
     "headerLabel": "Orbit header",

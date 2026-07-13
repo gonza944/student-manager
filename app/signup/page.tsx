@@ -32,6 +32,8 @@ export default async function SignupPage() {
     invalidName: t("invalidName"),
     invalidEmail: t("invalidEmail"),
     passwordTooShort: t("passwordTooShort"),
+    loginPrompt: t("loginPrompt"),
+    loginLink: t("loginLink"),
   };
 
   return (

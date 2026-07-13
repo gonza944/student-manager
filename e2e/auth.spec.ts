@@ -1,5 +1,17 @@
 import { expect, test } from "@playwright/test";
 
+test("auth pages link to each other", async ({ page }) => {
+  await page.goto("/login");
+  await page.addStyleTag({ content: ".invisible { visibility: visible !important; }" });
+  await page.getByRole("link", { name: "Create a teacher account" }).click();
+
+  await expect(page).toHaveURL("/signup");
+  await page.addStyleTag({ content: ".invisible { visibility: visible !important; }" });
+  await page.getByRole("link", { name: "Sign in" }).click();
+
+  await expect(page).toHaveURL("/login");
+});
+
 test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   const email = `e2e-${Date.now()}@example.test`;
   const password = "playwright-test";

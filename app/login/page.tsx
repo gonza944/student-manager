@@ -31,6 +31,8 @@ export default async function LoginPage() {
     notTeacher: t("notTeacher"),
     invalidEmail: t("invalidEmail"),
     passwordTooShort: t("passwordTooShort"),
+    signupPrompt: t("signupPrompt"),
+    signupLink: t("signupLink"),
   };
 
   return (
