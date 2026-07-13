@@ -25,6 +25,10 @@ export function createAuth(
       minPasswordLength: 8,
       maxPasswordLength: 128,
     },
+    session: {
+      expiresIn: 60 * 60 * 24 * 30,
+      updateAge: 60 * 60 * 24,
+    },
     user: {
       additionalFields: {
         role: {

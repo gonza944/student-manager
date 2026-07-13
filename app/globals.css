@@ -88,102 +88,102 @@
 }
 
 @theme {
-  --color-yellow-50: oklch(from var(--yellow-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* #FBF4E5 */
-  --color-yellow-100: oklch(from var(--yellow-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* #FAECCE */
-  --color-yellow-200: oklch(from var(--yellow-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* #F9DB9F */
-  --color-yellow-300: oklch(from var(--yellow-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* #F7CA6A */
-  --color-yellow-400: var(--yellow-base); /* #F4B800 */
-  --color-yellow-500: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* #CB9B1E */
-  --color-yellow-600: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* #A37E26 */
-  --color-yellow-700: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* #7D6328 */
-  --color-yellow-800: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* #594825 */
-  --color-yellow-900: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* #373020 */
-  --color-yellow-950: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* #27241D */
+  --color-yellow-50: oklch(from var(--yellow-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* yellow */
+  --color-yellow-100: oklch(from var(--yellow-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* yellow */
+  --color-yellow-200: oklch(from var(--yellow-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* yellow */
+  --color-yellow-300: oklch(from var(--yellow-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* yellow */
+  --color-yellow-400: var(--yellow-base); /* yellow */
+  --color-yellow-500: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* yellow */
+  --color-yellow-600: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* yellow */
+  --color-yellow-700: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* yellow */
+  --color-yellow-800: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* yellow */
+  --color-yellow-900: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* yellow */
+  --color-yellow-950: oklch(from var(--yellow-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* yellow */
 
-  --color-red-50: oklch(from var(--red-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* #FCE7E4 */
-  --color-red-100: oklch(from var(--red-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* #FBD2CD */
-  --color-red-200: oklch(from var(--red-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* #F5A89F */
-  --color-red-300: oklch(from var(--red-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* #EC7C71 */
-  --color-red-400: var(--red-base); /* #DF4B43 */
-  --color-red-500: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* #BB443C */
-  --color-red-600: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* #983D36 */
-  --color-red-700: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* #76352F */
-  --color-red-800: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* #552C28 */
-  --color-red-900: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* #362220 */
-  --color-red-950: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* #271D1C */
+  --color-red-50: oklch(from var(--red-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* red */
+  --color-red-100: oklch(from var(--red-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* red */
+  --color-red-200: oklch(from var(--red-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* red */
+  --color-red-300: oklch(from var(--red-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* red */
+  --color-red-400: var(--red-base); /* red */
+  --color-red-500: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* red */
+  --color-red-600: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* red */
+  --color-red-700: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* red */
+  --color-red-800: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* red */
+  --color-red-900: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* red */
+  --color-red-950: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* red */
 
-  --color-purple-50: oklch(from var(--purple-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* #F4F1FB */
-  --color-purple-100: oklch(from var(--purple-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* #ECE7FA */
-  --color-purple-200: oklch(from var(--purple-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* #DCD3F7 */
-  --color-purple-300: oklch(from var(--purple-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* #CDBEF4 */
-  --color-purple-400: var(--purple-base); /* #BEAAF0 */
-  --color-purple-500: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* #9F8FC8 */
-  --color-purple-600: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* #8175A1 */
-  --color-purple-700: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* #655C7B */
-  --color-purple-800: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* #494458 */
-  --color-purple-900: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* #302D37 */
-  --color-purple-950: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* #242327 */
+  --color-purple-50: oklch(from var(--purple-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* purple */
+  --color-purple-100: oklch(from var(--purple-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* purple */
+  --color-purple-200: oklch(from var(--purple-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* purple */
+  --color-purple-300: oklch(from var(--purple-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* purple */
+  --color-purple-400: var(--purple-base); /* purple */
+  --color-purple-500: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* purple */
+  --color-purple-600: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* purple */
+  --color-purple-700: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* purple */
+  --color-purple-800: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* purple */
+  --color-purple-900: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* purple */
+  --color-purple-950: oklch(from var(--purple-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* purple */
 
-  --color-green-50: oklch(from var(--green-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* #EAF4EA */
-  --color-green-100: oklch(from var(--green-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* #D9ECD9 */
-  --color-green-200: oklch(from var(--green-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* #B6DBB6 */
-  --color-green-300: oklch(from var(--green-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* #92CB94 */
-  --color-green-400: var(--green-base); /* #6DBA71 */
-  --color-green-500: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* #5E9C61 */
-  --color-green-600: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* #507F52 */
-  --color-green-700: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* #426343 */
-  --color-green-800: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* #344934 */
-  --color-green-900: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* #263026 */
-  --color-green-950: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* #1F241F */
+  --color-green-50: oklch(from var(--green-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* green */
+  --color-green-100: oklch(from var(--green-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* green */
+  --color-green-200: oklch(from var(--green-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* green */
+  --color-green-300: oklch(from var(--green-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* green */
+  --color-green-400: var(--green-base); /* green */
+  --color-green-500: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* green */
+  --color-green-600: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* green */
+  --color-green-700: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* green */
+  --color-green-800: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* green */
+  --color-green-900: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* green */
+  --color-green-950: oklch(from var(--green-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* green */
 
-  --color-blue-gray-50: oklch(from var(--blue-gray-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* #F1F3F4 */
-  --color-blue-gray-100: oklch(from var(--blue-gray-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* #E7EAED */
-  --color-blue-gray-200: oklch(from var(--blue-gray-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* #D2D9DE */
-  --color-blue-gray-300: oklch(from var(--blue-gray-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* #BEC9CF */
-  --color-blue-gray-400: var(--blue-gray-base); /* #AAB8C1 */
-  --color-blue-gray-500: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* #8F9AA2 */
-  --color-blue-gray-600: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* #757E83 */
-  --color-blue-gray-700: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* #5C6266 */
-  --color-blue-gray-800: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* #44484A */
-  --color-blue-gray-900: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* #2D2F30 */
-  --color-blue-gray-950: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* #232324 */
+  --color-blue-gray-50: oklch(from var(--blue-gray-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* blue-gray */
+  --color-blue-gray-100: oklch(from var(--blue-gray-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* blue-gray */
+  --color-blue-gray-200: oklch(from var(--blue-gray-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* blue-gray */
+  --color-blue-gray-300: oklch(from var(--blue-gray-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* blue-gray */
+  --color-blue-gray-400: var(--blue-gray-base); /* blue-gray */
+  --color-blue-gray-500: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* blue-gray */
+  --color-blue-gray-600: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* blue-gray */
+  --color-blue-gray-700: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* blue-gray */
+  --color-blue-gray-800: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* blue-gray */
+  --color-blue-gray-900: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* blue-gray */
+  --color-blue-gray-950: oklch(from var(--blue-gray-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* blue-gray */
 }
 
 @theme inline {
-  --color-orbit-paper: var(--orbit-paper);
-  --color-orbit-paper-strong: var(--orbit-paper-strong);
-  --color-orbit-ink: var(--orbit-ink);
-  --color-orbit-ink-soft: var(--orbit-ink-soft);
-  --color-paper: var(--paper);
-  --color-paper-strong: var(--paper-strong);
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
+  --color-orbit-paper: var(--orbit-paper); /* warm paper */
+  --color-orbit-paper-strong: var(--orbit-paper-strong); /* warm white */
+  --color-orbit-ink: var(--orbit-ink); /* charcoal */
+  --color-orbit-ink-soft: var(--orbit-ink-soft); /* soft charcoal */
+  --color-paper: var(--paper); /* warm off-white / near-black */
+  --color-paper-strong: var(--paper-strong); /* warm white / deep brown */
+  --color-ink: var(--ink); /* charcoal / warm white */
+  --color-ink-soft: var(--ink-soft); /* soft charcoal / blue-gray */
+  --color-background: var(--background); /* warm off-white / near-black */
+  --color-foreground: var(--foreground); /* charcoal / warm white */
+  --color-card: var(--card); /* warm white / deep brown */
+  --color-card-foreground: var(--card-foreground); /* charcoal / warm white */
+  --color-popover: var(--popover); /* warm white / deep brown */
+  --color-popover-foreground: var(--popover-foreground); /* charcoal / warm white */
+  --color-primary: var(--primary); /* charcoal / warm white */
+  --color-primary-foreground: var(--primary-foreground); /* warm white / charcoal */
+  --color-secondary: var(--secondary); /* blue-gray */
+  --color-secondary-foreground: var(--secondary-foreground); /* charcoal / warm white */
+  --color-muted: var(--muted); /* pale / dark blue-gray */
+  --color-muted-foreground: var(--muted-foreground); /* soft charcoal / blue-gray */
+  --color-accent: var(--accent); /* yellow */
+  --color-accent-foreground: var(--accent-foreground); /* charcoal */
+  --color-destructive: var(--destructive); /* red */
+  --color-destructive-foreground: var(--destructive-foreground); /* warm white / charcoal */
+  --color-success: var(--success); /* green */
+  --color-success-foreground: var(--success-foreground); /* charcoal */
+  --color-border: var(--border); /* translucent charcoal / warm white */
+  --color-input: var(--input); /* translucent charcoal / warm white */
+  --color-ring: var(--ring); /* purple */
+  --color-chart-1: var(--chart-1); /* yellow */
+  --color-chart-2: var(--chart-2); /* red */
+  --color-chart-3: var(--chart-3); /* purple */
+  --color-chart-4: var(--chart-4); /* blue-gray */
+  --color-chart-5: var(--chart-5); /* green */
   --font-sans: var(--font-geist-mono);
   --font-mono: var(--font-geist-mono);
   --radius-sm: calc(var(--radius) - 0.5rem);
@@ -204,6 +204,14 @@
 
   body {
     @apply min-h-dvh bg-background text-foreground;
+  }
+
+  .login-form input:autofill,
+  .login-form input:-webkit-autofill {
+    color: var(--orbit-ink);
+    -webkit-text-fill-color: var(--orbit-ink);
+    caret-color: var(--orbit-ink);
+    box-shadow: 0 0 0 100vmax var(--orbit-paper-strong) inset;
   }
 
   ::selection {
