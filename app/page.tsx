@@ -12,11 +12,11 @@ import {
   TeacherIcon,
   UserMultipleIcon,
 } from "@hugeicons/core-free-icons";
-import { hasLocale } from "next-intl";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
-import { notFound } from "next/navigation";
+import { getFormatter, getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { DashboardLogoutButton } from "@/components/dashboard-logout-button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,8 +38,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import { requireRole } from "@/lib/auth/server";
 
 const classes = [
   { time: "18:30", student: "Emma Reed", level: "B2", lesson: "speaking", status: "ready" },
@@ -93,12 +93,10 @@ function MetricCard({
   );
 }
 
-export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
+export default async function Home() {
+  const session = await requireRole("teacher");
+  if ("error" in session) redirect("/login");
 
-  if (!hasLocale(routing.locales, locale)) notFound();
-
-  setRequestLocale(locale);
   const [t, format] = await Promise.all([getTranslations("Dashboard"), getFormatter()]);
   const currency = (value: number) =>
     format.number(value, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -154,6 +152,13 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
           <div className="flex items-center gap-3">
             <ThemeToggle label={t("toggleTheme")} />
+            <DashboardLogoutButton
+              copy={{
+                label: t("logout"),
+                pending: t("loggingOut"),
+                failed: t("logoutFailed"),
+              }}
+            />
             <Button asChild className="rounded-full">
               <a href="#today">
                 <HugeiconsIcon
