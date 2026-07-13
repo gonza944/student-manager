@@ -12,9 +12,7 @@ import {
   TeacherIcon,
   UserMultipleIcon,
 } from "@hugeicons/core-free-icons";
-import { hasLocale } from "next-intl";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
-import { notFound } from "next/navigation";
+import { getFormatter, getTranslations } from "next-intl/server";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -38,7 +36,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 const classes = [
@@ -93,12 +90,7 @@ function MetricCard({
   );
 }
 
-export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-
-  if (!hasLocale(routing.locales, locale)) notFound();
-
-  setRequestLocale(locale);
+export default async function Home() {
   const [t, format] = await Promise.all([getTranslations("Dashboard"), getFormatter()]);
   const currency = (value: number) =>
     format.number(value, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
