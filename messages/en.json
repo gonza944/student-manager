@@ -1,0 +1,59 @@
+{
+  "Metadata": {
+    "title": "Orbit — Student Studio",
+    "description": "A calm dashboard for independent teachers."
+  },
+  "Dashboard": {
+    "headerLabel": "Orbit header",
+    "studio": "Student studio",
+    "viewSchedule": "View schedule",
+    "toggleTheme": "Toggle color theme",
+    "weekLocation": "Week {week} / {location}",
+    "title": "Teaching, without the admin noise.",
+    "overviewLabel": "Teaching overview",
+    "detailsLabel": "Dashboard details",
+    "metrics": {
+      "monthlyRevenue": "Monthly revenue",
+      "revenueDetail": "+{percent, number, percent} from {month}",
+      "activeStudents": "Active students",
+      "activeDetail": "+{count, plural, =0 {No new students} one {# new student} other {# new students}} this month",
+      "hoursTaught": "Hours taught",
+      "hoursDetail": "{count, plural, =0 {No classes today} one {# class today} other {# classes today}}",
+      "unreadMessages": "Unread messages",
+      "messagesDetail": "{count, plural, =0 {None need a reply} one {# needs a reply} other {# need a reply}}"
+    },
+    "upNext": "Up next",
+    "todaysClasses": "Today's classes",
+    "table": {
+      "time": "Time",
+      "student": "Student",
+      "lesson": "Lesson",
+      "status": "Status"
+    },
+    "lessons": {
+      "speaking": "Speaking",
+      "writing": "Writing",
+      "review": "Review"
+    },
+    "statuses": {
+      "ready": "Ready",
+      "draft": "Draft"
+    },
+    "studentPulse": "Student pulse",
+    "everyoneMoving": "Everyone is moving.",
+    "courseProgress": "{student}: {value, number, percent} course progress",
+    "monthlyRevenue": "Monthly revenue",
+    "revenueCaption": "Revenue for the last six months",
+    "needsAttention": "Needs attention",
+    "noCredits": "No available class credits",
+    "homeworkOverdue": "Homework overdue by {count, plural, one {# day} other {# days}}",
+    "inbox": "Inbox",
+    "inboxTitle": "Fresh from your students",
+    "weeklyNote": "Weekly note",
+    "weeklyQuote": "“Keep the admin quiet so the teaching can be loud.”",
+    "week": "Week {week}",
+    "classesLeft": "{count, plural, =0 {No classes left} one {# class left} other {# classes left}}",
+    "synced": "Orbit is synced",
+    "backToOverview": "Back to overview"
+  }
+}

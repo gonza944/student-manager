@@ -1,0 +1,59 @@
+{
+  "Metadata": {
+    "title": "Orbit — Gestión de estudiantes",
+    "description": "Un panel simple y tranquilo para docentes independientes."
+  },
+  "Dashboard": {
+    "headerLabel": "Encabezado de Orbit",
+    "studio": "Gestión de estudiantes",
+    "viewSchedule": "Ver agenda",
+    "toggleTheme": "Cambiar tema de color",
+    "weekLocation": "Semana {week} / {location}",
+    "title": "Enseña, sin el ruido administrativo.",
+    "overviewLabel": "Resumen de enseñanza",
+    "detailsLabel": "Detalles del panel",
+    "metrics": {
+      "monthlyRevenue": "Ingresos mensuales",
+      "revenueDetail": "+{percent, number, percent} desde {month}",
+      "activeStudents": "Estudiantes activos",
+      "activeDetail": "+{count, plural, =0 {Ningún estudiante nuevo} one {# estudiante nuevo} other {# estudiantes nuevos}} este mes",
+      "hoursTaught": "Horas dictadas",
+      "hoursDetail": "{count, plural, =0 {Ninguna clase hoy} one {# clase hoy} other {# clases hoy}}",
+      "unreadMessages": "Mensajes sin leer",
+      "messagesDetail": "{count, plural, =0 {Ninguno requiere respuesta} one {# requiere respuesta} other {# requieren respuesta}}"
+    },
+    "upNext": "A continuación",
+    "todaysClasses": "Clases de hoy",
+    "table": {
+      "time": "Hora",
+      "student": "Estudiante",
+      "lesson": "Lección",
+      "status": "Estado"
+    },
+    "lessons": {
+      "speaking": "Conversación",
+      "writing": "Escritura",
+      "review": "Repaso"
+    },
+    "statuses": {
+      "ready": "Lista",
+      "draft": "Borrador"
+    },
+    "studentPulse": "Progreso estudiantil",
+    "everyoneMoving": "Todos avanzan.",
+    "courseProgress": "{student}: {value, number, percent} de progreso del curso",
+    "monthlyRevenue": "Ingresos mensuales",
+    "revenueCaption": "Ingresos de los últimos seis meses",
+    "needsAttention": "Requiere atención",
+    "noCredits": "No tiene créditos de clase disponibles",
+    "homeworkOverdue": "La tarea tiene {count, plural, one {# día} other {# días}} de atraso",
+    "inbox": "Bandeja de entrada",
+    "inboxTitle": "Novedades de tus estudiantes",
+    "weeklyNote": "Nota semanal",
+    "weeklyQuote": "“Mantén la administración en silencio para que la enseñanza se haga escuchar.”",
+    "week": "Semana {week}",
+    "classesLeft": "{count, plural, =0 {No quedan clases} one {Queda # clase} other {Quedan # clases}}",
+    "synced": "Orbit está sincronizado",
+    "backToOverview": "Volver al resumen"
+  }
+}

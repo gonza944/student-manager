@@ -11,7 +11,7 @@ function applyTheme(dark: boolean) {
   document.querySelector('meta[name="color-scheme"]')?.setAttribute("content", dark ? "dark" : "light");
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({ label }: { label: string }) {
   useEffect(() => {
     const preference = window.matchMedia("(prefers-color-scheme: dark)");
     const syncWithSystem = (event: MediaQueryListEvent) => {
@@ -28,8 +28,8 @@ export function ThemeToggle() {
       variant="outline"
       size="icon-lg"
       className="rounded-full"
-      aria-label="Toggle color theme"
-      title="Toggle color theme"
+      aria-label={label}
+      title={label}
       onClick={() => {
         const dark = !document.documentElement.classList.contains("dark");
         localStorage.setItem("theme", dark ? "dark" : "light");
