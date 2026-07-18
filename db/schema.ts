@@ -19,6 +19,8 @@ export const user = sqliteTable("user", {
   role: text({ enum: ["teacher", "student"] })
     .default("student")
     .notNull(),
+  currency: text("currency").default("USD").notNull(),
+  preplyCommissionBps: integer("preply_commission_bps").default(1800).notNull(),
 });
 
 export const session = sqliteTable(

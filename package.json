@@ -14,15 +14,20 @@
     "auth:generate": "npx auth@latest generate --config ./auth.cli.ts --output ./db/schema.ts --yes",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply student-manager-db --local",
-    "db:migrate:remote": "wrangler d1 migrations apply student-manager-db --remote"
+    "db:migrate:remote": "wrangler d1 migrations apply student-manager-db --remote",
+    "db:seed:local": "wrangler d1 execute student-manager-db --local --file=./scripts/seed-local-students.sql"
   },
   "dependencies": {
+    "@base-ui/react": "^1.6.0",
     "@better-auth/drizzle-adapter": "^1.6.23",
     "@hugeicons/core-free-icons": "^4.2.2",
     "@hugeicons/react": "^1.1.9",
+    "@tanstack/react-query": "^5.101.2",
+    "@tanstack/react-virtual": "^3.14.6",
     "better-auth": "^1.6.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "country-flag-icons": "^1.6.20",
     "drizzle-orm": "^0.45.2",
     "gsap": "^3.15.0",
     "next": "16.2.10",
@@ -32,7 +37,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.6.0",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.20.1",

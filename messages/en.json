@@ -33,6 +33,15 @@
     "namePlaceholder": "Your full name",
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
+    "currencyLabel": "Teaching currency",
+    "currencyHint": "Rates and earnings will use this currency.",
+    "currencyPlaceholder": "Search currencies…",
+    "currencyNoResults": "No currencies found.",
+    "currencyOpen": "Open currency options",
+    "currencyGroups": {
+      "popular": "Popular",
+      "international": "International"
+    },
     "passwordLabel": "Password",
     "passwordPlaceholder": "Create a password",
     "showPassword": "Show password",
@@ -42,6 +51,7 @@
     "signupFailed": "We couldn't create your account. Please try again.",
     "invalidName": "Enter your name.",
     "invalidEmail": "Enter a valid email address.",
+    "invalidCurrency": "Choose a valid currency.",
     "passwordTooShort": "Your password must contain at least 8 characters.",
     "loginPrompt": "Already using Orbit?",
     "loginLink": "Sign in"

@@ -33,6 +33,15 @@
     "namePlaceholder": "Tu nombre completo",
     "emailLabel": "Correo electrónico",
     "emailPlaceholder": "tu@correo.com",
+    "currencyLabel": "Moneda de enseñanza",
+    "currencyHint": "Las tarifas y ganancias usarán esta moneda.",
+    "currencyPlaceholder": "Buscar monedas…",
+    "currencyNoResults": "No se encontraron monedas.",
+    "currencyOpen": "Abrir opciones de moneda",
+    "currencyGroups": {
+      "popular": "Más usadas",
+      "international": "Internacionales"
+    },
     "passwordLabel": "Contraseña",
     "passwordPlaceholder": "Crea una contraseña",
     "showPassword": "Mostrar contraseña",
@@ -42,6 +51,7 @@
     "signupFailed": "No pudimos crear tu cuenta. Inténtalo de nuevo.",
     "invalidName": "Ingresa tu nombre.",
     "invalidEmail": "Ingresa un correo electrónico válido.",
+    "invalidCurrency": "Elige una moneda válida.",
     "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
     "loginPrompt": "¿Ya usas Orbit?",
     "loginLink": "Inicia sesión"
