@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 
+import { LiquidButton } from "@/components/animate-ui/components/buttons/liquid";
 import { Button } from "@/components/ui/button";
 import { credentialsSchema } from "@/lib/auth-validation";
 import { Input } from "@/components/ui/input";
@@ -220,12 +221,13 @@ export function LoginForm({ copy }: { copy: Copy }) {
         </p>
       )}
 
-      <Button
+      <LiquidButton
         type="submit"
+        fillHeight="0"
         disabled={pending || !canSubmit}
-        className="h-12 w-full rounded-xl bg-orbit-ink px-4 text-sm font-black text-orbit-paper-strong transition-transform hover:-translate-y-px focus-visible:ring-4 focus-visible:ring-orbit-ink/30 disabled:cursor-wait">
+        className="h-12 w-full rounded-xl px-4 text-sm font-black text-orbit-paper-strong shadow-none hover:text-orbit-ink focus-visible:ring-4 focus-visible:ring-orbit-ink/30 disabled:cursor-wait [--liquid-button-background-color:var(--orbit-ink)] [--liquid-button-color:var(--orbit-paper-strong)]">
         {pending ? copy.loading : copy.continue}
-      </Button>
+      </LiquidButton>
 
       <p className="text-center text-sm font-semibold text-orbit-ink/80">
         {copy.signupPrompt}
