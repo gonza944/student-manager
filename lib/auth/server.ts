@@ -19,7 +19,14 @@ export async function getSession() {
   return (await getAuth()).api.getSession({ headers: await headers() });
 }
 
-export async function requireRole(role: UserRole) {
+type Session = NonNullable<Awaited<ReturnType<typeof getSession>>>;
+
+export async function requireRole(
+  role: UserRole,
+): Promise<
+  | { error: "unauthenticated" | "forbidden" }
+  | { session: Session }
+> {
   const session = await getSession();
 
   if (!session) return { error: "unauthenticated" } as const;
