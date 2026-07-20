@@ -8,11 +8,8 @@ import type { createDb } from "../../db";
 import { student } from "../../db/student-schema";
 import {
   calculateStudentRate,
-  createStudentInputSchema,
-  normalizeStudentName,
   studentDirectorySchema,
   studentDtoSchema,
-  type CreateStudentInput,
   type StudentDto,
 } from "./contracts";
 
@@ -71,26 +68,6 @@ export async function listTeacherStudents(
       toStudentDto(row, settings.preplyCommissionBps),
     ),
   });
-}
-
-export async function createTeacherStudent(
-  db: Database,
-  teacherId: string,
-  settings: TeacherSettings,
-  input: CreateStudentInput,
-) {
-  const values = createStudentInputSchema.parse(input);
-  const [created] = await db
-    .insert(student)
-    .values({
-      id: crypto.randomUUID(),
-      teacherId,
-      ...values,
-      normalizedName: normalizeStudentName(values.name),
-    })
-    .returning();
-
-  return toStudentDto(created, settings.preplyCommissionBps);
 }
 
 export async function setTeacherStudentActive(

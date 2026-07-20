@@ -27,8 +27,8 @@
   --foreground: var(--ink);
   --card: var(--paper-strong);
   --card-foreground: var(--ink);
-  --popover: var(--ink);
-  --popover-foreground: var(--paper-strong);
+  --popover: var(--paper-strong);
+  --popover-foreground: var(--ink);
   --primary: var(--ink);
   --primary-foreground: var(--paper-strong);
   --secondary: var(--color-blue-gray-400); /* #AAB8C1 */

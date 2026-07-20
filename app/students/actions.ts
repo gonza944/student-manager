@@ -8,22 +8,19 @@ import { z } from "zod";
 import { getDb } from "../../db";
 import { requireRole } from "../../lib/auth/server";
 import {
-  createStudentInputSchema,
   setStudentActiveInputSchema,
   studentIdInputSchema,
   teacherRateSettingsSchema,
   type StudentDirectory,
-  type StudentDto,
 } from "../../lib/students/contracts";
 import {
-  createTeacherStudent,
   listTeacherStudents,
   setTeacherStudentActive,
   softDeleteTeacherStudent,
 } from "../../lib/students/data";
 
 type ActionError =
-  | { ok: false; error: "unauthenticated" | "forbidden" | "conflict" | "notFound" }
+  | { ok: false; error: "unauthenticated" | "forbidden" | "notFound" }
   | { ok: false; error: "validation"; fields: string[] };
 type ActionResult<T> = { ok: true; data: T } | ActionError;
 
@@ -58,13 +55,6 @@ function validationError(error: z.ZodError): ActionError {
   };
 }
 
-function isUniqueStudentEmailError(error: unknown) {
-  return (
-    error instanceof Error &&
-    error.message.includes("UNIQUE constraint failed: student.teacher_id, student.email")
-  );
-}
-
 export async function listStudentsAction(): Promise<ActionResult<StudentDirectory>> {
   const context = await getTeacherContext();
   if (!context.ok) return context;
@@ -75,32 +65,6 @@ export async function listStudentsAction(): Promise<ActionResult<StudentDirector
     context.settings,
   );
   return { ok: true, data };
-}
-
-export async function createStudentAction(
-  input: unknown,
-): Promise<ActionResult<StudentDto>> {
-  const parsed = createStudentInputSchema.safeParse(input);
-  if (!parsed.success) return validationError(parsed.error);
-
-  const context = await getTeacherContext();
-  if (!context.ok) return context;
-
-  try {
-    const data = await createTeacherStudent(
-      await getDb(),
-      context.teacherId,
-      context.settings,
-      parsed.data,
-    );
-    revalidatePath("/students");
-    return { ok: true, data };
-  } catch (error) {
-    if (isUniqueStudentEmailError(error)) {
-      return { ok: false, error: "conflict" };
-    }
-    throw error;
-  }
 }
 
 export async function setStudentActiveAction(

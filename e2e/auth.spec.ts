@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 test("auth pages link to each other", async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+
   await page.goto("/login");
   await page.addStyleTag({ content: ".invisible { visibility: visible !important; }" });
   await page.getByRole("link", { name: "Create a teacher account" }).click();
@@ -10,6 +15,7 @@ test("auth pages link to each other", async ({ page }) => {
   await page.getByRole("link", { name: "Sign in" }).click();
 
   await expect(page).toHaveURL("/login");
+  expect(consoleErrors).toEqual([]);
 });
 
 test("currency options are grouped and filter as the teacher types", async ({
@@ -67,4 +73,8 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await continueButton.click();
 
   await expect(page).toHaveURL("/");
+  await page.getByRole("link", { name: "Students" }).click();
+  await expect(page).toHaveURL("/students");
+  await expect(page.getByRole("button", { name: "Add student" })).toHaveCount(0);
+  await expect(page.getByText("No students yet.", { exact: true })).toBeVisible();
 });

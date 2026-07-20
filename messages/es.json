@@ -110,6 +110,48 @@
     "week": "Semana {week}",
     "classesLeft": "{count, plural, =0 {No quedan clases} one {Queda # clase} other {Quedan # clases}}",
     "synced": "Orbit está sincronizado",
-    "backToOverview": "Volver al resumen"
+    "backToOverview": "Volver al resumen",
+    "students": "Estudiantes"
+  },
+  "Students": {
+    "metaTitle": "Estudiantes — Orbit",
+    "metaDescription": "Gestiona tus estudiantes activos e inactivos.",
+    "navigation": "Navegación del directorio de estudiantes",
+    "backToDashboard": "Panel",
+    "eyebrow": "Tu directorio de estudiantes",
+    "title": "Cada estudiante, de un vistazo.",
+    "subtitle": "Mantén cerca los datos importantes sin convertir la enseñanza en administración.",
+    "directory": "Estudiantes",
+    "searchLabel": "Buscar estudiantes",
+    "searchPlaceholder": "Buscar por nombre, correo o país…",
+    "sortLabel": "Ordenar estudiantes",
+    "sort": {
+      "name": "Nombre",
+      "rate": "Tarifa por hora",
+      "level": "Nivel"
+    },
+    "results": "{count, plural, =0 {Ningún estudiante} one {# estudiante} other {# estudiantes}}",
+    "empty": "Todavía no hay estudiantes.",
+    "noMatches": "Ningún estudiante coincide con la búsqueda.",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "sources": {
+      "private": "Directo",
+      "preply": "Preply"
+    },
+    "studentActions": "Acciones para {name}",
+    "activate": "Marcar como activo",
+    "deactivate": "Marcar como inactivo",
+    "delete": "Eliminar",
+    "confirmDelete": "¿Eliminar a {name}? Desaparecerá de tu directorio.",
+    "hourlyRate": "Tarifa por hora",
+    "netRate": "Tarifa neta",
+    "platformFee": "Comisión de Preply",
+    "errors": {
+      "validation": "Revisa los datos del estudiante e inténtalo de nuevo.",
+      "permission": "Tu sesión venció. Inicia sesión e inténtalo de nuevo.",
+      "notFound": "Este estudiante ya no existe.",
+      "general": "No pudimos completar la acción. Inténtalo de nuevo."
+    }
   }
 }

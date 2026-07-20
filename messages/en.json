@@ -110,6 +110,48 @@
     "week": "Week {week}",
     "classesLeft": "{count, plural, =0 {No classes left} one {# class left} other {# classes left}}",
     "synced": "Orbit is synced",
-    "backToOverview": "Back to overview"
+    "backToOverview": "Back to overview",
+    "students": "Students"
+  },
+  "Students": {
+    "metaTitle": "Students — Orbit",
+    "metaDescription": "Manage your active and inactive students.",
+    "navigation": "Student directory navigation",
+    "backToDashboard": "Dashboard",
+    "eyebrow": "Your student directory",
+    "title": "Every student, at a glance.",
+    "subtitle": "Keep the important details close without turning teaching into administration.",
+    "directory": "Students",
+    "searchLabel": "Search students",
+    "searchPlaceholder": "Search by name, email, or country…",
+    "sortLabel": "Sort students",
+    "sort": {
+      "name": "Name",
+      "rate": "Hourly rate",
+      "level": "Level"
+    },
+    "results": "{count, plural, =0 {No students} one {# student} other {# students}}",
+    "empty": "No students yet.",
+    "noMatches": "No students match that search.",
+    "active": "Active",
+    "inactive": "Inactive",
+    "sources": {
+      "private": "Direct",
+      "preply": "Preply"
+    },
+    "studentActions": "Actions for {name}",
+    "activate": "Set as active",
+    "deactivate": "Set as inactive",
+    "delete": "Delete",
+    "confirmDelete": "Delete {name}? They will disappear from your directory.",
+    "hourlyRate": "Hourly rate",
+    "netRate": "Net rate",
+    "platformFee": "Preply fee",
+    "errors": {
+      "validation": "Check the student details and try again.",
+      "permission": "Your session expired. Sign in and try again.",
+      "notFound": "This student no longer exists.",
+      "general": "We couldn't complete that action. Try again."
+    }
   }
 }

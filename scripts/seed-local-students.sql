@@ -25,7 +25,7 @@ WITH seed(n, name, nationality_code, time_zone) AS (
     (22, 'Gabriel Costa', 'PT', 'Europe/Lisbon'),
     (23, 'Luna Morales', 'PE', 'America/Lima'),
     (24, 'Henry Anderson', 'US', 'America/Chicago'),
-    (25, 'Giulia Romano', 'IT', 'Europe/Milan'),
+    (25, 'Giulia Romano', 'IT', 'Europe/Rome'),
     (26, 'Daniel Kim', 'KR', 'Asia/Seoul'),
     (27, 'Victoria Herrera', 'EC', 'America/Guayaquil'),
     (28, 'Alexander Smith', 'AU', 'Australia/Melbourne'),

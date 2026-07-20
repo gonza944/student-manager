@@ -13,6 +13,7 @@ import {
   UserMultipleIcon,
 } from "@hugeicons/core-free-icons";
 import { getFormatter, getTranslations } from "next-intl/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -159,6 +160,19 @@ export default async function Home() {
                 failed: t("logoutFailed"),
               }}
             />
+            <Button asChild variant="outline" className="rounded-full">
+              <Link href="/students">
+                <HugeiconsIcon
+                  data-icon="inline-start"
+                  icon={UserMultipleIcon}
+                  size={18}
+                  color="currentColor"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
+                {t("students")}
+              </Link>
+            </Button>
             <Button asChild className="rounded-full">
               <a href="#today">
                 <HugeiconsIcon

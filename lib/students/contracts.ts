@@ -84,7 +84,7 @@ const timeZoneSchema = z.string().trim().min(1).max(80).refine((timeZone) => {
   }
 });
 
-export const createStudentInputSchema = z.object({
+const studentDetailsSchema = z.object({
   name: z.string().trim().min(1).max(120),
   email: z.string().trim().toLowerCase().check(z.email()).max(320),
   phone: optionalTrimmedText(40),
@@ -122,7 +122,7 @@ export const studentRateSchema = z.object({
   netMinor: z.int().nonnegative(),
 });
 
-export const studentDtoSchema = createStudentInputSchema.extend({
+export const studentDtoSchema = studentDetailsSchema.extend({
   id: z.string().min(1).max(128),
   rates: studentRateSchema,
   createdAt: z.iso.datetime(),
@@ -133,7 +133,6 @@ export const studentDirectorySchema = teacherRateSettingsSchema.extend({
   students: z.array(studentDtoSchema),
 });
 
-export type CreateStudentInput = z.input<typeof createStudentInputSchema>;
 export type SetStudentActiveInput = z.input<typeof setStudentActiveInputSchema>;
 export type StudentDto = z.output<typeof studentDtoSchema>;
 export type StudentDirectory = z.output<typeof studentDirectorySchema>;
@@ -153,13 +152,4 @@ export function calculateStudentRate(
     platformFeeMinor,
     netMinor: grossMinor - platformFeeMinor,
   });
-}
-
-export function normalizeStudentName(name: string) {
-  return name
-    .normalize("NFKD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLocaleLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
 }
