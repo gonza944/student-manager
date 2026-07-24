@@ -61,7 +61,6 @@ INSERT INTO student (
   is_active,
   avatar_key,
   theme_color,
-  deleted_at,
   created_at,
   updated_at
 )
@@ -123,7 +122,6 @@ SELECT
     WHEN 4 THEN 'violet'
     ELSE 'rose'
   END,
-  NULL,
   unixepoch(datetime('2026-06-01', printf('+%d days', n))) * 1000,
   unixepoch(datetime('2026-07-01', printf('+%d hours', n))) * 1000
 FROM seed
@@ -146,6 +144,5 @@ ON CONFLICT(id) DO UPDATE SET
   is_active = excluded.is_active,
   avatar_key = excluded.avatar_key,
   theme_color = excluded.theme_color,
-  deleted_at = excluded.deleted_at,
   created_at = excluded.created_at,
   updated_at = excluded.updated_at;

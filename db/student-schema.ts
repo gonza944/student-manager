@@ -65,7 +65,6 @@ export const student = sqliteTable(
       .notNull(),
     avatarKey: text("avatar_key", { enum: studentAvatarKeys }).notNull(),
     themeColor: text("theme_color", { enum: studentThemeColors }).notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
     createdAt: timestamp("created_at"),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
@@ -76,14 +75,12 @@ export const student = sqliteTable(
     ),
     index("student_teacher_status_updated_idx").on(
       table.teacherId,
-      table.deletedAt,
       table.isActive,
       table.updatedAt,
       table.id,
     ),
     index("student_teacher_status_name_idx").on(
       table.teacherId,
-      table.deletedAt,
       table.isActive,
       table.normalizedName,
       table.id,

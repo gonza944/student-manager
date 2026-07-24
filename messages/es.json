@@ -144,7 +144,14 @@
     "activate": "Marcar como activo",
     "deactivate": "Marcar como inactivo",
     "delete": "Eliminar",
-    "confirmDelete": "¿Eliminar a {name}? Desaparecerá de tu directorio.",
+    "deleteDialog": {
+      "title": "¿Eliminar a {name}?",
+      "description": "Esto elimina permanentemente a {name} y todos sus datos de estudiante. Esta acción no se puede deshacer.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar para siempre",
+      "deleting": "Eliminando…",
+      "close": "Cerrar confirmación de eliminación"
+    },
     "hourlyRate": "Tarifa por hora",
     "netRate": "Tarifa neta",
     "platformFee": "Comisión de Preply",

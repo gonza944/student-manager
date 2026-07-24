@@ -10,7 +10,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +32,7 @@ import {
   listStudentsAction,
   setStudentActiveAction,
 } from "../actions";
+import { DeleteStudentConfirmation } from "./delete-student-confirmation";
 import { StudentCard } from "./student-card";
 import {
   useStudentDirectoryStore,
@@ -64,6 +65,9 @@ export function StudentDirectory({
   const sort = useStudentDirectoryStore((state) => state.sort);
   const setSearch = useStudentDirectoryStore((state) => state.setSearch);
   const setSort = useStudentDirectoryStore((state) => state.setSort);
+  const [studentToDelete, setStudentToDelete] = useState<StudentDto | null>(
+    null,
+  );
 
   const studentsQuery = useQuery({
     queryKey: ["students"],
@@ -111,8 +115,10 @@ export function StudentDirectory({
       if (!result.ok) throw new Error(result.error);
       return result.data;
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["students"] }),
+    onSuccess: async () => {
+      setStudentToDelete(null);
+      await queryClient.invalidateQueries({ queryKey: ["students"] });
+    },
   });
 
   const visibleStudents = useMemo(() => {
@@ -266,14 +272,7 @@ export function StudentDirectory({
                       statusMutation.isPending || deleteMutation.isPending
                     }
                     onStatusChange={() => statusMutation.mutate(student)}
-                    onDelete={() => {
-                      if (
-                        window.confirm(
-                          t("confirmDelete", { name: student.name }),
-                        )
-                      )
-                        deleteMutation.mutate(student);
-                    }}
+                    onDelete={() => setStudentToDelete(student)}
                   />
                 </li>
               ))}
@@ -286,6 +285,17 @@ export function StudentDirectory({
             </div>
           )}
         </section>
+        <DeleteStudentConfirmation
+          name={studentToDelete?.name ?? ""}
+          open={studentToDelete !== null}
+          pending={deleteMutation.isPending}
+          onOpenChange={(open) => {
+            if (!open && !deleteMutation.isPending) setStudentToDelete(null);
+          }}
+          onConfirm={() => {
+            if (studentToDelete) deleteMutation.mutate(studentToDelete);
+          }}
+        />
       </div>
     </main>
   );

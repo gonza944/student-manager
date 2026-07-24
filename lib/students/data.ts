@@ -2,7 +2,7 @@ import "server-only";
 
 // Database-only student operations. Authentication stays in the action layer;
 // every query receives a teacher ID so student data remains tenant-scoped.
-import { and, asc, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 
 import type { createDb } from "../../db";
 import { student } from "../../db/student-schema";
@@ -59,7 +59,7 @@ export async function listTeacherStudents(
   const rows = await db
     .select()
     .from(student)
-    .where(and(eq(student.teacherId, teacherId), isNull(student.deletedAt)))
+    .where(eq(student.teacherId, teacherId))
     .orderBy(desc(student.isActive), asc(student.normalizedName), asc(student.id));
 
   return studentDirectorySchema.parse({
@@ -101,34 +101,20 @@ export async function setTeacherStudentActive(
   const [updated] = await db
     .update(student)
     .set({ isActive, updatedAt: new Date() })
-    .where(
-      and(
-        eq(student.id, studentId),
-        eq(student.teacherId, teacherId),
-        isNull(student.deletedAt),
-      ),
-    )
+    .where(and(eq(student.id, studentId), eq(student.teacherId, teacherId)))
     .returning({ id: student.id, isActive: student.isActive });
 
   return updated ?? null;
 }
 
-export async function softDeleteTeacherStudent(
+export async function deleteTeacherStudent(
   db: Database,
   teacherId: string,
   studentId: string,
 ) {
-  const deletedAt = new Date();
   const [deleted] = await db
-    .update(student)
-    .set({ isActive: false, deletedAt, updatedAt: deletedAt })
-    .where(
-      and(
-        eq(student.id, studentId),
-        eq(student.teacherId, teacherId),
-        isNull(student.deletedAt),
-      ),
-    )
+    .delete(student)
+    .where(and(eq(student.id, studentId), eq(student.teacherId, teacherId)))
     .returning({ id: student.id });
 
   return deleted ?? null;

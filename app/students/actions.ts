@@ -17,9 +17,9 @@ import {
 } from "../../lib/students/contracts";
 import {
   createTeacherStudent,
+  deleteTeacherStudent,
   listTeacherStudents,
   setTeacherStudentActive,
-  softDeleteTeacherStudent,
 } from "../../lib/students/data";
 
 type ActionError =
@@ -133,7 +133,7 @@ export async function deleteStudentAction(
   const context = await getTeacherContext();
   if (!context.ok) return context;
 
-  const data = await softDeleteTeacherStudent(
+  const data = await deleteTeacherStudent(
     await getDb(),
     context.teacherId,
     parsed.data.studentId,

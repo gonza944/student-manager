@@ -140,6 +140,39 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(page).toHaveURL("/students");
   await expect(page.getByRole("heading", { name: studentName })).toBeVisible();
 
+  const studentCard = page.getByRole("article").filter({
+    has: page.getByRole("heading", { name: studentName }),
+  });
+  await studentCard
+    .getByRole("button", { name: `Actions for ${studentName}` })
+    .click();
+  await page.getByRole("menuitem", { name: "Delete" }).click();
+  const deleteDialog = page.getByRole("dialog", {
+    name: `Delete ${studentName}?`,
+  });
+  await expect(deleteDialog).toBeVisible();
+  await deleteDialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(deleteDialog).toBeHidden();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await studentCard
+    .getByRole("button", { name: `Actions for ${studentName}` })
+    .click();
+  await page.getByRole("menuitem", { name: "Delete" }).click();
+  const deleteDrawer = page.locator('[data-slot="drawer-content"]').filter({
+    hasText: `Delete ${studentName}?`,
+  });
+  await expect(deleteDrawer).toBeVisible();
+  await deleteDrawer
+    .getByRole("button", { name: "Delete forever" })
+    .click();
+  await expect(studentCard).toHaveCount(0);
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: studentName }),
+  ).toHaveCount(0);
+
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/students/add");
   await expect(page).toHaveURL("/students/add");
   await expect(page.getByRole("dialog")).toHaveCount(0);

@@ -144,7 +144,14 @@
     "activate": "Set as active",
     "deactivate": "Set as inactive",
     "delete": "Delete",
-    "confirmDelete": "Delete {name}? They will disappear from your directory.",
+    "deleteDialog": {
+      "title": "Delete {name}?",
+      "description": "This permanently deletes {name} and all their student data. This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete forever",
+      "deleting": "Deleting…",
+      "close": "Close deletion confirmation"
+    },
     "hourlyRate": "Hourly rate",
     "netRate": "Net rate",
     "platformFee": "Preply fee",
