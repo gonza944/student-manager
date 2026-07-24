@@ -58,12 +58,7 @@ export const studentAvatarKeys = [
 ] as const;
 export const tagKinds = ["preference", "interest"] as const;
 
-export const studentTagSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("builtin"), key: z.string().trim().min(1).max(80) }),
-  z.object({ type: z.literal("custom"), label: z.string().trim().min(1).max(80) }),
-]);
-
-export type StudentTag = z.infer<typeof studentTagSchema>;
+const studentTagSchema = z.string().trim().min(1).max(80);
 
 const optionalTrimmedText = (maximum: number) =>
   z
@@ -91,7 +86,6 @@ const studentDetailsSchema = z.object({
   nationalityCode: z.string().trim().toUpperCase().regex(/^[A-Z]{2}$/),
   timeZone: timeZoneSchema,
   preferredContactChannel: z.enum(contactChannels),
-  contactDetails: optionalTrimmedText(240),
   level: z.enum(studentLevels),
   preferences: z.array(studentTagSchema).max(20).default([]),
   interests: z.array(studentTagSchema).max(20).default([]),
@@ -102,6 +96,8 @@ const studentDetailsSchema = z.object({
   avatarKey: z.enum(studentAvatarKeys),
   themeColor: z.enum(studentThemeColors),
 });
+
+export const createStudentInputSchema = studentDetailsSchema;
 
 export const studentIdInputSchema = z.object({
   studentId: z.string().trim().min(1).max(128),
@@ -134,6 +130,7 @@ export const studentDirectorySchema = teacherRateSettingsSchema.extend({
 });
 
 export type SetStudentActiveInput = z.input<typeof setStudentActiveInputSchema>;
+export type CreateStudentInput = z.output<typeof createStudentInputSchema>;
 export type StudentDto = z.output<typeof studentDtoSchema>;
 export type StudentDirectory = z.output<typeof studentDirectorySchema>;
 

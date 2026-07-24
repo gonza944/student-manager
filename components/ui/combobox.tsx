@@ -9,6 +9,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { usePortalContainer } from "@/components/ui/portal-container";
 
 const Combobox = ComboboxPrimitive.Root;
 
@@ -77,8 +78,11 @@ function ComboboxContent({
 }: ComboboxPrimitive.Popup.Props & {
   sideOffset?: number;
 }) {
+  const portalContainer = usePortalContainer();
+
   return (
-    <ComboboxPrimitive.Portal>
+    <ComboboxPrimitive.Portal
+      {...(portalContainer ? { container: portalContainer } : {})}>
       <ComboboxPrimitive.Positioner
         sideOffset={sideOffset}
         align="start"

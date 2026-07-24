@@ -75,6 +75,90 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(page).toHaveURL("/");
   await page.getByRole("link", { name: "Students" }).click();
   await expect(page).toHaveURL("/students");
-  await expect(page.getByRole("button", { name: "Add student" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Add student" })).toBeVisible();
   await expect(page.getByText("No students yet.", { exact: true })).toBeVisible();
+
+  const studentName = `Playwright Student ${Date.now()}`;
+  await page.getByRole("link", { name: "Add student" }).click();
+
+  const dialog = page.getByRole("dialog", { name: "Add a student" });
+  await expect(page).toHaveURL("/students/add");
+  await expect(dialog).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL("/students");
+  await expect(dialog).toBeHidden();
+
+  await page.getByRole("link", { name: "Add student" }).click();
+  await expect(dialog).toBeVisible();
+  await dialog.getByLabel("Full name").fill(studentName);
+  await dialog.getByLabel("Email address").fill(`${Date.now()}@example.test`);
+
+  const nationality = dialog.getByRole("combobox", { name: "Nationality" });
+  await nationality.fill("Japan");
+  await page.getByRole("option", { name: "Japan" }).click();
+  await expect(nationality).toHaveValue("Japan");
+  await expect(
+    dialog.getByRole("combobox", { name: "Time zone" }),
+  ).toHaveValue("Asia/Tokyo");
+
+  await dialog.getByRole("button", { name: "Level: A1" }).click();
+  await page.getByRole("menuitemradio", { name: "B2" }).click();
+  await expect(dialog.getByRole("button", { name: "Level: B2" })).toBeVisible();
+
+  await dialog.getByLabel("Preferences").fill("Visual summaries");
+  await dialog.getByLabel("Preferences").press("Enter");
+  await expect(dialog.getByText("Visual summaries", { exact: true })).toBeVisible();
+  await dialog.getByLabel("Interests").fill("Travel");
+  await dialog.getByLabel("Interests").press("Enter");
+  await expect(dialog.getByText("Travel", { exact: true })).toBeVisible();
+
+  await dialog
+    .getByRole("button", { name: "Preferred contact channel: Email" })
+    .click();
+  await page.getByRole("menuitemradio", { name: "WhatsApp" }).click();
+  await expect(
+    dialog.getByRole("button", {
+      name: "Preferred contact channel: WhatsApp",
+    }),
+  ).toBeVisible();
+
+  const firstAvatar = dialog.getByAltText("Avatar 1", { exact: true });
+  await firstAvatar.scrollIntoViewIfNeeded();
+  await expect(firstAvatar).toBeVisible();
+  await dialog.getByRole("radio", { name: "Preply" }).click();
+  await expect(dialog.getByRole("radio", { name: "Preply" })).toBeChecked();
+  await dialog.getByRole("radio", { name: "Direct" }).click();
+  await dialog.getByRole("radio", { name: "Yellow" }).click();
+  await expect(dialog.getByRole("radio", { name: "Yellow" })).toBeChecked();
+  await dialog.getByRole("switch", { name: "Active student" }).click();
+  await expect(dialog.getByRole("switch", { name: "Active student" })).not.toBeChecked();
+  await dialog.getByRole("switch", { name: "Active student" }).click();
+  await expect(dialog.getByRole("heading", { name: studentName })).toBeVisible();
+  await dialog.getByRole("button", { name: "Add student", exact: true }).click();
+
+  await expect(dialog).toBeHidden();
+  await expect(page).toHaveURL("/students");
+  await expect(page.getByRole("heading", { name: studentName })).toBeVisible();
+
+  await page.goto("/students/add");
+  await expect(page).toHaveURL("/students/add");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Add a student" }),
+  ).toBeVisible();
+  const addNavigation = page.getByRole("navigation", {
+    name: "Add student navigation",
+  });
+  await expect(
+    addNavigation.getByRole("link", { name: "Dashboard" }),
+  ).toBeVisible();
+  await expect(
+    addNavigation.getByRole("link", { name: "Students" }),
+  ).toBeVisible();
+  await expect(page.locator('[data-slot="card"]').first()).toBeVisible();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/students");
+  await page.getByRole("link", { name: "Add student" }).click();
+  await expect(page.locator('[data-slot="drawer-content"]')).toBeVisible();
 });

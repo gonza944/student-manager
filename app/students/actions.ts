@@ -8,19 +8,25 @@ import { z } from "zod";
 import { getDb } from "../../db";
 import { requireRole } from "../../lib/auth/server";
 import {
+  createStudentInputSchema,
   setStudentActiveInputSchema,
   studentIdInputSchema,
   teacherRateSettingsSchema,
+  type StudentDto,
   type StudentDirectory,
 } from "../../lib/students/contracts";
 import {
+  createTeacherStudent,
   listTeacherStudents,
   setTeacherStudentActive,
   softDeleteTeacherStudent,
 } from "../../lib/students/data";
 
 type ActionError =
-  | { ok: false; error: "unauthenticated" | "forbidden" | "notFound" }
+  | {
+      ok: false;
+      error: "unauthenticated" | "forbidden" | "notFound" | "conflict";
+    }
   | { ok: false; error: "validation"; fields: string[] };
 type ActionResult<T> = { ok: true; data: T } | ActionError;
 
@@ -65,6 +71,36 @@ export async function listStudentsAction(): Promise<ActionResult<StudentDirector
     context.settings,
   );
   return { ok: true, data };
+}
+
+export async function createStudentAction(
+  input: unknown,
+): Promise<ActionResult<StudentDto>> {
+  const parsed = createStudentInputSchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+
+  const context = await getTeacherContext();
+  if (!context.ok) return context;
+
+  try {
+    const data = await createTeacherStudent(
+      await getDb(),
+      context.teacherId,
+      parsed.data,
+      context.settings.preplyCommissionBps,
+    );
+    revalidatePath("/students");
+    return { ok: true, data };
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("student_teacher_email_unique") ||
+        error.message.includes("UNIQUE constraint failed: student.teacher_id, student.email"))
+    ) {
+      return { ok: false, error: "conflict" };
+    }
+    throw error;
+  }
 }
 
 export async function setStudentActiveAction(

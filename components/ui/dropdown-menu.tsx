@@ -6,6 +6,7 @@ import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Tick02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
+import { usePortalContainer } from "@/components/ui/portal-container"
 
 function DropdownMenu({
   ...props
@@ -16,8 +17,14 @@ function DropdownMenu({
 function DropdownMenuPortal({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Portal>) {
+  const portalContainer = usePortalContainer()
+
   return (
-    <DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />
+    <DropdownMenuPrimitive.Portal
+      data-slot="dropdown-menu-portal"
+      {...(portalContainer ? { container: portalContainer } : {})}
+      {...props}
+    />
   )
 }
 
@@ -38,13 +45,16 @@ function DropdownMenuContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+  const portalContainer = usePortalContainer()
+
   return (
-    <DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.Portal
+      {...(portalContainer ? { container: portalContainer } : {})}>
       <DropdownMenuPrimitive.Content
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         align={align}
-        className={cn("z-50 max-h-(--radix-dropdown-menu-content-available-height) w-(--radix-dropdown-menu-trigger-width) min-w-32 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:overflow-hidden data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95", className )}
+        className={cn("z-50 max-h-(--radix-dropdown-menu-content-available-height) w-(--radix-dropdown-menu-trigger-width) min-w-32 overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground opacity-100 shadow-md ring-1 ring-foreground/10 transition-opacity duration-300 ease-out starting:opacity-0 data-[state=closed]:overflow-hidden data-[state=closed]:opacity-0 data-[state=open]:opacity-100 motion-reduce:transition-none", className )}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -243,7 +253,7 @@ function DropdownMenuSubContent({
   return (
     <DropdownMenuPrimitive.SubContent
       data-slot="dropdown-menu-sub-content"
-      className={cn("z-50 min-w-[96px] origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-lg bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95", className )}
+      className={cn("z-50 min-w-24 overflow-hidden rounded-lg bg-popover p-1 text-popover-foreground opacity-100 shadow-lg ring-1 ring-foreground/10 transition-opacity duration-300 ease-out starting:opacity-0 data-[state=closed]:opacity-0 data-[state=open]:opacity-100 motion-reduce:transition-none", className )}
       {...props}
     />
   )

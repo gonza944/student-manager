@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { toMinorUnits } from "../../app/students/utils/to-minor-units";
 import {
   calculateStudentRate,
+  createStudentInputSchema,
   studentDtoSchema,
   studentIdInputSchema,
 } from "../../lib/students/contracts";
@@ -14,10 +16,9 @@ const validStudent = {
   nationalityCode: "ar",
   timeZone: "America/Argentina/Cordoba",
   preferredContactChannel: "email" as const,
-  contactDetails: null,
   level: "B2" as const,
-  preferences: [],
-  interests: [],
+  preferences: ["Conversation practice"],
+  interests: ["Travel"],
   learningGoals: "Speak confidently",
   source: "preply" as const,
   hourlyRateMinor: 2_500,
@@ -40,6 +41,24 @@ test("normalizes a student DTO", () => {
   assert.equal(student.email, "sofia@example.com");
   assert.equal(student.phone, null);
   assert.equal(student.nationalityCode, "AR");
+  assert.deepEqual(student.preferences, ["Conversation practice"]);
+});
+
+test("normalizes the input used to create a student", () => {
+  const student = createStudentInputSchema.parse(validStudent);
+
+  assert.equal(student.email, "sofia@example.com");
+  assert.equal(student.phone, null);
+  assert.equal(student.nationalityCode, "AR");
+});
+
+test("rejects prefixed tag objects in favor of plain labels", () => {
+  const result = createStudentInputSchema.safeParse({
+    ...validStudent,
+    preferences: [{ type: "builtin", key: "visualMaterials" }],
+  });
+
+  assert.equal(result.success, false);
 });
 
 test("rejects an invalid time zone", () => {
@@ -68,4 +87,9 @@ test("accepts deterministic local seed identifiers", () => {
   assert.deepEqual(studentIdInputSchema.parse({
     studentId: "local-seed-student-01",
   }), { studentId: "local-seed-student-01" });
+});
+
+test("converts displayed rates to currency minor units", () => {
+  assert.equal(toMinorUnits("20.55", 2), 2_055);
+  assert.equal(toMinorUnits("invalid", 2), 0);
 });

@@ -11,18 +11,31 @@ import { cn } from "@/lib/utils";
 import { StudentActionsMenu } from "./student-actions-menu";
 import { studentThemeStyles } from "../const/student-card-config";
 
+type StudentCardData = Pick<
+  StudentDto,
+  | "avatarKey"
+  | "isActive"
+  | "level"
+  | "name"
+  | "rates"
+  | "source"
+  | "themeColor"
+>;
+
 export function StudentCard({
   student,
   formatMoney,
   onStatusChange,
   onDelete,
   pending,
+  preview = false,
 }: {
-  student: StudentDto;
+  student: StudentCardData;
   formatMoney: (minor: number) => string;
-  onStatusChange: () => void;
-  onDelete: () => void;
-  pending: boolean;
+  onStatusChange?: () => void;
+  onDelete?: () => void;
+  pending?: boolean;
+  preview?: boolean;
 }) {
   const t = useTranslations("Students");
 
@@ -63,13 +76,15 @@ export function StudentCard({
               {student.level}
             </Badge>
           </div>
-          <StudentActionsMenu
-            name={student.name}
-            isActive={student.isActive}
-            pending={pending}
-            onStatusChange={onStatusChange}
-            onDelete={onDelete}
-          />
+          {preview || !onStatusChange || !onDelete ? null : (
+            <StudentActionsMenu
+              name={student.name}
+              isActive={student.isActive}
+              pending={pending ?? false}
+              onStatusChange={onStatusChange}
+              onDelete={onDelete}
+            />
+          )}
         </div>
 
         <CardContent className="absolute inset-x-0 bottom-0 z-10 flex items-baseline justify-between gap-3 p-5 sm:p-6">

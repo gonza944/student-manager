@@ -16,7 +16,6 @@ import {
   studentSources,
   studentThemeColors,
   tagKinds,
-  type StudentTag,
 } from "../lib/students/contracts";
 
 export {
@@ -26,7 +25,6 @@ export {
   studentSources,
   studentThemeColors,
   tagKinds,
-  type StudentTag,
 };
 
 const timestamp = (name: string) =>
@@ -50,14 +48,13 @@ export const student = sqliteTable(
     preferredContactChannel: text("preferred_contact_channel", {
       enum: contactChannels,
     }).notNull(),
-    contactDetails: text("contact_details"),
     level: text("level", { enum: studentLevels }).notNull(),
     preferences: text("preferences", { mode: "json" })
-      .$type<StudentTag[]>()
+      .$type<string[]>()
       .default(sql`'[]'`)
       .notNull(),
     interests: text("interests", { mode: "json" })
-      .$type<StudentTag[]>()
+      .$type<string[]>()
       .default(sql`'[]'`)
       .notNull(),
     learningGoals: text("learning_goals"),

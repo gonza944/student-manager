@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Add01Icon,
   ArrowDown01Icon,
   ArrowLeft01Icon,
   Search01Icon,
@@ -35,13 +36,17 @@ import { StudentCard } from "./student-card";
 import {
   useStudentDirectoryStore,
   type StudentSort,
-} from "../student-store";
+} from "../store/student-store";
 
 const actionErrorKeys: Record<
   string,
-  "errors.validation" | "errors.permission" | "errors.notFound"
+  | "errors.validation"
+  | "errors.conflict"
+  | "errors.permission"
+  | "errors.notFound"
 > = {
   validation: "errors.validation",
+  conflict: "errors.conflict",
   unauthenticated: "errors.permission",
   forbidden: "errors.permission",
   notFound: "errors.notFound",
@@ -140,7 +145,7 @@ export function StudentDirectory({
     <main className="min-h-dvh px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
       <div className="mx-auto max-w-[90rem]">
         <nav
-          className="flex items-center gap-4"
+          className="flex items-center justify-between gap-4"
           aria-label={t("navigation")}>
           <Button asChild variant="ghost" className="rounded-full">
             <Link href="/">
@@ -151,6 +156,17 @@ export function StudentDirectory({
                 aria-hidden="true"
               />
               {t("backToDashboard")}
+            </Link>
+          </Button>
+          <Button asChild className="rounded-full">
+            <Link href="/students/add">
+              <HugeiconsIcon
+                data-icon="inline-start"
+                icon={Add01Icon}
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+              {t("addStudent")}
             </Link>
           </Button>
         </nav>

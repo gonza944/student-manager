@@ -52,7 +52,6 @@ INSERT INTO student (
   nationality_code,
   time_zone,
   preferred_contact_channel,
-  contact_details,
   level,
   preferences,
   interests,
@@ -83,7 +82,6 @@ SELECT
     WHEN 4 THEN 'zoom'
     ELSE 'other'
   END,
-  CASE WHEN n % 3 = 0 THEN 'Usually available after 17:00 local time.' ELSE NULL END,
   CASE n % 6
     WHEN 1 THEN 'A1'
     WHEN 2 THEN 'A2'
@@ -93,15 +91,15 @@ SELECT
     ELSE 'C2'
   END,
   CASE n % 3
-    WHEN 0 THEN '[{"type":"builtin","key":"visualMaterials"}]'
-    WHEN 1 THEN '[{"type":"builtin","key":"conversationLed"}]'
-    ELSE '[{"type":"builtin","key":"structuredPractice"}]'
+    WHEN 0 THEN '["Visual materials"]'
+    WHEN 1 THEN '["Conversation-led lessons"]'
+    ELSE '["Structured practice"]'
   END,
   CASE n % 4
-    WHEN 0 THEN '[{"type":"builtin","key":"travel"}]'
-    WHEN 1 THEN '[{"type":"builtin","key":"music"}]'
-    WHEN 2 THEN '[{"type":"builtin","key":"technology"}]'
-    ELSE '[{"type":"builtin","key":"film"}]'
+    WHEN 0 THEN '["Travel"]'
+    WHEN 1 THEN '["Music"]'
+    WHEN 2 THEN '["Technology"]'
+    ELSE '["Film"]'
   END,
   CASE n % 4
     WHEN 0 THEN 'Prepare for an upcoming proficiency exam.'
@@ -139,7 +137,6 @@ ON CONFLICT(id) DO UPDATE SET
   nationality_code = excluded.nationality_code,
   time_zone = excluded.time_zone,
   preferred_contact_channel = excluded.preferred_contact_channel,
-  contact_details = excluded.contact_details,
   level = excluded.level,
   preferences = excluded.preferences,
   interests = excluded.interests,

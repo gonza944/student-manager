@@ -8,6 +8,7 @@ import type { createDb } from "../../db";
 import { student } from "../../db/student-schema";
 import {
   calculateStudentRate,
+  type CreateStudentInput,
   studentDirectorySchema,
   studentDtoSchema,
   type StudentDto,
@@ -31,7 +32,6 @@ function toStudentDto(
     nationalityCode: row.nationalityCode,
     timeZone: row.timeZone,
     preferredContactChannel: row.preferredContactChannel,
-    contactDetails: row.contactDetails,
     level: row.level,
     preferences: row.preferences,
     interests: row.interests,
@@ -68,6 +68,28 @@ export async function listTeacherStudents(
       toStudentDto(row, settings.preplyCommissionBps),
     ),
   });
+}
+
+export async function createTeacherStudent(
+  db: Database,
+  teacherId: string,
+  input: CreateStudentInput,
+  preplyCommissionBps: number,
+) {
+  const [created] = await db
+    .insert(student)
+    .values({
+      id: crypto.randomUUID(),
+      teacherId,
+      ...input,
+      normalizedName: input.name
+        .normalize("NFKD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLocaleLowerCase(),
+    })
+    .returning();
+
+  return toStudentDto(created, preplyCommissionBps);
 }
 
 export async function setTeacherStudentActive(
