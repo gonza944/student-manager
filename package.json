@@ -10,7 +10,7 @@
     "test:unit": "node --import tsx --test tests/**/*.test.ts",
     "test:e2e": "playwright test",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "deploy": "opennextjs-cloudflare build && npm run db:migrate:remote && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "auth:generate": "npx auth@latest generate --config ./auth.cli.ts --output ./db/schema.ts --yes",
     "db:generate": "drizzle-kit generate",
