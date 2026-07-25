@@ -10,6 +10,7 @@
     "test:unit": "node --import tsx --test tests/**/*.test.ts",
     "test:e2e": "playwright test",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "predeploy": "test \"$(git branch --show-current)\" = master && test -z \"$(git status --porcelain)\" && git fetch origin master && test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/master)\" || (echo 'Production deploy blocked: use a clean master exactly matching origin/master.' >&2; exit 1)",
     "deploy": "opennextjs-cloudflare build && npm run db:migrate:remote && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "auth:generate": "npx auth@latest generate --config ./auth.cli.ts --output ./db/schema.ts --yes",
