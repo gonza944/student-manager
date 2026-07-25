@@ -15,3 +15,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - Prefer an existing shadcn component over a raw HTML element when it fits the use case.
 - Preserve shadcn registry component behavior unless a functional change is explicitly requested; performance-only changes are allowed.
+
+## Production deployment safety
+
+- NEVER EVER deploy to production anything that is not already merged into `master`.
+- Production deployments must use `npm run deploy` from a clean `master` checkout whose `HEAD` exactly matches `origin/master`.
+- Never run `opennextjs-cloudflare deploy` or `wrangler deploy` directly against production. PR branches may only use preview deployments.

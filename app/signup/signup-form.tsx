@@ -10,19 +10,39 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type CSSProperties, useState } from "react";
 import { z } from "zod";
 
+import { LiquidButton } from "@/components/animate-ui/components/buttons/liquid";
 import { Button } from "@/components/ui/button";
-import { signupSchema } from "@/lib/auth-validation";
+import {
+  Combobox,
+  ComboboxCollection,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxGroup,
+  ComboboxInput,
+  ComboboxInputGroup,
+  ComboboxItem,
+  ComboboxLabel,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+import { signupSchema } from "@/lib/auth-validation";
+import type { CurrencyGroup, CurrencyOption } from "@/lib/currencies";
 
 type Copy = {
   nameLabel: string;
   namePlaceholder: string;
   emailLabel: string;
   emailPlaceholder: string;
+  currencyLabel: string;
+  currencyHint: string;
+  currencyPlaceholder: string;
+  currencyNoResults: string;
+  currencyOpen: string;
   passwordLabel: string;
   passwordPlaceholder: string;
   showPassword: string;
@@ -32,15 +52,27 @@ type Copy = {
   signupFailed: string;
   invalidName: string;
   invalidEmail: string;
+  invalidCurrency: string;
   passwordTooShort: string;
   loginPrompt: string;
   loginLink: string;
 };
 
-type FieldErrors = Partial<Record<"name" | "email" | "password", string>>;
+type FieldErrors = Partial<
+  Record<"name" | "email" | "currency" | "password", string>
+>;
 
-export function SignupForm({ copy }: { copy: Copy }) {
+export function SignupForm({
+  copy,
+  currencyGroups,
+}: {
+  copy: Copy;
+  currencyGroups: CurrencyGroup[];
+}) {
   const router = useRouter();
+  const [currency, setCurrency] = useState<CurrencyOption | null>(() =>
+    currencyGroups[0]?.items.find((option) => option.value === "USD") ?? null,
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string>();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -51,6 +83,7 @@ export function SignupForm({ copy }: { copy: Copy }) {
     const validation = signupSchema.safeParse({
       name: form.get("name"),
       email: form.get("email"),
+      currency: form.get("currency"),
       password: form.get("password"),
     });
 
@@ -62,6 +95,7 @@ export function SignupForm({ copy }: { copy: Copy }) {
       setFieldErrors({
         name: fields.name ? copy.invalidName : undefined,
         email: fields.email ? copy.invalidEmail : undefined,
+        currency: fields.currency ? copy.invalidCurrency : undefined,
         password: fields.password ? copy.passwordTooShort : undefined,
       });
       return;
@@ -159,6 +193,81 @@ export function SignupForm({ copy }: { copy: Copy }) {
       </div>
 
       <div className="space-y-2">
+        <label className="text-sm font-bold" htmlFor="currency">
+          {copy.currencyLabel}
+        </label>
+        <Combobox
+          items={currencyGroups}
+          name="currency"
+          value={currency}
+          onValueChange={setCurrency}
+          itemToStringLabel={(option: CurrencyOption) =>
+            `${option.value} — ${option.label}`
+          }
+          itemToStringValue={(option: CurrencyOption) => option.value}
+          autoHighlight
+          required
+          disabled={pending}>
+          <ComboboxInputGroup>
+            <ComboboxInput
+              id="currency"
+              placeholder={copy.currencyPlaceholder}
+              aria-invalid={Boolean(fieldErrors.currency)}
+              aria-describedby={
+                fieldErrors.currency ? "currency-error" : "currency-hint"
+              }
+              disabled={pending}
+            />
+            <ComboboxTrigger
+              aria-label={copy.currencyOpen}
+              disabled={pending}
+            />
+          </ComboboxInputGroup>
+          <ComboboxContent>
+            <ComboboxEmpty>{copy.currencyNoResults}</ComboboxEmpty>
+            <ComboboxList>
+              {(group: CurrencyGroup) => (
+                <ComboboxGroup
+                  key={group.value}
+                  items={group.items}
+                  className={
+                    group.value === currencyGroups[1]?.value
+                      ? "mt-1 border-t border-orbit-strong/20 pt-1 dark:border-border"
+                      : undefined
+                  }>
+                  <ComboboxLabel>{group.value}</ComboboxLabel>
+                  <ComboboxCollection>
+                    {(option: CurrencyOption, index: number) => (
+                      <ComboboxItem
+                        key={option.value}
+                        value={option}
+                        className="m-0"
+                        style={
+                          {
+                            "--combobox-item-delay": `${Math.min(index, 8) * 25}ms`,
+                          } as CSSProperties
+                        }>
+                        {option.label} ({option.value})
+                      </ComboboxItem>
+                    )}
+                  </ComboboxCollection>
+                </ComboboxGroup>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+        {fieldErrors.currency ? (
+          <p id="currency-error" className="text-sm font-semibold text-red-500">
+            {fieldErrors.currency}
+          </p>
+        ) : (
+          <p id="currency-hint" className="text-sm text-orbit-ink/60">
+            {copy.currencyHint}
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-2">
         <label className="text-sm font-bold" htmlFor="password">
           {copy.passwordLabel}
         </label>
@@ -218,12 +327,13 @@ export function SignupForm({ copy }: { copy: Copy }) {
         </p>
       )}
 
-      <Button
+      <LiquidButton
         type="submit"
+        fillHeight="0"
         disabled={pending || !canSubmit}
-        className="h-12 w-full rounded-xl bg-orbit-ink px-4 text-sm font-black text-orbit-paper-strong transition-transform hover:-translate-y-px focus-visible:ring-4 focus-visible:ring-orbit-ink/30 disabled:cursor-wait">
+        className="h-12 w-full rounded-xl px-4 text-sm font-black text-orbit-paper-strong shadow-none hover:text-orbit-ink focus-visible:ring-4 focus-visible:ring-orbit-ink/30 disabled:cursor-wait [--liquid-button-background-color:var(--orbit-ink)] [--liquid-button-color:var(--orbit-paper-strong)]">
         {pending ? copy.loading : copy.continue}
-      </Button>
+      </LiquidButton>
 
       <p className="text-center text-sm font-semibold text-orbit-ink/80">
         {copy.loginPrompt}

@@ -8,6 +8,27 @@
       "when": 1783788416011,
       "tag": "0000_demonic_wong",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1784325768796,
+      "tag": "0001_amused_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1784551292511,
+      "tag": "0002_mushy_namora",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1784897165750,
+      "tag": "0003_light_starfox",
+      "breakpoints": true
     }
   ]
 }

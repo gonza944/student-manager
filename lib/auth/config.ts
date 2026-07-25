@@ -3,6 +3,7 @@ import { betterAuth } from "better-auth/minimal";
 
 import type { createDb } from "@/db";
 import * as schema from "@/db/schema";
+import { currencySchema } from "@/lib/currencies";
 
 export const userRoles = ["teacher", "student"] as const;
 export type UserRole = (typeof userRoles)[number];
@@ -36,6 +37,19 @@ export function createAuth(
           required: true,
           defaultValue: "student",
           input: true,
+        },
+        currency: {
+          type: "string",
+          required: true,
+          defaultValue: "USD",
+          input: true,
+          validator: { input: currencySchema },
+        },
+        preplyCommissionBps: {
+          type: "number",
+          required: true,
+          defaultValue: 1800,
+          input: false,
         },
       },
     },
