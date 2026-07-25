@@ -11,10 +11,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function AddStudentPage() {
   return (
-    <main className="min-h-dvh bg-background sm:px-6 lg:px-10 lg:py-8">
+    <div className="min-h-dvh bg-background sm:px-6 lg:px-10 lg:py-8">
       <Card className="mx-auto w-full rounded-none sm:rounded-3xl border border-border bg-paper-strong shadow-sm">
         <AddStudentContent />
       </Card>
-    </main>
+    </div>
   );
 }

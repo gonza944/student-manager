@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { currencySchema } from "../currencies";
+import { studentCountries } from "./geography";
 
 export const studentSources = ["private", "preply"] as const;
 export const contactChannels = [
@@ -59,6 +60,9 @@ export const studentAvatarKeys = [
 export const tagKinds = ["preference", "interest"] as const;
 
 const studentTagSchema = z.string().trim().min(1).max(80);
+const studentCountryCodes = new Set<string>(
+  studentCountries.map((country) => country.code),
+);
 
 const optionalTrimmedText = (maximum: number) =>
   z
@@ -83,7 +87,11 @@ const studentDetailsSchema = z.object({
   name: z.string().trim().min(1).max(120),
   email: z.string().trim().toLowerCase().check(z.email()).max(320),
   phone: optionalTrimmedText(40),
-  nationalityCode: z.string().trim().toUpperCase().regex(/^[A-Z]{2}$/),
+  nationalityCode: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .refine((countryCode) => studentCountryCodes.has(countryCode)),
   timeZone: timeZoneSchema,
   preferredContactChannel: z.enum(contactChannels),
   level: z.enum(studentLevels),

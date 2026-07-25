@@ -70,6 +70,15 @@ test("rejects an invalid time zone", () => {
   assert.equal(result.success, false);
 });
 
+test("rejects an unsupported country code", () => {
+  const result = createStudentInputSchema.safeParse({
+    ...validStudent,
+    nationalityCode: "ZZ",
+  });
+
+  assert.equal(result.success, false);
+});
+
 test("derives Preply and private rates from teacher settings", () => {
   assert.deepEqual(calculateStudentRate(2_500, "preply", 1_800), {
     grossMinor: 2_500,
