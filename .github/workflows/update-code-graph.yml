@@ -56,13 +56,12 @@ jobs:
           PR_BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
           cp prospective/graphify-out/graph.json branch/graphify-out/graph.json
-          cp prospective/graphify-out/manifest.json branch/graphify-out/manifest.json
           cd branch
-          if git diff --quiet -- graphify-out/graph.json graphify-out/manifest.json; then
+          if git diff --quiet -- graphify-out/graph.json; then
             exit 0
           fi
           git config user.name "graphify-bot"
           git config user.email "graphify-bot@users.noreply.github.com"
-          git add graphify-out/graph.json graphify-out/manifest.json
+          git add graphify-out/graph.json
           git commit -m "chore: update code graph"
           git push origin "HEAD:$PR_BRANCH"
