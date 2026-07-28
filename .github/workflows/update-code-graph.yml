@@ -36,10 +36,12 @@ jobs:
           path: prospective
 
       - name: Install Graphify
-        run: pipx install graphifyy==0.8.39
+        run: |
+          python3 -m venv .graphify-venv
+          .graphify-venv/bin/pip install graphifyy==0.8.39
 
       - name: Update relationships
-        run: python3 prospective/.github/scripts/build-code-graph.py prospective
+        run: .graphify-venv/bin/python prospective/.github/scripts/build-code-graph.py prospective
 
       - name: Check out PR branch
         uses: actions/checkout@v4
