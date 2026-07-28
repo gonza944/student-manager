@@ -37,3 +37,8 @@ coverage/
 .DS_Store
 .idea/
 .vscode/
+
+# Graphify: keep only the searchable relationship data.
+graphify-out/*
+!graphify-out/graph.json
+!graphify-out/manifest.json
