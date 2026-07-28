@@ -22,7 +22,7 @@ def main() -> None:
     )
     graph = build_from_json(extraction)
 
-    to_json(graph, {}, str(output / "graph.json"), force=True)
+    to_json(graph, {}, str(output / "graph.json"), force=True, built_at_commit="")
     save_manifest(
         detection["files"],
         str(output / "manifest.json"),
