@@ -124,7 +124,7 @@
     "directory": "Students",
     "addStudent": "Add student",
     "searchLabel": "Search students",
-    "searchPlaceholder": "Search by name, email, or country…",
+    "searchPlaceholder": "Search by name…",
     "sortLabel": "Sort students",
     "sort": {
       "name": "Name",
@@ -132,6 +132,11 @@
       "level": "Level"
     },
     "results": "{count, plural, =0 {No students} one {# student} other {# students}}",
+    "hideInactive": "Hide inactive",
+    "filtersMayHideResults": "Some students may be hidden by filters.",
+    "resetFilters": "Reset filters",
+    "loading": "Loading students…",
+    "loadingMore": "Loading more students…",
     "empty": "No students yet.",
     "noMatches": "No students match that search.",
     "active": "Active",

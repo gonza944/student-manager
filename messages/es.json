@@ -124,7 +124,7 @@
     "directory": "Estudiantes",
     "addStudent": "Agregar estudiante",
     "searchLabel": "Buscar estudiantes",
-    "searchPlaceholder": "Buscar por nombre, correo o país…",
+    "searchPlaceholder": "Buscar por nombre…",
     "sortLabel": "Ordenar estudiantes",
     "sort": {
       "name": "Nombre",
@@ -132,6 +132,11 @@
       "level": "Nivel"
     },
     "results": "{count, plural, =0 {Ningún estudiante} one {# estudiante} other {# estudiantes}}",
+    "hideInactive": "Ocultar inactivos",
+    "filtersMayHideResults": "Algunos estudiantes pueden estar ocultos por los filtros.",
+    "resetFilters": "Restablecer filtros",
+    "loading": "Cargando estudiantes…",
+    "loadingMore": "Cargando más estudiantes…",
     "empty": "Todavía no hay estudiantes.",
     "noMatches": "Ningún estudiante coincide con la búsqueda.",
     "active": "Activo",

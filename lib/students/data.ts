@@ -2,15 +2,29 @@ import "server-only";
 
 // Database-only student operations. Authentication stays in the action layer;
 // every query receives a teacher ID so student data remains tenant-scoped.
-import { and, asc, desc, eq } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  lt,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 
 import type { createDb } from "../../db";
 import { student } from "../../db/student-schema";
 import {
   calculateStudentRate,
   type CreateStudentInput,
-  studentDirectorySchema,
+  type StudentCursor,
+  studentCountsSchema,
+  studentCardDtoSchema,
   studentDtoSchema,
+  type StudentListInput,
+  studentListPageSchema,
   type StudentDto,
 } from "./contracts";
 
@@ -51,22 +65,147 @@ function toStudentDto(
   });
 }
 
-export async function listTeacherStudents(
+function toStudentCardDto(
+  row: typeof student.$inferSelect,
+  preplyCommissionBps: number,
+) {
+  return studentCardDtoSchema.parse(
+    toStudentDto(row, preplyCommissionBps),
+  );
+}
+
+export function normalizeStudentName(name: string) {
+  return name
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase();
+}
+
+function cursorCondition(cursor: StudentCursor): SQL {
+  const withinStatus =
+    cursor.sort === "name"
+      ? or(
+          gt(student.normalizedName, cursor.normalizedName),
+          and(
+            eq(student.normalizedName, cursor.normalizedName),
+            gt(student.id, cursor.id),
+          ),
+        )
+      : cursor.sort === "rate"
+        ? or(
+            lt(student.hourlyRateMinor, cursor.hourlyRateMinor),
+            and(
+              eq(student.hourlyRateMinor, cursor.hourlyRateMinor),
+              gt(student.id, cursor.id),
+            ),
+          )
+        : or(
+            gt(student.level, cursor.level),
+            and(eq(student.level, cursor.level), gt(student.id, cursor.id)),
+          );
+
+  if (!withinStatus) return sql`false`;
+
+  return cursor.isActive
+    ? or(
+        and(eq(student.isActive, true), withinStatus),
+        eq(student.isActive, false),
+      )!
+    : and(eq(student.isActive, false), withinStatus)!;
+}
+
+function toCursor(
+  row: typeof student.$inferSelect,
+  sort: StudentListInput["sort"],
+): StudentCursor {
+  return sort === "name"
+    ? {
+        sort,
+        isActive: row.isActive,
+        normalizedName: row.normalizedName,
+        id: row.id,
+      }
+    : sort === "rate"
+      ? {
+          sort,
+          isActive: row.isActive,
+          hourlyRateMinor: row.hourlyRateMinor,
+          id: row.id,
+        }
+      : {
+          sort,
+          isActive: row.isActive,
+          level: row.level,
+          id: row.id,
+        };
+}
+
+export async function getTeacherStudentCounts(
+  db: Database,
+  teacherId: string,
+) {
+  const [counts] = await db
+    .select({
+      totalStudents: sql<number>`count(*)`,
+      activeStudents: sql<number>`coalesce(sum(case when ${student.isActive} = 1 then 1 else 0 end), 0)`,
+    })
+    .from(student)
+    .where(eq(student.teacherId, teacherId));
+
+  return studentCountsSchema.parse({
+    totalStudents: Number(counts?.totalStudents ?? 0),
+    activeStudents: Number(counts?.activeStudents ?? 0),
+  });
+}
+
+export async function listTeacherStudentsPage(
   db: Database,
   teacherId: string,
   settings: TeacherSettings,
+  input: StudentListInput,
 ) {
-  const rows = await db
+  const filters: SQL[] = [eq(student.teacherId, teacherId)];
+  if (input.hideInactive) filters.push(eq(student.isActive, true));
+  if (input.search) {
+    filters.push(
+      sql`instr(${student.normalizedName}, ${normalizeStudentName(input.search)}) > 0`,
+    );
+  }
+  if (input.cursor) filters.push(cursorCondition(input.cursor));
+
+  const ordering =
+    input.sort === "name"
+      ? [desc(student.isActive), asc(student.normalizedName), asc(student.id)]
+      : input.sort === "rate"
+        ? [
+            desc(student.isActive),
+            desc(student.hourlyRateMinor),
+            asc(student.id),
+          ]
+        : [desc(student.isActive), asc(student.level), asc(student.id)];
+  const rowsPromise = db
     .select()
     .from(student)
-    .where(eq(student.teacherId, teacherId))
-    .orderBy(desc(student.isActive), asc(student.normalizedName), asc(student.id));
+    .where(and(...filters))
+    .orderBy(...ordering)
+    .limit(input.limit + 1);
 
-  return studentDirectorySchema.parse({
+  const [rows, counts] = await Promise.all([
+    rowsPromise,
+    getTeacherStudentCounts(db, teacherId),
+  ]);
+  const hasNextPage = rows.length > input.limit;
+  const pageRows = hasNextPage ? rows.slice(0, input.limit) : rows;
+  const lastRow = pageRows.at(-1);
+
+  return studentListPageSchema.parse({
     ...settings,
-    students: rows.map((row) =>
-      toStudentDto(row, settings.preplyCommissionBps),
+    students: pageRows.map((row) =>
+      toStudentCardDto(row, settings.preplyCommissionBps),
     ),
+    nextCursor:
+      hasNextPage && lastRow ? toCursor(lastRow, input.sort) : null,
+    totalStudents: counts.totalStudents,
   });
 }
 
@@ -82,10 +221,7 @@ export async function createTeacherStudent(
       id: crypto.randomUUID(),
       teacherId,
       ...input,
-      normalizedName: input.name
-        .normalize("NFKD")
-        .replace(/\p{Diacritic}/gu, "")
-        .toLocaleLowerCase(),
+      normalizedName: normalizeStudentName(input.name),
     })
     .returning();
 

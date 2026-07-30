@@ -5,22 +5,13 @@ import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import type { StudentDto } from "@/lib/students/contracts";
+import type { StudentCardDto } from "@/lib/students/contracts";
 import { cn } from "@/lib/utils";
 
 import { StudentActionsMenu } from "./student-actions-menu";
 import { studentThemeStyles } from "../const/student-card-config";
 
-type StudentCardData = Pick<
-  StudentDto,
-  | "avatarKey"
-  | "isActive"
-  | "level"
-  | "name"
-  | "rates"
-  | "source"
-  | "themeColor"
->;
+type StudentCardData = Omit<StudentCardDto, "id">;
 
 export function StudentCard({
   student,
@@ -47,7 +38,7 @@ export function StudentCard({
       )}>
       <Card
         className={cn(
-          "relative isolate h-100 w-full gap-0 overflow-hidden bg-linear-to-b p-0 text-orbit-ink border-none",
+          "relative isolate h-(--student-card-height,25rem) w-full gap-0 overflow-hidden bg-linear-to-b p-0 text-orbit-ink border-none",
           studentThemeStyles[student.themeColor],
         )}>
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[72%] overflow-hidden">

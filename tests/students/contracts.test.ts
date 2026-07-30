@@ -7,6 +7,7 @@ import {
   createStudentInputSchema,
   studentDtoSchema,
   studentIdInputSchema,
+  studentListInputSchema,
 } from "../../lib/students/contracts";
 
 const validStudent = {
@@ -118,6 +119,32 @@ test("accepts deterministic local seed identifiers", () => {
 test("rejects malformed student identifiers", () => {
   assert.equal(
     studentIdInputSchema.safeParse({ studentId: "../student-01" }).success,
+    false,
+  );
+});
+
+test("defaults and bounds student directory pages", () => {
+  assert.deepEqual(studentListInputSchema.parse({}), {
+    search: "",
+    sort: "name",
+    hideInactive: false,
+    limit: 20,
+    cursor: null,
+  });
+  assert.equal(studentListInputSchema.safeParse({ limit: 51 }).success, false);
+});
+
+test("rejects a cursor from a different directory sort", () => {
+  assert.equal(
+    studentListInputSchema.safeParse({
+      sort: "name",
+      cursor: {
+        sort: "rate",
+        isActive: true,
+        hourlyRateMinor: 2_500,
+        id: "student-01",
+      },
+    }).success,
     false,
   );
 });
