@@ -1,0 +1,67 @@
+name: Update code graph
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: code-graph-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Require push token
+        env:
+          GRAPHIFY_PUSH_TOKEN: ${{ secrets.GRAPHIFY_PUSH_TOKEN }}
+        run: |
+          if [ -z "$GRAPHIFY_PUSH_TOKEN" ]; then
+            echo "::error::Add a GRAPHIFY_PUSH_TOKEN repository secret with Contents: read/write access."
+            exit 1
+          fi
+
+      - name: Check out prospective merge
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
+          path: prospective
+
+      - name: Install Graphify
+        run: |
+          python3 -m venv .graphify-venv
+          .graphify-venv/bin/pip install graphifyy==0.8.39
+
+      - name: Update relationships
+        run: .graphify-venv/bin/python prospective/.github/scripts/build-code-graph.py prospective
+
+      - name: Check out PR branch
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GRAPHIFY_PUSH_TOKEN }}
+          path: branch
+
+      - name: Commit updated relationships
+        env:
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          cp prospective/graphify-out/graph.json branch/graphify-out/graph.json
+          cd branch
+          if git diff --quiet -- graphify-out/graph.json; then
+            exit 0
+          fi
+          git config user.name "graphify-bot"
+          git config user.email "graphify-bot@users.noreply.github.com"
+          git add graphify-out/graph.json
+          git commit -m "chore: update code graph"
+          git push origin "HEAD:$PR_BRANCH"
