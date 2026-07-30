@@ -15,7 +15,6 @@ import {
   studentLevels,
   studentSources,
   studentThemeColors,
-  tagKinds,
 } from "../lib/students/contracts";
 
 export {
@@ -24,7 +23,6 @@ export {
   studentLevels,
   studentSources,
   studentThemeColors,
-  tagKinds,
 };
 
 const timestamp = (name: string) =>
@@ -86,30 +84,5 @@ export const student = sqliteTable(
       table.id,
     ),
     check("student_hourly_rate_positive", sql`${table.hourlyRateMinor} > 0`),
-  ],
-);
-
-export const teacherTagSuggestion = sqliteTable(
-  "teacher_tag_suggestion",
-  {
-    id: text("id").primaryKey(),
-    teacherId: text("teacher_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    kind: text("kind", { enum: tagKinds }).notNull(),
-    label: text("label").notNull(),
-    normalizedLabel: text("normalized_label").notNull(),
-    createdAt: timestamp("created_at"),
-  },
-  (table) => [
-    uniqueIndex("teacher_tag_suggestion_unique").on(
-      table.teacherId,
-      table.kind,
-      table.normalizedLabel,
-    ),
-    index("teacher_tag_suggestion_teacher_kind_idx").on(
-      table.teacherId,
-      table.kind,
-    ),
   ],
 );

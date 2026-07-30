@@ -13,6 +13,7 @@ test("teachers can search, sort, and change student status", async ({
       level: "C2",
       rate: "10",
       active: true,
+      contactChannel: "preply",
     },
     {
       name: `Zoe Beta ${suffix}`,
@@ -21,6 +22,7 @@ test("teachers can search, sort, and change student status", async ({
       level: "A1",
       rate: "40",
       active: true,
+      contactChannel: "email",
     },
     {
       name: `Mia Gamma ${suffix}`,
@@ -29,6 +31,7 @@ test("teachers can search, sort, and change student status", async ({
       level: "B1",
       rate: "25",
       active: false,
+      contactChannel: "email",
     },
   ];
 
@@ -48,6 +51,12 @@ test("teachers can search, sort, and change student status", async ({
     const dialog = page.getByRole("dialog", { name: "Add a student" });
     await dialog.getByLabel("Full name").fill(student.name);
     await dialog.getByLabel("Email address").fill(student.email);
+    if (student.contactChannel === "preply") {
+      await dialog
+        .getByRole("button", { name: "Preferred contact channel: Email" })
+        .click();
+      await page.getByRole("menuitemradio", { name: "Preply" }).click();
+    }
 
     if (student.country !== "Argentina") {
       const nationality = dialog.getByRole("combobox", {

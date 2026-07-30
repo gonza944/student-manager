@@ -52,6 +52,23 @@ test("normalizes the input used to create a student", () => {
   assert.equal(student.nationalityCode, "AR");
 });
 
+test("accepts Preply and rejects the removed Zoom contact channel", () => {
+  assert.equal(
+    createStudentInputSchema.safeParse({
+      ...validStudent,
+      preferredContactChannel: "preply",
+    }).success,
+    true,
+  );
+  assert.equal(
+    createStudentInputSchema.safeParse({
+      ...validStudent,
+      preferredContactChannel: "zoom",
+    }).success,
+    false,
+  );
+});
+
 test("rejects prefixed tag objects in favor of plain labels", () => {
   const result = createStudentInputSchema.safeParse({
     ...validStudent,
@@ -96,6 +113,13 @@ test("accepts deterministic local seed identifiers", () => {
   assert.deepEqual(studentIdInputSchema.parse({
     studentId: "local-seed-student-01",
   }), { studentId: "local-seed-student-01" });
+});
+
+test("rejects malformed student identifiers", () => {
+  assert.equal(
+    studentIdInputSchema.safeParse({ studentId: "../student-01" }).success,
+    false,
+  );
 });
 
 test("converts displayed rates to currency minor units", () => {

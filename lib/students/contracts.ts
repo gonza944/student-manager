@@ -11,7 +11,7 @@ export const contactChannels = [
   "phone",
   "whatsapp",
   "telegram",
-  "zoom",
+  "preply",
   "other",
 ] as const;
 export const studentLevels = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
@@ -57,8 +57,6 @@ export const studentAvatarKeys = [
   "avatar-31",
   "avatar-32",
 ] as const;
-export const tagKinds = ["preference", "interest"] as const;
-
 const studentTagSchema = z.string().trim().min(1).max(80);
 const studentCountryCodes = new Set<string>(
   studentCountries.map((country) => country.code),
@@ -108,7 +106,7 @@ const studentDetailsSchema = z.object({
 export const createStudentInputSchema = studentDetailsSchema;
 
 export const studentIdInputSchema = z.object({
-  studentId: z.string().trim().min(1).max(128),
+  studentId: z.string().trim().min(1).max(128).regex(/^[A-Za-z0-9_-]+$/),
 });
 
 export const setStudentActiveInputSchema = studentIdInputSchema.extend({
