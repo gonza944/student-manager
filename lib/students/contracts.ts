@@ -11,7 +11,7 @@ export const contactChannels = [
   "phone",
   "whatsapp",
   "telegram",
-  "zoom",
+  "preply",
   "other",
 ] as const;
 export const studentLevels = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
@@ -23,6 +23,7 @@ export const studentThemeColors = [
   "violet",
   "rose",
 ] as const;
+export const studentListSorts = ["name", "rate", "level"] as const;
 export const studentAvatarKeys = [
   "avatar-01",
   "avatar-02",
@@ -57,8 +58,6 @@ export const studentAvatarKeys = [
   "avatar-31",
   "avatar-32",
 ] as const;
-export const tagKinds = ["preference", "interest"] as const;
-
 const studentTagSchema = z.string().trim().min(1).max(80);
 const studentCountryCodes = new Set<string>(
   studentCountries.map((country) => country.code),
@@ -108,7 +107,7 @@ const studentDetailsSchema = z.object({
 export const createStudentInputSchema = studentDetailsSchema;
 
 export const studentIdInputSchema = z.object({
-  studentId: z.string().trim().min(1).max(128),
+  studentId: z.string().trim().min(1).max(128).regex(/^[A-Za-z0-9_-]+$/),
 });
 
 export const setStudentActiveInputSchema = studentIdInputSchema.extend({
@@ -133,14 +132,76 @@ export const studentDtoSchema = studentDetailsSchema.extend({
   updatedAt: z.iso.datetime(),
 });
 
-export const studentDirectorySchema = teacherRateSettingsSchema.extend({
-  students: z.array(studentDtoSchema),
+export const studentCardDtoSchema = studentDtoSchema.pick({
+  id: true,
+  name: true,
+  source: true,
+  level: true,
+  isActive: true,
+  avatarKey: true,
+  themeColor: true,
+  rates: true,
+});
+
+const namedStudentCursorSchema = z.object({
+  sort: z.literal("name"),
+  isActive: z.boolean(),
+  normalizedName: z.string(),
+  id: z.string().min(1).max(128),
+});
+
+const ratedStudentCursorSchema = z.object({
+  sort: z.literal("rate"),
+  isActive: z.boolean(),
+  hourlyRateMinor: z.int().positive(),
+  id: z.string().min(1).max(128),
+});
+
+const leveledStudentCursorSchema = z.object({
+  sort: z.literal("level"),
+  isActive: z.boolean(),
+  level: z.enum(studentLevels),
+  id: z.string().min(1).max(128),
+});
+
+export const studentCursorSchema = z.discriminatedUnion("sort", [
+  namedStudentCursorSchema,
+  ratedStudentCursorSchema,
+  leveledStudentCursorSchema,
+]);
+
+export const studentListInputSchema = z
+  .object({
+    search: z.string().trim().max(120).default(""),
+    sort: z.enum(studentListSorts).default("name"),
+    hideInactive: z.boolean().default(false),
+    limit: z.int().min(1).max(50).default(20),
+    cursor: studentCursorSchema.nullable().default(null),
+  })
+  .refine(
+    ({ cursor, sort }) => cursor === null || cursor.sort === sort,
+    { path: ["cursor"], message: "Cursor does not match the requested sort." },
+  );
+
+export const studentListPageSchema = teacherRateSettingsSchema.extend({
+  students: z.array(studentCardDtoSchema),
+  nextCursor: studentCursorSchema.nullable(),
+  totalStudents: z.int().nonnegative(),
+});
+
+export const studentCountsSchema = z.object({
+  totalStudents: z.int().nonnegative(),
+  activeStudents: z.int().nonnegative(),
 });
 
 export type SetStudentActiveInput = z.input<typeof setStudentActiveInputSchema>;
 export type CreateStudentInput = z.output<typeof createStudentInputSchema>;
 export type StudentDto = z.output<typeof studentDtoSchema>;
-export type StudentDirectory = z.output<typeof studentDirectorySchema>;
+export type StudentCardDto = z.output<typeof studentCardDtoSchema>;
+export type StudentListInput = z.output<typeof studentListInputSchema>;
+export type StudentCursor = z.output<typeof studentCursorSchema>;
+export type StudentListPage = z.output<typeof studentListPageSchema>;
+export type StudentCounts = z.output<typeof studentCountsSchema>;
 
 export function calculateStudentRate(
   grossMinor: number,

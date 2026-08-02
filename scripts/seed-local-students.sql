@@ -78,7 +78,7 @@ SELECT
     WHEN 1 THEN 'phone'
     WHEN 2 THEN 'whatsapp'
     WHEN 3 THEN 'telegram'
-    WHEN 4 THEN 'zoom'
+    WHEN 4 THEN 'preply'
     ELSE 'other'
   END,
   CASE n % 6

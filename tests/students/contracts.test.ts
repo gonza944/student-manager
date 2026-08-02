@@ -7,6 +7,7 @@ import {
   createStudentInputSchema,
   studentDtoSchema,
   studentIdInputSchema,
+  studentListInputSchema,
 } from "../../lib/students/contracts";
 
 const validStudent = {
@@ -50,6 +51,23 @@ test("normalizes the input used to create a student", () => {
   assert.equal(student.email, "sofia@example.com");
   assert.equal(student.phone, null);
   assert.equal(student.nationalityCode, "AR");
+});
+
+test("accepts Preply and rejects the removed Zoom contact channel", () => {
+  assert.equal(
+    createStudentInputSchema.safeParse({
+      ...validStudent,
+      preferredContactChannel: "preply",
+    }).success,
+    true,
+  );
+  assert.equal(
+    createStudentInputSchema.safeParse({
+      ...validStudent,
+      preferredContactChannel: "zoom",
+    }).success,
+    false,
+  );
 });
 
 test("rejects prefixed tag objects in favor of plain labels", () => {
@@ -96,6 +114,39 @@ test("accepts deterministic local seed identifiers", () => {
   assert.deepEqual(studentIdInputSchema.parse({
     studentId: "local-seed-student-01",
   }), { studentId: "local-seed-student-01" });
+});
+
+test("rejects malformed student identifiers", () => {
+  assert.equal(
+    studentIdInputSchema.safeParse({ studentId: "../student-01" }).success,
+    false,
+  );
+});
+
+test("defaults and bounds student directory pages", () => {
+  assert.deepEqual(studentListInputSchema.parse({}), {
+    search: "",
+    sort: "name",
+    hideInactive: false,
+    limit: 20,
+    cursor: null,
+  });
+  assert.equal(studentListInputSchema.safeParse({ limit: 51 }).success, false);
+});
+
+test("rejects a cursor from a different directory sort", () => {
+  assert.equal(
+    studentListInputSchema.safeParse({
+      sort: "name",
+      cursor: {
+        sort: "rate",
+        isActive: true,
+        hourlyRateMinor: 2_500,
+        id: "student-01",
+      },
+    }).success,
+    false,
+  );
 });
 
 test("converts displayed rates to currency minor units", () => {

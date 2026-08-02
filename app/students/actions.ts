@@ -11,14 +11,15 @@ import {
   createStudentInputSchema,
   setStudentActiveInputSchema,
   studentIdInputSchema,
+  studentListInputSchema,
   teacherRateSettingsSchema,
   type StudentDto,
-  type StudentDirectory,
+  type StudentListPage,
 } from "../../lib/students/contracts";
 import {
   createTeacherStudent,
   deleteTeacherStudent,
-  listTeacherStudents,
+  listTeacherStudentsPage,
   setTeacherStudentActive,
 } from "../../lib/students/data";
 
@@ -61,14 +62,20 @@ function validationError(error: z.ZodError): ActionError {
   };
 }
 
-export async function listStudentsAction(): Promise<ActionResult<StudentDirectory>> {
+export async function listStudentsAction(
+  input: unknown = {},
+): Promise<ActionResult<StudentListPage>> {
+  const parsed = studentListInputSchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+
   const context = await getTeacherContext();
   if (!context.ok) return context;
 
-  const data = await listTeacherStudents(
+  const data = await listTeacherStudentsPage(
     await getDb(),
     context.teacherId,
     context.settings,
+    parsed.data,
   );
   return { ok: true, data };
 }
@@ -90,6 +97,7 @@ export async function createStudentAction(
       context.settings.preplyCommissionBps,
     );
     revalidatePath("/students");
+    revalidatePath("/");
     return { ok: true, data };
   } catch (error) {
     if (
@@ -121,6 +129,7 @@ export async function setStudentActiveAction(
   if (!data) return { ok: false, error: "notFound" };
 
   revalidatePath("/students");
+  revalidatePath("/");
   return { ok: true, data };
 }
 
@@ -141,5 +150,6 @@ export async function deleteStudentAction(
   if (!data) return { ok: false, error: "notFound" };
 
   revalidatePath("/students");
+  revalidatePath("/");
   return { ok: true, data };
 }

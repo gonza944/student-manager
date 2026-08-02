@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test("teachers can search, sort, and change student status", async ({
+test("teachers can filter, sort, and change student status", async ({
   page,
 }) => {
+  test.setTimeout(45_000);
   const suffix = Date.now();
   const email = `students-e2e-${suffix}@example.test`;
   const students = [
@@ -13,6 +14,7 @@ test("teachers can search, sort, and change student status", async ({
       level: "C2",
       rate: "10",
       active: true,
+      contactChannel: "preply",
     },
     {
       name: `Zoe Beta ${suffix}`,
@@ -21,6 +23,7 @@ test("teachers can search, sort, and change student status", async ({
       level: "A1",
       rate: "40",
       active: true,
+      contactChannel: "email",
     },
     {
       name: `Mia Gamma ${suffix}`,
@@ -29,6 +32,7 @@ test("teachers can search, sort, and change student status", async ({
       level: "B1",
       rate: "25",
       active: false,
+      contactChannel: "email",
     },
   ];
 
@@ -48,6 +52,12 @@ test("teachers can search, sort, and change student status", async ({
     const dialog = page.getByRole("dialog", { name: "Add a student" });
     await dialog.getByLabel("Full name").fill(student.name);
     await dialog.getByLabel("Email address").fill(student.email);
+    if (student.contactChannel === "preply") {
+      await dialog
+        .getByRole("button", { name: "Preferred contact channel: Email" })
+        .click();
+      await page.getByRole("menuitemradio", { name: "Preply" }).click();
+    }
 
     if (student.country !== "Argentina") {
       const nationality = dialog.getByRole("combobox", {
@@ -74,24 +84,30 @@ test("teachers can search, sort, and change student status", async ({
   }
 
   const cardNames = page.getByRole("article").getByRole("heading");
+  await expect(page.getByText("3 students", { exact: true })).toBeVisible();
+  const sort = page.locator("#student-sort");
+  await sort.click();
+  await page.getByRole("menuitemradio", { name: "Name" }).click();
   await expect(cardNames).toHaveText([
     students[0].name,
     students[1].name,
     students[2].name,
   ]);
 
-  const search = page.getByPlaceholder(
-    "Search by name, email, or country…",
-  );
+  const search = page.getByRole("searchbox", { name: "Search students" });
   await search.fill(students[1].name);
   await expect(cardNames).toHaveText([students[1].name]);
-  await search.fill(students[1].email);
-  await expect(cardNames).toHaveText([students[1].name]);
-  await search.fill(students[1].country);
-  await expect(cardNames).toHaveText([students[1].name]);
-  await search.fill("");
+  await expect(page.getByText("3 students", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Some students may be hidden by filters."),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Reset filters" }).click();
+  await expect(cardNames).toHaveText([
+    students[0].name,
+    students[1].name,
+    students[2].name,
+  ]);
 
-  const sort = page.locator("#student-sort");
   await sort.click();
   await page
     .getByRole("menuitemradio", { name: "Hourly rate" })
@@ -101,7 +117,6 @@ test("teachers can search, sort, and change student status", async ({
     students[0].name,
     students[2].name,
   ]);
-
   await sort.click();
   await page.getByRole("menuitemradio", { name: "Level" }).click();
   await expect(cardNames).toHaveText([
@@ -109,9 +124,16 @@ test("teachers can search, sort, and change student status", async ({
     students[0].name,
     students[2].name,
   ]);
-
   await sort.click();
   await page.getByRole("menuitemradio", { name: "Name" }).click();
+
+  await page.getByRole("switch", { name: "Hide inactive" }).click();
+  await expect(cardNames).toHaveText([
+    students[0].name,
+    students[1].name,
+  ]);
+  await expect(page.getByText("3 students", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Reset filters" }).click();
   const miaCard = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: students[2].name }),
   });
@@ -149,5 +171,14 @@ test("teachers can search, sort, and change student status", async ({
     .click();
   await expect(
     page.getByRole("menuitem", { name: "Set as active" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  await page.getByRole("link", { name: "Dashboard" }).click();
+  const activeStudentsMetric = page.locator('[data-slot="card"]').filter({
+    hasText: "Active students",
+  });
+  await expect(
+    activeStudentsMetric.getByText("2", { exact: true }),
   ).toBeVisible();
 });

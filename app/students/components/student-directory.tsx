@@ -7,11 +7,23 @@ import {
   Search01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  type InfiniteData,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 
+import { Switch } from "@/components/animate-ui/components/radix/switch";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,21 +35,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type {
-  StudentDirectory as StudentDirectoryData,
-  StudentDto,
+  StudentCursor,
+  StudentCardDto,
+  StudentListPage,
 } from "@/lib/students/contracts";
 
 import {
   deleteStudentAction,
-  listStudentsAction,
   setStudentActiveAction,
 } from "../actions";
-import { DeleteStudentConfirmation } from "./delete-student-confirmation";
-import { StudentCard } from "./student-card";
+import { useStudentsQuery } from "../hooks/use-students-query";
 import {
   useStudentDirectoryStore,
   type StudentSort,
 } from "../store/student-store";
+import { DeleteStudentConfirmation } from "./delete-student-confirmation";
+import { StudentCard } from "./student-card";
 
 const actionErrorKeys: Record<
   string,
@@ -53,33 +66,52 @@ const actionErrorKeys: Record<
   notFound: "errors.notFound",
 };
 
+const gridMetrics = {
+  cardWidth: 288,
+  cardHeight: 400,
+  gap: 16,
+} as const;
+const gridStyles = {
+  "--student-card-width": `${gridMetrics.cardWidth}px`,
+  "--student-card-height": `${gridMetrics.cardHeight}px`,
+  "--student-grid-gap": `${gridMetrics.gap}px`,
+} as CSSProperties;
+
 export function StudentDirectory({
   initialData,
 }: {
-  initialData: StudentDirectoryData;
+  initialData: StudentListPage;
 }) {
   const t = useTranslations("Students");
   const locale = useLocale();
   const queryClient = useQueryClient();
   const search = useStudentDirectoryStore((state) => state.search);
   const sort = useStudentDirectoryStore((state) => state.sort);
+  const hideInactive = useStudentDirectoryStore((state) => state.hideInactive);
   const setSearch = useStudentDirectoryStore((state) => state.setSearch);
   const setSort = useStudentDirectoryStore((state) => state.setSort);
-  const [studentToDelete, setStudentToDelete] = useState<StudentDto | null>(
+  const setHideInactive = useStudentDirectoryStore(
+    (state) => state.setHideInactive,
+  );
+  const resetFilters = useStudentDirectoryStore((state) => state.resetFilters);
+  const [studentToDelete, setStudentToDelete] = useState<StudentCardDto | null>(
     null,
   );
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [viewportWidth, setViewportWidth] = useState(0);
 
-  const studentsQuery = useQuery({
-    queryKey: ["students"],
-    queryFn: async () => {
-      const result = await listStudentsAction();
-      if (!result.ok) throw new Error(result.error);
-      return result.data;
-    },
+  const studentsQuery = useStudentsQuery({
     initialData,
-    staleTime: 60_000,
+    search,
+    sort,
+    hideInactive,
   });
-  const directory = studentsQuery.data;
+
+  const directory = studentsQuery.data?.pages[0] ?? initialData;
+  const students = useMemo(
+    () => studentsQuery.data?.pages.flatMap((page) => page.students) ?? [],
+    [studentsQuery.data],
+  );
   const currencyFormatter = useMemo(
     () =>
       new Intl.NumberFormat(locale, {
@@ -93,12 +125,72 @@ export function StudentDirectory({
   const minorFactor = 10 ** fractionDigits;
   const formatMoney = (minor: number) =>
     currencyFormatter.format(minor / minorFactor);
-  const regionNames = useMemo(
-    () => new Intl.DisplayNames(locale, { type: "region" }),
-    [locale],
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const updateWidth = () => setViewportWidth(viewport.clientWidth);
+    const observer = new ResizeObserver(updateWidth);
+    updateWidth();
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, []);
+
+  const columns = Math.max(
+    1,
+    Math.floor(
+      (viewportWidth + gridMetrics.gap) /
+        (gridMetrics.cardWidth + gridMetrics.gap),
+    ),
   );
+  const rowCount = Math.ceil(students.length / columns);
+  // TanStack Virtual deliberately exposes mutable measurement functions.
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const rowVirtualizer = useVirtualizer({
+    count: rowCount,
+    getScrollElement: () => viewportRef.current,
+    estimateSize: () => gridMetrics.cardHeight + gridMetrics.gap,
+    overscan: 2,
+    getItemKey: (index) =>
+      students[index * columns]?.id ?? `student-row-${index}`,
+  });
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const lastVirtualRow = virtualRows.at(-1);
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = studentsQuery;
+
+  useEffect(() => {
+    if (
+      lastVirtualRow &&
+      lastVirtualRow.index >= rowCount - 2 &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
+      void fetchNextPage();
+    }
+  }, [
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    lastVirtualRow,
+    rowCount,
+  ]);
+
+  const refreshStudentPages = async () => {
+    queryClient.setQueriesData<
+      InfiniteData<StudentListPage, StudentCursor | null>
+    >({ queryKey: ["students"] }, (data) =>
+      data
+        ? {
+            pages: data.pages.slice(0, 1),
+            pageParams: data.pageParams.slice(0, 1),
+          }
+        : data,
+    );
+    await queryClient.invalidateQueries({ queryKey: ["students"] });
+  };
   const statusMutation = useMutation({
-    mutationFn: async (student: StudentDto) => {
+    mutationFn: async (student: StudentCardDto) => {
       const result = await setStudentActiveAction({
         studentId: student.id,
         isActive: !student.isActive,
@@ -106,46 +198,25 @@ export function StudentDirectory({
       if (!result.ok) throw new Error(result.error);
       return result.data;
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["students"] }),
+    onSuccess: refreshStudentPages,
   });
   const deleteMutation = useMutation({
-    mutationFn: async (student: StudentDto) => {
+    mutationFn: async (student: StudentCardDto) => {
       const result = await deleteStudentAction({ studentId: student.id });
       if (!result.ok) throw new Error(result.error);
       return result.data;
     },
     onSuccess: async () => {
       setStudentToDelete(null);
-      await queryClient.invalidateQueries({ queryKey: ["students"] });
+      await refreshStudentPages();
     },
   });
-
-  const visibleStudents = useMemo(() => {
-    const term = search.trim().toLocaleLowerCase(locale);
-    const filtered = term
-      ? directory.students.filter((student) =>
-          [
-            student.name,
-            student.email,
-            regionNames.of(student.nationalityCode) ?? student.nationalityCode,
-          ].some((value) => value.toLocaleLowerCase(locale).includes(term)),
-        )
-      : directory.students;
-
-    return filtered.toSorted((a, b) => {
-      if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
-      if (sort === "rate") return b.rates.grossMinor - a.rates.grossMinor;
-      const valueA = sort === "level" ? a.level : a.name;
-      const valueB = sort === "level" ? b.level : b.name;
-      return valueA.localeCompare(valueB, locale);
-    });
-  }, [directory.students, locale, regionNames, search, sort]);
 
   const mutationError = statusMutation.error ?? deleteMutation.error;
   const mutationErrorKey = mutationError
     ? (actionErrorKeys[mutationError.message] ?? "errors.general")
     : null;
+  const filtersHideResults = search.trim() !== "" || hideInactive;
 
   return (
     <main className="min-h-dvh px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
@@ -190,8 +261,11 @@ export function StudentDirectory({
         </header>
 
         <section aria-label={t("directory")}>
-          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="relative w-full max-w-xl">
+              <Label htmlFor="student-search" className="sr-only">
+                {t("searchLabel")}
+              </Label>
               <HugeiconsIcon
                 icon={Search01Icon}
                 strokeWidth={2}
@@ -207,50 +281,81 @@ export function StudentDirectory({
                 className="h-12 rounded-xl ps-10"
               />
             </div>
-            <div className="w-full sm:max-w-80 flex gap-2 shrink-0">
-              <Label htmlFor="student-sort" className="mb-2">
-                {t("sortLabel")}
-              </Label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    id="student-sort"
-                    className="group h-12 min-w-44 justify-between rounded-xl px-3 font-normal">
-                    {t(`sort.${sort}`)}
-                    <HugeiconsIcon
-                      icon={ArrowDown01Icon}
-                      strokeWidth={2}
-                      aria-hidden="true"
-                      className="transition-transform duration-200 group-data-[state=open]:rotate-180 motion-reduce:transition-none"
-                    />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="p-2">
-                  <DropdownMenuRadioGroup
-                    value={sort}
-                    onValueChange={(value) => setSort(value as StudentSort)}>
-                    <DropdownMenuRadioItem value="name">
-                      {t("sort.name")}
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="rate">
-                      {t("sort.rate")}
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="level">
-                      {t("sort.level")}
-                    </DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="flex min-h-12 items-center gap-3 px-3">
+                <Switch
+                  id="hide-inactive-students"
+                  checked={hideInactive}
+                  onCheckedChange={setHideInactive}
+                />
+                <Label
+                  htmlFor="hide-inactive-students"
+                  className="cursor-pointer whitespace-nowrap">
+                  {t("hideInactive")}
+                </Label>
+              </div>
+              <div>
+                <Label htmlFor="student-sort" className="mb-2">
+                  {t("sortLabel")}
+                </Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      id="student-sort"
+                      className="group h-12 min-w-44 justify-between rounded-xl px-3 font-normal">
+                      {t(`sort.${sort}`)}
+                      <HugeiconsIcon
+                        icon={ArrowDown01Icon}
+                        strokeWidth={2}
+                        aria-hidden="true"
+                        className="transition-transform duration-200 group-data-[state=open]:rotate-180 motion-reduce:transition-none"
+                      />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="p-2">
+                    <DropdownMenuRadioGroup
+                      value={sort}
+                      onValueChange={(value) => setSort(value as StudentSort)}>
+                      <DropdownMenuRadioItem value="name">
+                        {t("sort.name")}
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="rate">
+                        {t("sort.rate")}
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="level">
+                        {t("sort.level")}
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
 
-          <p
-            aria-live="polite"
-            className="mb-4 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-            {t("results", { count: visibleStudents.length })}
-          </p>
+          <div className="mb-4 flex min-h-12 flex-wrap items-center justify-between gap-3">
+            <p
+              aria-live="polite"
+              className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+              {t("results", { count: directory.totalStudents })}
+            </p>
+            {filtersHideResults ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-semibold text-muted-foreground">
+                  {t("filtersMayHideResults")}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-12 rounded-full"
+                  onClick={resetFilters}>
+                  {t("resetFilters")}
+                </Button>
+              </div>
+            ) : null}
+          </div>
+
           {mutationErrorKey ? (
             <p
               role="alert"
@@ -259,31 +364,76 @@ export function StudentDirectory({
             </p>
           ) : null}
 
-          {visibleStudents.length ? (
-            <ul
+          {studentsQuery.isPending ? (
+            <div className="rounded-3xl border border-dashed p-12 text-center">
+              <p className="text-xl font-black">{t("loading")}</p>
+            </div>
+          ) : students.length ? (
+            <div
+              ref={viewportRef}
               role="list"
-              className="grid list-none grid-cols-1 justify-center gap-4 sm:grid-cols-[repeat(auto-fill,18rem)]">
-              {visibleStudents.map((student) => (
-                <li key={student.id}>
-                  <StudentCard
-                    student={student}
-                    formatMoney={formatMoney}
-                    pending={
-                      statusMutation.isPending || deleteMutation.isPending
-                    }
-                    onStatusChange={() => statusMutation.mutate(student)}
-                    onDelete={() => setStudentToDelete(student)}
-                  />
-                </li>
-              ))}
-            </ul>
+              aria-label={t("directory")}
+              className="h-[70dvh] min-h-112 max-h-180 overflow-auto rounded-3xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              style={gridStyles}
+              tabIndex={0}>
+              <div
+                className="relative w-full"
+                style={{ height: rowVirtualizer.getTotalSize() }}>
+                {virtualRows.map((virtualRow) => {
+                  const rowStudents = students.slice(
+                    virtualRow.index * columns,
+                    virtualRow.index * columns + columns,
+                  );
+
+                  return (
+                    <div
+                      key={virtualRow.key}
+                      className="absolute start-0 top-0 grid w-full justify-center gap-(--student-grid-gap)"
+                      style={{
+                        height: virtualRow.size,
+                        transform: `translateY(${virtualRow.start}px)`,
+                        gridTemplateColumns:
+                          `repeat(${columns}, minmax(0, var(--student-card-width)))`,
+                      }}>
+                      {rowStudents.map((student) => (
+                        <div key={student.id} role="listitem">
+                          <StudentCard
+                            student={student}
+                            formatMoney={formatMoney}
+                            pending={
+                              statusMutation.isPending ||
+                              deleteMutation.isPending
+                            }
+                            onStatusChange={() =>
+                              statusMutation.mutate(student)
+                            }
+                            onDelete={() => setStudentToDelete(student)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+              {studentsQuery.isFetchingNextPage ? (
+                <p className="py-4 text-center text-sm font-bold" role="status">
+                  {t("loadingMore")}
+                </p>
+              ) : null}
+            </div>
           ) : (
             <div className="rounded-3xl border border-dashed p-12 text-center">
               <p className="text-xl font-black">
-                {search ? t("noMatches") : t("empty")}
+                {filtersHideResults ? t("noMatches") : t("empty")}
               </p>
             </div>
           )}
+
+          {studentsQuery.isError ? (
+            <p role="alert" className="mt-4 text-sm font-bold text-destructive">
+              {t("errors.general")}
+            </p>
+          ) : null}
         </section>
         <DeleteStudentConfirmation
           name={studentToDelete?.name ?? ""}

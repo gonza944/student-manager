@@ -41,6 +41,8 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { requireRole } from "@/lib/auth/server";
+import { getDb } from "@/db";
+import { getTeacherStudentCounts } from "@/lib/students/data";
 
 const classes = [
   { time: "18:30", student: "Emma Reed", level: "B2", lesson: "speaking", status: "ready" },
@@ -98,7 +100,11 @@ export default async function Home() {
   const session = await requireRole("teacher");
   if ("error" in session) redirect("/login");
 
-  const [t, format] = await Promise.all([getTranslations("Dashboard"), getFormatter()]);
+  const [t, format, studentCounts] = await Promise.all([
+    getTranslations("Dashboard"),
+    getFormatter(),
+    getDb().then((db) => getTeacherStudentCounts(db, session.session.user.id)),
+  ]);
   const currency = (value: number) =>
     format.number(value, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
   const month = (value: number, style: "long" | "short") =>
@@ -113,7 +119,7 @@ export default async function Home() {
     },
     {
       label: t("metrics.activeStudents"),
-      value: format.number(21),
+      value: format.number(studentCounts.activeStudents),
       detail: t("metrics.activeDetail", { count: 3 }),
       icon: UserMultipleIcon,
       className: "bg-green-400 text-orbit-ink",
