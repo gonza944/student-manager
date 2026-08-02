@@ -129,6 +129,7 @@ export async function setStudentActiveAction(
   if (!data) return { ok: false, error: "notFound" };
 
   revalidatePath("/students");
+  revalidatePath(`/students/${parsed.data.studentId}`);
   revalidatePath("/");
   return { ok: true, data };
 }
@@ -150,6 +151,7 @@ export async function deleteStudentAction(
   if (!data) return { ok: false, error: "notFound" };
 
   revalidatePath("/students");
+  revalidatePath(`/students/${parsed.data.studentId}`);
   revalidatePath("/");
   return { ok: true, data };
 }

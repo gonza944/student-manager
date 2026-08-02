@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { Toaster } from "@/components/ui/sonner";
+
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -26,7 +28,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <head>
         <meta name="color-scheme" content="light dark" />
       </head>
-      <body className="min-h-full font-sans">{children}</body>
+      <body className="min-h-full font-sans">
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }

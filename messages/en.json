@@ -141,6 +141,7 @@
     "noMatches": "No students match that search.",
     "active": "Active",
     "inactive": "Inactive",
+    "openProfile": "Open profile for {name}",
     "sources": {
       "private": "Direct",
       "preply": "Preply"
@@ -158,8 +159,9 @@
       "close": "Close deletion confirmation"
     },
     "hourlyRate": "Hourly rate",
+    "grossRate": "Gross rate",
     "netRate": "Net rate",
-    "platformFee": "Preply fee",
+    "platformFee": "Discount",
     "contactChannels": {
       "email": "Email",
       "phone": "Phone",
@@ -167,6 +169,44 @@
       "telegram": "Telegram",
       "preply": "Preply",
       "other": "Other"
+    },
+    "profile": {
+      "metaTitle": "{name} — Orbit",
+      "metaDescription": "View {name}'s student profile.",
+      "navigation": "Student profile navigation",
+      "back": "Back to students",
+      "eyebrow": "Student profile",
+      "details": "Student details",
+      "notProvided": "Not provided",
+      "statusSuccess": "Student status updated.",
+      "statusError": "We couldn't update this student's status. Try again.",
+      "deleteError": "We couldn't delete this student. Try again.",
+      "groups": {
+        "personal": "Personal details",
+        "contact": "Contact",
+        "learning": "Learning"
+      },
+      "fields": {
+        "name": "Name",
+        "nationality": "Nationality",
+        "status": "Status",
+        "email": "Email",
+        "phone": "Phone",
+        "timeZone": "Time zone",
+        "preferredContact": "Preferred contact",
+        "level": "Level",
+        "preferences": "Preferences",
+        "interests": "Interests",
+        "goals": "Learning goals",
+        "createdAt": "Created",
+        "updatedAt": "Last updated"
+      },
+      "notFound": {
+        "eyebrow": "Student profile",
+        "title": "Student not found.",
+        "description": "This student doesn't exist or isn't available to your account.",
+        "back": "Back to students"
+      }
     },
     "colors": {
       "coral": "Red",
