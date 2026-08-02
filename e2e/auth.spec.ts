@@ -78,6 +78,13 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Add student" })).toBeVisible();
   await expect(page.getByText("No students yet.", { exact: true })).toBeVisible();
 
+  await page.goto("/students/local-seed-student-240");
+  await expect(
+    page.getByRole("heading", { name: "Student not found." }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Back to students" }).click();
+  await expect(page).toHaveURL("/students");
+
   const studentName = `Playwright Student ${Date.now()}`;
   await page.getByRole("link", { name: "Add student" }).click();
 
@@ -127,7 +134,6 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(firstAvatar).toBeVisible();
   await dialog.getByRole("radio", { name: "Preply" }).click();
   await expect(dialog.getByRole("radio", { name: "Preply" })).toBeChecked();
-  await dialog.getByRole("radio", { name: "Direct" }).click();
   await dialog.getByRole("radio", { name: "Yellow" }).click();
   await expect(dialog.getByRole("radio", { name: "Yellow" })).toBeChecked();
   await dialog.getByRole("switch", { name: "Active student" }).click();
@@ -143,6 +149,38 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   const studentCard = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: studentName }),
   });
+  await studentCard
+    .getByRole("link", { name: `Open profile for ${studentName}` })
+    .click();
+  await expect(page).toHaveURL(/\/students\/[A-Za-z0-9_-]+$/);
+  await expect(
+    page.getByRole("heading", { level: 1, name: studentName }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Contact" })).toBeVisible();
+  await expect(page.getByText("Japan", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Asia/Tokyo", { exact: true })).toBeVisible();
+  await expect(page.getByText("WhatsApp", { exact: true })).toBeVisible();
+  await expect(page.getByText("Visual summaries", { exact: true })).toBeVisible();
+  await expect(page.getByText("Travel", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Preply" })).toBeVisible();
+  await expect(page.getByText("Gross rate", { exact: true })).toBeVisible();
+  await expect(page.getByText("Discount", { exact: true })).toBeVisible();
+  await expect(page.getByText("Net rate", { exact: true })).toBeVisible();
+  await expect(page.getByText("Created", { exact: true })).toBeVisible();
+  await expect(page.getByText("Last updated", { exact: true })).toBeVisible();
+  await expect(page.getByText("Learning goals", { exact: true })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Set as inactive" }).click();
+  await expect(
+    page.getByText("Student status updated.", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("Inactive", { exact: true }).first()).toBeVisible();
+  await expect(page.locator('[data-slot="marquee"]')).toHaveClass(
+    /bg-blue-gray-400/,
+  );
+
+  await page.getByRole("link", { name: "Back to students" }).click();
+  await expect(page).toHaveURL("/students");
   await studentCard
     .getByRole("button", { name: `Actions for ${studentName}` })
     .click();

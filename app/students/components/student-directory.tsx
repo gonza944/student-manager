@@ -399,6 +399,7 @@ export function StudentDirectory({
                         <div key={student.id} role="listitem">
                           <StudentCard
                             student={student}
+                            href={`/students/${student.id}`}
                             formatMoney={formatMoney}
                             pending={
                               statusMutation.isPending ||

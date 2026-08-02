@@ -189,6 +189,11 @@ export const studentListPageSchema = teacherRateSettingsSchema.extend({
   totalStudents: z.int().nonnegative(),
 });
 
+export const studentProfileSchema = z.object({
+  currency: currencySchema,
+  student: studentDtoSchema,
+});
+
 export const studentCountsSchema = z.object({
   totalStudents: z.int().nonnegative(),
   activeStudents: z.int().nonnegative(),
@@ -201,6 +206,7 @@ export type StudentCardDto = z.output<typeof studentCardDtoSchema>;
 export type StudentListInput = z.output<typeof studentListInputSchema>;
 export type StudentCursor = z.output<typeof studentCursorSchema>;
 export type StudentListPage = z.output<typeof studentListPageSchema>;
+export type StudentProfile = z.output<typeof studentProfileSchema>;
 export type StudentCounts = z.output<typeof studentCountsSchema>;
 
 export function calculateStudentRate(

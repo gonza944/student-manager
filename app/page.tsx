@@ -81,7 +81,7 @@ function MetricCard({
   return (
     <Card className={cn("min-h-48 justify-between overflow-hidden py-5 shadow-none", className)}>
       <CardHeader className="px-5">
-        <CardDescription className="text-current text-[0.6875rem] font-bold uppercase tracking-[0.14em]">
+        <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-current">
           {label}
         </CardDescription>
         <CardAction className="grid size-10 place-items-center rounded-full border border-current/20">
@@ -142,7 +142,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-dvh px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
-      <div className="mx-auto max-w-[90rem]">
+      <div className="mx-auto max-w-360">
         <header className="flex flex-wrap items-center justify-between gap-4" aria-label={t("headerLabel")}>
           <div className="flex items-center gap-3">
             <span className="grid size-10 place-items-center rounded-full border-[0.5rem] border-ink" aria-hidden="true" />
@@ -151,8 +151,8 @@ export default async function Home() {
                 <HugeiconsIcon icon={Orbit02Icon} size={18} color="currentColor" strokeWidth={1.5} aria-hidden="true" />
               </span>
               <div>
-                <p className="text-sm font-black tracking-[-0.05em]">Orbit</p>
-                <p className="text-[0.625rem] font-bold uppercase tracking-[0.12em] text-ink/55">{t("studio")}</p>
+                <p className="text-sm font-black tracking-tighter">Orbit</p>
+                <p className="text-label font-bold uppercase tracking-[0.12em] text-ink/55">{t("studio")}</p>
               </div>
             </div>
           </div>
@@ -199,7 +199,7 @@ export default async function Home() {
         </header>
 
         <section className="pb-10 pt-16 sm:pt-24 lg:pb-14 lg:pt-32" aria-labelledby="dashboard-title">
-          <p className="mb-4 text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-ink/60">
+          <p className="mb-4 text-caption font-bold uppercase tracking-[0.16em] text-ink/60">
             {t("weekLocation", { week: 28, location: "Córdoba" })}
           </p>
           <h1
@@ -222,7 +222,7 @@ export default async function Home() {
             className="overflow-hidden border-orbit-ink/20 bg-yellow-400 text-orbit-ink shadow-none lg:col-span-7"
           >
             <CardHeader>
-              <CardDescription className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-orbit-ink/65">
+              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-orbit-ink/65">
                 {t("upNext")}
               </CardDescription>
               <CardTitle className="text-3xl font-black tracking-[-0.06em] sm:text-4xl">{t("todaysClasses")}</CardTitle>
@@ -260,7 +260,7 @@ export default async function Home() {
 
           <Card className="border-orbit-ink/20 bg-blue-gray-400 text-orbit-ink shadow-none lg:col-span-5">
             <CardHeader>
-              <CardDescription className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-orbit-ink/65">
+              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-orbit-ink/65">
                 {t("studentPulse")}
               </CardDescription>
               <CardTitle className="text-3xl font-black tracking-[-0.06em] sm:text-4xl">{t("everyoneMoving")}</CardTitle>
@@ -290,7 +290,7 @@ export default async function Home() {
 
           <Card className="border-orbit-paper-strong/20 bg-orbit-ink text-orbit-paper-strong shadow-none lg:col-span-5">
             <CardHeader>
-              <CardDescription className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-blue-gray-400">
+              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-blue-gray-400">
                 {t("monthlyRevenue")}
               </CardDescription>
               <CardTitle className="text-5xl font-black tracking-[-0.09em]">{currency(3840)}</CardTitle>
@@ -322,7 +322,7 @@ export default async function Home() {
                   ))}
                 </tbody>
               </table>
-              <div className="mt-3 flex justify-between text-[0.625rem] font-bold uppercase tracking-[0.08em] text-blue-gray-400" aria-hidden="true">
+              <div className="mt-3 flex justify-between text-label font-bold uppercase tracking-[0.08em] text-blue-gray-400" aria-hidden="true">
                 {revenue.map((item) => (
                   <span key={item.month}>{month(item.month, "short")}</span>
                 ))}
@@ -332,7 +332,7 @@ export default async function Home() {
 
           <Card className="border-ink/20 bg-paper-strong shadow-none lg:col-span-3">
             <CardHeader>
-              <CardDescription className="text-[0.6875rem] font-bold uppercase tracking-[0.14em]">{t("needsAttention")}</CardDescription>
+              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em]">{t("needsAttention")}</CardDescription>
               <CardAction className="text-red-500">
                 <HugeiconsIcon icon={Alert02Icon} size={22} color="currentColor" strokeWidth={1.5} aria-hidden="true" />
               </CardAction>
@@ -352,7 +352,7 @@ export default async function Home() {
 
           <Card className="border-ink/20 bg-paper-strong shadow-none lg:col-span-4">
             <CardHeader>
-              <CardDescription className="text-[0.6875rem] font-bold uppercase tracking-[0.14em]">{t("inbox")}</CardDescription>
+              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em]">{t("inbox")}</CardDescription>
               <CardTitle className="text-2xl font-black tracking-[-0.05em]">{t("inboxTitle")}</CardTitle>
               <CardAction className="grid size-10 place-items-center rounded-full bg-purple-400 text-orbit-ink">
                 <span className="font-black">{format.number(4, { minimumIntegerDigits: 2 })}</span>
@@ -383,7 +383,7 @@ export default async function Home() {
 
           <Card className="min-h-80 border-red-500 bg-red-500 text-orbit-paper-strong shadow-none lg:col-span-7">
             <CardHeader>
-              <CardDescription className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-orbit-paper-strong/75">
+              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-orbit-paper-strong/75">
                 {t("weeklyNote")}
               </CardDescription>
               <CardAction>
@@ -394,7 +394,7 @@ export default async function Home() {
               <blockquote className="max-w-3xl text-pretty text-3xl font-black leading-[0.95] tracking-[-0.06em] sm:text-5xl">
                 {t("weeklyQuote")}
               </blockquote>
-              <div className="flex items-center justify-between border-t border-orbit-paper-strong/35 pt-4 text-[0.6875rem] font-bold uppercase tracking-[0.12em]">
+              <div className="flex items-center justify-between border-t border-orbit-paper-strong/35 pt-4 text-caption font-bold uppercase tracking-[0.12em]">
                 <span>{t("week", { week: 28 })}</span>
                 <span>{t("classesLeft", { count: 6 })}</span>
               </div>

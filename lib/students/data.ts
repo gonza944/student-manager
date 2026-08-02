@@ -25,6 +25,7 @@ import {
   studentDtoSchema,
   type StudentListInput,
   studentListPageSchema,
+  studentProfileSchema,
   type StudentDto,
 } from "./contracts";
 
@@ -206,6 +207,26 @@ export async function listTeacherStudentsPage(
     nextCursor:
       hasNextPage && lastRow ? toCursor(lastRow, input.sort) : null,
     totalStudents: counts.totalStudents,
+  });
+}
+
+export async function getTeacherStudentProfile(
+  db: Database,
+  teacherId: string,
+  settings: TeacherSettings,
+  studentId: string,
+) {
+  const [row] = await db
+    .select()
+    .from(student)
+    .where(and(eq(student.id, studentId), eq(student.teacherId, teacherId)))
+    .limit(1);
+
+  if (!row) return null;
+
+  return studentProfileSchema.parse({
+    currency: settings.currency,
+    student: toStudentDto(row, settings.preplyCommissionBps),
   });
 }
 

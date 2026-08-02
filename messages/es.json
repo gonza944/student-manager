@@ -141,6 +141,7 @@
     "noMatches": "Ningún estudiante coincide con la búsqueda.",
     "active": "Activo",
     "inactive": "Inactivo",
+    "openProfile": "Abrir perfil de {name}",
     "sources": {
       "private": "Directo",
       "preply": "Preply"
@@ -158,8 +159,9 @@
       "close": "Cerrar confirmación de eliminación"
     },
     "hourlyRate": "Tarifa por hora",
+    "grossRate": "Tarifa bruta",
     "netRate": "Tarifa neta",
-    "platformFee": "Comisión de Preply",
+    "platformFee": "Descuento",
     "contactChannels": {
       "email": "Correo electrónico",
       "phone": "Teléfono",
@@ -167,6 +169,44 @@
       "telegram": "Telegram",
       "preply": "Preply",
       "other": "Otro"
+    },
+    "profile": {
+      "metaTitle": "{name} — Orbit",
+      "metaDescription": "Consulta el perfil de estudiante de {name}.",
+      "navigation": "Navegación del perfil del estudiante",
+      "back": "Volver a estudiantes",
+      "eyebrow": "Perfil del estudiante",
+      "details": "Datos del estudiante",
+      "notProvided": "No proporcionado",
+      "statusSuccess": "Se actualizó el estado del estudiante.",
+      "statusError": "No pudimos actualizar el estado del estudiante. Inténtalo de nuevo.",
+      "deleteError": "No pudimos eliminar al estudiante. Inténtalo de nuevo.",
+      "groups": {
+        "personal": "Datos personales",
+        "contact": "Contacto",
+        "learning": "Aprendizaje"
+      },
+      "fields": {
+        "name": "Nombre",
+        "nationality": "Nacionalidad",
+        "status": "Estado",
+        "email": "Correo electrónico",
+        "phone": "Teléfono",
+        "timeZone": "Zona horaria",
+        "preferredContact": "Contacto preferido",
+        "level": "Nivel",
+        "preferences": "Preferencias",
+        "interests": "Intereses",
+        "goals": "Objetivos de aprendizaje",
+        "createdAt": "Creado",
+        "updatedAt": "Última actualización"
+      },
+      "notFound": {
+        "eyebrow": "Perfil del estudiante",
+        "title": "No se encontró al estudiante.",
+        "description": "Este estudiante no existe o no está disponible para tu cuenta.",
+        "back": "Volver a estudiantes"
+      }
     },
     "colors": {
       "coral": "Rojo",

@@ -75,7 +75,7 @@ export function AuthPage({
               </span>
               <div>
                 <p className="text-sm font-black tracking-tighter">Orbit</p>
-                <p className="text-[0.625rem] font-bold uppercase tracking-[0.12em] text-orbit-ink/60">
+                <p className="text-label font-bold uppercase tracking-[0.12em] text-orbit-ink/60">
                   {eyebrow}
                 </p>
               </div>
