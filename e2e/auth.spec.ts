@@ -145,16 +145,53 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(dialog).toBeHidden();
   await expect(page).toHaveURL("/students");
   await expect(page.getByRole("heading", { name: studentName })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: studentName })).toBeVisible();
+  await page.getByRole("link", { name: "Add student" }).click();
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(page).toHaveURL("/students");
 
-  const studentCard = page.getByRole("article").filter({
+  const editedStudentName = `${studentName} Updated`;
+  const originalStudentCard = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: studentName }),
   });
-  await studentCard
-    .getByRole("link", { name: `Open profile for ${studentName}` })
+  await originalStudentCard
+    .getByRole("button", { name: `Actions for ${studentName}` })
     .click();
+  await page.getByRole("menuitem", { name: "Edit" }).click();
+  await expect(page).toHaveURL(/\/students\/edit\/[A-Za-z0-9_-]+$/);
+  const directoryEditDialog = page.getByRole("dialog", {
+    name: "Edit student",
+  });
+  await expect(
+    directoryEditDialog.getByRole("button", { name: "Cancel" }),
+  ).toHaveCount(0);
+  await expect(directoryEditDialog.getByLabel("Full name")).toHaveValue(
+    studentName,
+  );
+  await directoryEditDialog.getByLabel("Full name").fill(editedStudentName);
+  await directoryEditDialog
+    .getByRole("button", { name: "Level: B2" })
+    .click();
+  await page.getByRole("menuitemradio", { name: "C1" }).click();
+  await directoryEditDialog
+    .getByRole("button", { name: "Save changes" })
+    .click();
+  await expect(directoryEditDialog).toBeHidden();
   await expect(page).toHaveURL(/\/students\/[A-Za-z0-9_-]+$/);
   await expect(
-    page.getByRole("heading", { level: 1, name: studentName }),
+    page.getByText("Student details updated.", { exact: true }),
+  ).toBeVisible();
+
+  const studentCard = page.getByRole("article").filter({
+    has: page.getByRole("heading", { name: editedStudentName }),
+  });
+  const profileUrl = new URL(page.url()).pathname;
+  const profileEditUrl = `/students/edit/${profileUrl.split("/").at(-1)}`;
+  await expect(
+    page.getByRole("heading", { level: 1, name: editedStudentName }),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Contact" })).toBeVisible();
   await expect(page.getByText("Japan", { exact: true }).first()).toBeVisible();
@@ -170,6 +207,50 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(page.getByText("Last updated", { exact: true })).toBeVisible();
   await expect(page.getByText("Learning goals", { exact: true })).toHaveCount(0);
 
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { level: 1, name: editedStudentName }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Edit" }).click();
+  await expect(page).toHaveURL(profileEditUrl);
+  const profileEditDialog = page.getByRole("dialog", {
+    name: "Edit student",
+  });
+  await expect(profileEditDialog.getByLabel("Full name")).toHaveValue(
+    editedStudentName,
+  );
+  await profileEditDialog.getByLabel("Phone number").fill("+5493515550101");
+  await profileEditDialog
+    .getByLabel("Learning goals")
+    .fill("Prepare for an advanced conversation exam");
+  await profileEditDialog.getByLabel("Hourly rate (USD)").fill("35");
+  await profileEditDialog
+    .getByRole("button", { name: "Save changes" })
+    .click();
+  await expect(profileEditDialog).toBeHidden();
+  await expect(page).toHaveURL(profileUrl);
+  await expect(page.getByText("+5493515550101", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Prepare for an advanced conversation exam", {
+      exact: true,
+    }),
+  ).toBeVisible();
+
+  await page.goto(profileEditUrl);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Edit student" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Full name")).toHaveValue(editedStudentName);
+  await expect(
+    page.getByRole("button", { name: "Cancel" }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("navigation", { name: "Student edit navigation" })
+    .getByRole("link", { name: "Student profile" })
+    .click();
+  await expect(page).toHaveURL(profileUrl);
+
   await page.getByRole("button", { name: "Set as inactive" }).click();
   await expect(
     page.getByText("Student status updated.", { exact: true }),
@@ -182,11 +263,11 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await page.getByRole("link", { name: "Back to students" }).click();
   await expect(page).toHaveURL("/students");
   await studentCard
-    .getByRole("button", { name: `Actions for ${studentName}` })
+    .getByRole("button", { name: `Actions for ${editedStudentName}` })
     .click();
   await page.getByRole("menuitem", { name: "Delete" }).click();
   const deleteDialog = page.getByRole("dialog", {
-    name: `Delete ${studentName}?`,
+    name: `Delete ${editedStudentName}?`,
   });
   await expect(deleteDialog).toBeVisible();
   await deleteDialog.getByRole("button", { name: "Cancel" }).click();
@@ -194,11 +275,11 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
 
   await page.setViewportSize({ width: 390, height: 844 });
   await studentCard
-    .getByRole("button", { name: `Actions for ${studentName}` })
+    .getByRole("button", { name: `Actions for ${editedStudentName}` })
     .click();
   await page.getByRole("menuitem", { name: "Delete" }).click();
   const deleteDrawer = page.locator('[data-slot="drawer-content"]').filter({
-    hasText: `Delete ${studentName}?`,
+    hasText: `Delete ${editedStudentName}?`,
   });
   await expect(deleteDrawer).toBeVisible();
   await deleteDrawer
@@ -207,7 +288,7 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(studentCard).toHaveCount(0);
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: studentName }),
+    page.getByRole("heading", { name: editedStudentName }),
   ).toHaveCount(0);
 
   await page.setViewportSize({ width: 1280, height: 900 });

@@ -12,12 +12,14 @@ export function StudentTagInput({
   values,
   placeholder,
   removeLabel,
+  invalid = false,
   onValueChange,
 }: {
   id: string;
   values: string[];
   placeholder: string;
   removeLabel: (value: string) => string;
+  invalid?: boolean;
   onValueChange: (values: string[]) => void;
 }) {
   const [draft, setDraft] = useState("");
@@ -63,6 +65,8 @@ export function StudentTagInput({
         placeholder={values.length ? undefined : placeholder}
         enterKeyHint="done"
         maxLength={80}
+        aria-invalid={invalid}
+        aria-describedby={invalid ? `${id}-error` : undefined}
         className="h-8 min-w-32 flex-1 bg-transparent px-1 text-base outline-none placeholder:text-muted-foreground md:text-sm"
         onChange={(event) => setDraft(event.target.value)}
         onBlur={addDraft}

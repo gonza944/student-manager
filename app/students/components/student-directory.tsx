@@ -34,10 +34,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type {
-  StudentCursor,
-  StudentCardDto,
-  StudentListPage,
+import {
+  type StudentCardDto,
+  type StudentCursor,
+  type StudentListPage,
 } from "@/lib/students/contracts";
 
 import {
@@ -211,7 +211,6 @@ export function StudentDirectory({
       await refreshStudentPages();
     },
   });
-
   const mutationError = statusMutation.error ?? deleteMutation.error;
   const mutationErrorKey = mutationError
     ? (actionErrorKeys[mutationError.message] ?? "errors.general")
@@ -405,6 +404,7 @@ export function StudentDirectory({
                               statusMutation.isPending ||
                               deleteMutation.isPending
                             }
+                            editHref={`/students/edit/${student.id}`}
                             onStatusChange={() =>
                               statusMutation.mutate(student)
                             }

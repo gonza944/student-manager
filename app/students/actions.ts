@@ -13,6 +13,7 @@ import {
   studentIdInputSchema,
   studentListInputSchema,
   teacherRateSettingsSchema,
+  updateStudentInputSchema,
   type StudentDto,
   type StudentListPage,
 } from "../../lib/students/contracts";
@@ -21,6 +22,7 @@ import {
   deleteTeacherStudent,
   listTeacherStudentsPage,
   setTeacherStudentActive,
+  updateTeacherStudent,
 } from "../../lib/students/data";
 
 type ActionError =
@@ -97,6 +99,40 @@ export async function createStudentAction(
       context.settings.preplyCommissionBps,
     );
     revalidatePath("/students");
+    revalidatePath("/");
+    return { ok: true, data };
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("student_teacher_email_unique") ||
+        error.message.includes("UNIQUE constraint failed: student.teacher_id, student.email"))
+    ) {
+      return { ok: false, error: "conflict" };
+    }
+    throw error;
+  }
+}
+
+export async function updateStudentAction(
+  input: unknown,
+): Promise<ActionResult<StudentDto>> {
+  const parsed = updateStudentInputSchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+
+  const context = await getTeacherContext();
+  if (!context.ok) return context;
+
+  try {
+    const data = await updateTeacherStudent(
+      await getDb(),
+      context.teacherId,
+      parsed.data,
+      context.settings.preplyCommissionBps,
+    );
+    if (!data) return { ok: false, error: "notFound" };
+
+    revalidatePath("/students");
+    revalidatePath(`/students/${parsed.data.studentId}`);
     revalidatePath("/");
     return { ok: true, data };
   } catch (error) {

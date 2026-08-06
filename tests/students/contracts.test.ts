@@ -8,6 +8,7 @@ import {
   studentDtoSchema,
   studentIdInputSchema,
   studentListInputSchema,
+  updateStudentInputSchema,
 } from "../../lib/students/contracts";
 
 const validStudent = {
@@ -50,6 +51,18 @@ test("normalizes the input used to create a student", () => {
 
   assert.equal(student.email, "sofia@example.com");
   assert.equal(student.phone, null);
+  assert.equal(student.nationalityCode, "AR");
+});
+
+test("validates and normalizes the input used to update a student", () => {
+  const student = updateStudentInputSchema.parse({
+    ...validStudent,
+    studentId: validStudent.id,
+  });
+
+  assert.equal(student.id, undefined);
+  assert.equal(student.studentId, "student-01");
+  assert.equal(student.email, "sofia@example.com");
   assert.equal(student.nationalityCode, "AR");
 });
 

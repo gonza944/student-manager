@@ -254,12 +254,27 @@
       "avatar": "Avatar",
       "avatarOption": "Avatar {number}",
       "color": "Card color",
-      "cancel": "Cancel",
       "save": "Add student",
       "saving": "Adding…"
     },
+    "edit": {
+      "action": "Edit",
+      "navigation": "Student edit navigation",
+      "profile": "Student profile",
+      "eyebrow": "Student details",
+      "title": "Edit student",
+      "description": "Update this student's personal, learning, and rate information.",
+      "close": "Close edit student dialog",
+      "loading": "Loading student details…",
+      "loadError": "We couldn't load this student's details.",
+      "retry": "Try again",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "success": "Student details updated."
+    },
     "errors": {
       "validation": "Check the student details and try again.",
+      "field": "Check this field.",
       "conflict": "A student with this email already exists.",
       "permission": "Your session expired. Sign in and try again.",
       "notFound": "This student no longer exists.",

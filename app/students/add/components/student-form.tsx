@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { Switch } from "@/components/animate-ui/components/radix/switch";
 import {
@@ -23,11 +24,12 @@ import {
   studentSources,
   studentThemeColors,
   type CreateStudentInput,
+  type StudentDto,
 } from "@/lib/students/contracts";
 import { studentCountries } from "@/lib/students/geography";
 import { cn } from "@/lib/utils";
 
-import { createStudentAction } from "../../actions";
+import { createStudentAction, updateStudentAction } from "../../actions";
 import { StudentCard } from "../../components/student-card";
 import { studentThemeSwatches } from "../../const/student-card-config";
 import { toMinorUnits } from "../../utils/to-minor-units";
@@ -72,19 +74,37 @@ const initialForm: StudentForm = {
   themeColor: "coral",
 };
 
-export function AddStudentForm({
+type StudentFormError = Error & { fields?: string[] };
+
+function FieldError({
+  invalid,
+  id,
+  message,
+}: {
+  invalid: boolean;
+  id: string;
+  message: string;
+}) {
+  return invalid ? (
+    <p id={id} className="text-xs font-bold text-destructive">
+      {message}
+    </p>
+  ) : null;
+}
+
+export function StudentForm({
   currency,
   preplyCommissionBps,
+  student,
 }: {
   currency: string;
   preplyCommissionBps: number;
+  student?: StudentDto;
 }) {
   const t = useTranslations("Students");
   const locale = useLocale();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<StudentForm>(initialForm);
-  const [clientInvalid, setClientInvalid] = useState(false);
   const currencyFormatter = useMemo(
     () => new Intl.NumberFormat(locale, { style: "currency", currency }),
     [currency, locale],
@@ -92,6 +112,28 @@ export function AddStudentForm({
   const currencyFractionDigits =
     currencyFormatter.resolvedOptions().maximumFractionDigits ?? 2;
   const minorFactor = 10 ** currencyFractionDigits;
+  const [form, setForm] = useState<StudentForm>(() =>
+    student
+      ? {
+          name: student.name,
+          email: student.email,
+          phone: student.phone ?? "",
+          nationalityCode: student.nationalityCode,
+          timeZone: student.timeZone,
+          preferredContactChannel: student.preferredContactChannel,
+          level: student.level,
+          preferences: student.preferences,
+          interests: student.interests,
+          learningGoals: student.learningGoals ?? "",
+          source: student.source,
+          hourlyRate: (student.hourlyRateMinor / minorFactor).toString(),
+          isActive: student.isActive,
+          avatarKey: student.avatarKey,
+          themeColor: student.themeColor,
+        }
+      : initialForm,
+  );
+  const [clientInvalidFields, setClientInvalidFields] = useState<string[]>([]);
   const hourlyRateMinor = toMinorUnits(form.hourlyRate, currencyFractionDigits);
   const rates = calculateStudentRate(
     hourlyRateMinor,
@@ -100,41 +142,68 @@ export function AddStudentForm({
   );
   const formatMoney = (minor: number) =>
     currencyFormatter.format(minor / minorFactor);
-  const createMutation = useMutation({
+  const saveMutation = useMutation({
     mutationFn: async (input: CreateStudentInput) => {
-      const result = await createStudentAction(input);
-      if (!result.ok) throw new Error(result.error);
+      const result = student
+        ? await updateStudentAction({ ...input, studentId: student.id })
+        : await createStudentAction(input);
+      if (!result.ok) {
+        const error = new Error(result.error) as StudentFormError;
+        error.fields =
+          result.error === "validation"
+            ? result.fields
+            : result.error === "conflict"
+              ? ["email"]
+              : undefined;
+        throw error;
+      }
       return result.data;
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["students"] });
       setForm(initialForm);
-      setClientInvalid(false);
-      router.push("/students");
+      setClientInvalidFields([]);
+      if (student) toast.success(t("edit.success"));
+      router.push(student ? `/students/${student.id}` : "/students");
     },
   });
+  const mutationFields = (saveMutation.error as StudentFormError | null)?.fields;
+  const invalidFields = new Set([
+    ...clientInvalidFields,
+    ...(mutationFields ?? []),
+  ]);
+  const isEditing = student !== undefined;
+  const fieldError = t("errors.field");
+  const emailError =
+    saveMutation.error?.message === "conflict"
+      ? t("errors.conflict")
+      : fieldError;
 
   return (
     <div className="p-4 sm:p-6 xl:p-7">
       <div className="mb-5 pe-10">
         <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
-          {t("form.eyebrow")}
+          {t(isEditing ? "edit.eyebrow" : "form.eyebrow")}
         </p>
         <h1
-          id="add-student-title"
+          id={isEditing ? "edit-student-title" : "add-student-title"}
           className="text-3xl font-black tracking-[-0.05em]">
-          {t("form.title")}
+          {t(isEditing ? "edit.title" : "form.title")}
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          {t("form.description")}
+          {t(isEditing ? "edit.description" : "form.description")}
         </p>
       </div>
 
       <form
-        className="grid gap-6 lg:grid-cols-[minmax(15rem,0.7fr)_minmax(0,1.3fr)] xl:grid-cols-[minmax(16rem,0.7fr)_repeat(2,minmax(0,1fr))]"
+        className={cn(
+          "grid gap-6",
+          !isEditing &&
+            "lg:grid-cols-[minmax(15rem,0.7fr)_minmax(0,1.3fr)] xl:grid-cols-[minmax(16rem,0.7fr)_repeat(2,minmax(0,1fr))]",
+        )}
         onSubmit={(event) => {
           event.preventDefault();
-          setClientInvalid(false);
+          setClientInvalidFields([]);
 
           const input = createStudentInputSchema.safeParse({
             ...form,
@@ -142,37 +211,48 @@ export function AddStudentForm({
           });
 
           if (!input.success) {
-            setClientInvalid(true);
+            setClientInvalidFields([
+              ...new Set(
+                input.error.issues.map((issue) =>
+                  String(issue.path[0] ?? "form"),
+                ),
+              ),
+            ]);
             return;
           }
 
-          createMutation.mutate(input.data);
+          saveMutation.mutate(input.data);
         }}>
-        <aside className="flex h-fit flex-col gap-4 p-4 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-3 lg:row-start-1">
-          <StudentCard
-            student={{
-              name: form.name || t("form.previewName"),
-              source: form.source,
-              level: form.level,
-              isActive: form.isActive,
-              avatarKey: form.avatarKey,
-              themeColor: form.themeColor,
-              rates,
-            }}
-            formatMoney={formatMoney}
-            preview
-          />
-          {form.source === "preply" ? (
-            <p className="text-sm font-semibold text-muted-foreground self-center">
-              {t("form.preplyRate", {
-                fee: formatMoney(rates.platformFeeMinor),
-                net: formatMoney(rates.netMinor),
-              })}
-            </p>
-          ) : null}
-        </aside>
+        {isEditing ? null : (
+          <aside className="flex h-fit flex-col gap-4 p-4 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-3 lg:row-start-1">
+            <StudentCard
+              student={{
+                name: form.name || t("form.previewName"),
+                source: form.source,
+                level: form.level,
+                isActive: form.isActive,
+                avatarKey: form.avatarKey,
+                themeColor: form.themeColor,
+                rates,
+              }}
+              formatMoney={formatMoney}
+              preview
+            />
+            {form.source === "preply" ? (
+              <p className="self-center text-sm font-semibold text-muted-foreground">
+                {t("form.preplyRate", {
+                  fee: formatMoney(rates.platformFeeMinor),
+                  net: formatMoney(rates.netMinor),
+                })}
+              </p>
+            ) : null}
+          </aside>
+        )}
 
-        <fieldset className="lg:col-start-2 lg:row-start-1 xl:col-span-2">
+        <fieldset
+          className={cn(
+            !isEditing && "lg:col-start-2 lg:row-start-1 xl:col-span-2",
+          )}>
           <legend className="mb-3 text-sm font-black">
             {t("form.personal")}
           </legend>
@@ -185,6 +265,10 @@ export function AddStudentForm({
                 autoComplete="name"
                 required
                 maxLength={120}
+                aria-invalid={invalidFields.has("name")}
+                aria-describedby={
+                  invalidFields.has("name") ? "student-name-error" : undefined
+                }
                 value={form.name}
                 onChange={(event) =>
                   setForm((current) => ({
@@ -193,6 +277,11 @@ export function AddStudentForm({
                   }))
                 }
                 className="h-11 rounded-xl"
+              />
+              <FieldError
+                id="student-name-error"
+                invalid={invalidFields.has("name")}
+                message={fieldError}
               />
             </div>
             <div className="space-y-2">
@@ -203,6 +292,13 @@ export function AddStudentForm({
                 type="email"
                 autoComplete="email"
                 required
+                maxLength={320}
+                aria-invalid={invalidFields.has("email")}
+                aria-describedby={
+                  invalidFields.has("email")
+                    ? "student-email-error"
+                    : undefined
+                }
                 value={form.email}
                 onChange={(event) =>
                   setForm((current) => ({
@@ -212,6 +308,11 @@ export function AddStudentForm({
                 }
                 className="h-11 rounded-xl"
               />
+              <FieldError
+                id="student-email-error"
+                invalid={invalidFields.has("email")}
+                message={emailError}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="student-phone">{t("form.phone")}</Label>
@@ -220,6 +321,13 @@ export function AddStudentForm({
                 name="phone"
                 type="tel"
                 autoComplete="tel"
+                maxLength={40}
+                aria-invalid={invalidFields.has("phone")}
+                aria-describedby={
+                  invalidFields.has("phone")
+                    ? "student-phone-error"
+                    : undefined
+                }
                 value={form.phone}
                 onChange={(event) =>
                   setForm((current) => ({
@@ -228,6 +336,11 @@ export function AddStudentForm({
                   }))
                 }
                 className="h-11 rounded-xl"
+              />
+              <FieldError
+                id="student-phone-error"
+                invalid={invalidFields.has("phone")}
+                message={fieldError}
               />
             </div>
             <div className="space-y-2">
@@ -238,6 +351,7 @@ export function AddStudentForm({
                 id="student-contact-channel"
                 label={t("form.preferredContact")}
                 value={form.preferredContactChannel}
+                invalid={invalidFields.has("preferredContactChannel")}
                 options={contactChannels.map((channel) => ({
                   value: channel,
                   label: t(`contactChannels.${channel}`),
@@ -248,6 +362,11 @@ export function AddStudentForm({
                     preferredContactChannel: value,
                   }))
                 }
+              />
+              <FieldError
+                id="student-contact-channel-error"
+                invalid={invalidFields.has("preferredContactChannel")}
+                message={fieldError}
               />
             </div>
             <div className="space-y-2">
@@ -261,6 +380,7 @@ export function AddStudentForm({
                 placeholder={t("form.nationalityPlaceholder")}
                 emptyMessage={t("form.nationalityNoResults")}
                 openLabel={t("form.nationalityOpen")}
+                invalid={invalidFields.has("nationalityCode")}
                 onValueChange={(nationalityCode) => {
                   const country = studentCountries.find(
                     (option) => option.code === nationalityCode,
@@ -272,6 +392,11 @@ export function AddStudentForm({
                   }));
                 }}
               />
+              <FieldError
+                id="student-nationality-error"
+                invalid={invalidFields.has("nationalityCode")}
+                message={fieldError}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="student-time-zone">{t("form.timeZone")}</Label>
@@ -281,15 +406,24 @@ export function AddStudentForm({
                 placeholder={t("form.timeZonePlaceholder")}
                 emptyMessage={t("form.timeZoneNoResults")}
                 openLabel={t("form.timeZoneOpen")}
+                invalid={invalidFields.has("timeZone")}
                 onValueChange={(timeZone) =>
                   setForm((current) => ({ ...current, timeZone }))
                 }
+              />
+              <FieldError
+                id="student-time-zone-error"
+                invalid={invalidFields.has("timeZone")}
+                message={fieldError}
               />
             </div>
           </div>
         </fieldset>
 
-        <fieldset className="lg:col-start-2 lg:row-start-2 xl:col-span-2">
+        <fieldset
+          className={cn(
+            !isEditing && "lg:col-start-2 lg:row-start-2 xl:col-span-2",
+          )}>
           <legend className="mb-3 text-sm font-black">
             {t("form.learning")}
           </legend>
@@ -300,6 +434,7 @@ export function AddStudentForm({
                 id="student-level"
                 label={t("form.level")}
                 value={form.level}
+                invalid={invalidFields.has("level")}
                 options={studentLevels.map((level) => ({
                   value: level,
                   label: level,
@@ -307,6 +442,11 @@ export function AddStudentForm({
                 onValueChange={(value) =>
                   setForm((current) => ({ ...current, level: value }))
                 }
+              />
+              <FieldError
+                id="student-level-error"
+                invalid={invalidFields.has("level")}
+                message={fieldError}
               />
             </div>
             <div className="space-y-2">
@@ -321,6 +461,12 @@ export function AddStudentForm({
                 required
                 min={1 / minorFactor}
                 step={1 / minorFactor}
+                aria-invalid={invalidFields.has("hourlyRateMinor")}
+                aria-describedby={
+                  invalidFields.has("hourlyRateMinor")
+                    ? "student-rate-error"
+                    : undefined
+                }
                 value={form.hourlyRate}
                 onChange={(event) =>
                   setForm((current) => ({
@@ -330,6 +476,11 @@ export function AddStudentForm({
                 }
                 className="h-11 rounded-xl"
               />
+              <FieldError
+                id="student-rate-error"
+                invalid={invalidFields.has("hourlyRateMinor")}
+                message={fieldError}
+              />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="student-goals">{t("form.goals")}</Label>
@@ -337,6 +488,12 @@ export function AddStudentForm({
                 id="student-goals"
                 name="learningGoals"
                 maxLength={2_000}
+                aria-invalid={invalidFields.has("learningGoals")}
+                aria-describedby={
+                  invalidFields.has("learningGoals")
+                    ? "student-goals-error"
+                    : undefined
+                }
                 value={form.learningGoals}
                 onChange={(event) =>
                   setForm((current) => ({
@@ -346,6 +503,11 @@ export function AddStudentForm({
                 }
                 className="min-h-20 w-full resize-y rounded-xl border border-input bg-transparent px-3 py-2 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
               />
+              <FieldError
+                id="student-goals-error"
+                invalid={invalidFields.has("learningGoals")}
+                message={fieldError}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="student-preferences">
@@ -354,11 +516,17 @@ export function AddStudentForm({
               <StudentTagInput
                 id="student-preferences"
                 values={form.preferences}
+                invalid={invalidFields.has("preferences")}
                 placeholder={t("form.preferencesPlaceholder")}
                 removeLabel={(value) => t("form.removeTag", { value })}
                 onValueChange={(preferences) =>
                   setForm((current) => ({ ...current, preferences }))
                 }
+              />
+              <FieldError
+                id="student-preferences-error"
+                invalid={invalidFields.has("preferences")}
+                message={fieldError}
               />
             </div>
             <div className="space-y-2">
@@ -366,11 +534,17 @@ export function AddStudentForm({
               <StudentTagInput
                 id="student-interests"
                 values={form.interests}
+                invalid={invalidFields.has("interests")}
                 placeholder={t("form.interestsPlaceholder")}
                 removeLabel={(value) => t("form.removeTag", { value })}
                 onValueChange={(interests) =>
                   setForm((current) => ({ ...current, interests }))
                 }
+              />
+              <FieldError
+                id="student-interests-error"
+                invalid={invalidFields.has("interests")}
+                message={fieldError}
               />
             </div>
             <p className="text-xs text-muted-foreground sm:col-span-2">
@@ -379,7 +553,12 @@ export function AddStudentForm({
           </div>
         </fieldset>
 
-        <div className="space-y-6 lg:col-start-2 lg:row-start-3 xl:col-span-2 xl:row-start-3">
+        <div
+          className={cn(
+            "space-y-6",
+            !isEditing &&
+              "lg:col-start-2 lg:row-start-3 xl:col-span-2 xl:row-start-3",
+          )}>
           <fieldset>
             <legend className="mb-3 text-sm font-black">
               {t("form.source")}
@@ -491,31 +670,26 @@ export function AddStudentForm({
             </ToggleGroup>
           </fieldset>
 
-          {clientInvalid ? (
+          {clientInvalidFields.length ? (
             <p role="alert" className="text-sm font-bold text-destructive">
               {t("errors.validation")}
             </p>
           ) : null}
-          {createMutation.isError ? (
+          {saveMutation.isError && !mutationFields?.length ? (
             <p role="alert" className="text-sm font-bold text-destructive">
               {t(
-                createMutation.error.message === "conflict"
+                saveMutation.error.message === "conflict"
                   ? "errors.conflict"
                   : "errors.general",
               )}
             </p>
           ) : null}
 
-          <div className="flex justify-end gap-3 border-t border-border pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={createMutation.isPending}
-              onClick={() => router.push("/students")}>
-              {t("form.cancel")}
-            </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? t("form.saving") : t("form.save")}
+          <div className="flex justify-end border-t border-border pt-4">
+            <Button type="submit" disabled={saveMutation.isPending}>
+              {saveMutation.isPending
+                ? t(isEditing ? "edit.saving" : "form.saving")
+                : t(isEditing ? "edit.save" : "form.save")}
             </Button>
           </div>
         </div>
