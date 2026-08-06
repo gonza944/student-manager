@@ -110,6 +110,10 @@ export const studentIdInputSchema = z.object({
   studentId: z.string().trim().min(1).max(128).regex(/^[A-Za-z0-9_-]+$/),
 });
 
+export const updateStudentInputSchema = studentDetailsSchema.extend({
+  studentId: studentIdInputSchema.shape.studentId,
+});
+
 export const setStudentActiveInputSchema = studentIdInputSchema.extend({
   isActive: z.boolean(),
 });
@@ -189,8 +193,7 @@ export const studentListPageSchema = teacherRateSettingsSchema.extend({
   totalStudents: z.int().nonnegative(),
 });
 
-export const studentProfileSchema = z.object({
-  currency: currencySchema,
+export const studentProfileSchema = teacherRateSettingsSchema.extend({
   student: studentDtoSchema,
 });
 
@@ -201,6 +204,7 @@ export const studentCountsSchema = z.object({
 
 export type SetStudentActiveInput = z.input<typeof setStudentActiveInputSchema>;
 export type CreateStudentInput = z.output<typeof createStudentInputSchema>;
+export type UpdateStudentInput = z.output<typeof updateStudentInputSchema>;
 export type StudentDto = z.output<typeof studentDtoSchema>;
 export type StudentCardDto = z.output<typeof studentCardDtoSchema>;
 export type StudentListInput = z.output<typeof studentListInputSchema>;

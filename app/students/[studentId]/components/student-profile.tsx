@@ -7,6 +7,7 @@ import {
   Clock03Icon,
   Delete02Icon,
   Message01Icon,
+  PencilEdit01Icon,
   UserCheck01Icon,
   UserMinus01Icon,
 } from "@hugeicons/core-free-icons";
@@ -137,6 +138,19 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
 
           <div className="flex flex-wrap items-center justify-end gap-2">
             <Button
+              asChild
+              variant="outline"
+              className="min-h-12 rounded-full">
+              <Link href={`/students/edit/${student.id}`}>
+                <HugeiconsIcon
+                  icon={PencilEdit01Icon}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+                {t("edit.action")}
+              </Link>
+            </Button>
+            <Button
               type="button"
               variant="outline"
               disabled={pending}
@@ -165,12 +179,14 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
           </div>
         </header>
 
-        <section className="pb-8 pt-14 sm:pt-20" aria-labelledby="student-name">
+        <section
+          className="pb-8 pt-14 sm:pt-20"
+          aria-labelledby="student-profile-name">
           <p className="mb-4 text-caption font-bold uppercase tracking-[0.16em] text-muted-foreground">
             {t("profile.eyebrow")}
           </p>
           <h1
-            id="student-name"
+            id="student-profile-name"
             className="max-w-6xl text-balance text-[clamp(3.25rem,9vw,8rem)] font-black leading-[0.82] tracking-[-0.09em]">
             {student.name}
           </h1>

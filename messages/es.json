@@ -254,12 +254,27 @@
       "avatar": "Avatar",
       "avatarOption": "Avatar {number}",
       "color": "Color de la tarjeta",
-      "cancel": "Cancelar",
       "save": "Agregar estudiante",
       "saving": "Agregando…"
     },
+    "edit": {
+      "action": "Editar",
+      "navigation": "Navegación de edición del estudiante",
+      "profile": "Perfil del estudiante",
+      "eyebrow": "Datos del estudiante",
+      "title": "Editar estudiante",
+      "description": "Actualiza los datos personales, de aprendizaje y de tarifa de este estudiante.",
+      "close": "Cerrar diálogo de edición del estudiante",
+      "loading": "Cargando los datos del estudiante…",
+      "loadError": "No pudimos cargar los datos de este estudiante.",
+      "retry": "Intentar de nuevo",
+      "save": "Guardar cambios",
+      "saving": "Guardando…",
+      "success": "Se actualizaron los datos del estudiante."
+    },
     "errors": {
       "validation": "Revisa los datos del estudiante e inténtalo de nuevo.",
+      "field": "Revisa este campo.",
       "conflict": "Ya existe un estudiante con este correo electrónico.",
       "permission": "Tu sesión venció. Inicia sesión e inténtalo de nuevo.",
       "notFound": "Este estudiante ya no existe.",

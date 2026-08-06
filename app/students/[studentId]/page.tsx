@@ -51,5 +51,8 @@ export default async function StudentProfilePage({
   params,
 }: PageProps<"/students/[studentId]">) {
   const { studentId } = await params;
-  return <StudentProfile profile={await loadProfile(studentId)} />;
+  const profile = await loadProfile(studentId);
+  return (
+    <StudentProfile key={profile.student.updatedAt} profile={profile} />
+  );
 }

@@ -27,6 +27,7 @@ import {
   studentListPageSchema,
   studentProfileSchema,
   type StudentDto,
+  type UpdateStudentInput,
 } from "./contracts";
 
 type Database = ReturnType<typeof createDb>;
@@ -225,7 +226,7 @@ export async function getTeacherStudentProfile(
   if (!row) return null;
 
   return studentProfileSchema.parse({
-    currency: settings.currency,
+    ...settings,
     student: toStudentDto(row, settings.preplyCommissionBps),
   });
 }
@@ -262,6 +263,26 @@ export async function setTeacherStudentActive(
     .returning({ id: student.id, isActive: student.isActive });
 
   return updated ?? null;
+}
+
+export async function updateTeacherStudent(
+  db: Database,
+  teacherId: string,
+  input: UpdateStudentInput,
+  preplyCommissionBps: number,
+) {
+  const { studentId, ...details } = input;
+  const [updated] = await db
+    .update(student)
+    .set({
+      ...details,
+      normalizedName: normalizeStudentName(details.name),
+      updatedAt: new Date(),
+    })
+    .where(and(eq(student.id, studentId), eq(student.teacherId, teacherId)))
+    .returning();
+
+  return updated ? toStudentDto(updated, preplyCommissionBps) : null;
 }
 
 export async function deleteTeacherStudent(

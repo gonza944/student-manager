@@ -1,10 +1,10 @@
-import { AddStudentContent } from "../../add/components/add-student-content";
-import { AddStudentModal } from "../../add/components/add-student-modal";
+import { StudentFormContent } from "../../add/components/student-form-content";
+import { StudentFormModal } from "../../components/student-form-modal";
 
 export default function AddStudentModalPage() {
   return (
-    <AddStudentModal>
-      <AddStudentContent />
-    </AddStudentModal>
+    <StudentFormModal mode="add">
+      <StudentFormContent />
+    </StudentFormModal>
   );
 }

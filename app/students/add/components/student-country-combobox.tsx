@@ -28,6 +28,7 @@ export function StudentCountryCombobox({
   placeholder,
   emptyMessage,
   openLabel,
+  invalid = false,
   onValueChange,
 }: {
   id: string;
@@ -36,6 +37,7 @@ export function StudentCountryCombobox({
   placeholder: string;
   emptyMessage: string;
   openLabel: string;
+  invalid?: boolean;
   onValueChange: (countryCode: string) => void;
 }) {
   const options = useMemo(() => {
@@ -63,7 +65,12 @@ export function StudentCountryCombobox({
       autoHighlight
       required>
       <ComboboxInputGroup className="h-11">
-        <ComboboxInput id={id} placeholder={placeholder} />
+        <ComboboxInput
+          id={id}
+          placeholder={placeholder}
+          aria-invalid={invalid}
+          aria-describedby={invalid ? `${id}-error` : undefined}
+        />
         <ComboboxTrigger aria-label={openLabel} />
       </ComboboxInputGroup>
       <ComboboxContent>

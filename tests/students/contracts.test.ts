@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import {
+  getInitialForm,
+  initialStudentForm,
+} from "../../app/students/add/utils/student-form-model";
 import { toMinorUnits } from "../../app/students/utils/to-minor-units";
 import {
   calculateStudentRate,
@@ -8,6 +12,7 @@ import {
   studentDtoSchema,
   studentIdInputSchema,
   studentListInputSchema,
+  updateStudentInputSchema,
 } from "../../lib/students/contracts";
 
 const validStudent = {
@@ -36,6 +41,15 @@ const validStudent = {
   updatedAt: "2026-07-01T00:00:00.000Z",
 };
 
+test("builds initial form values for add and edit", () => {
+  assert.equal(getInitialForm(undefined, 100), initialStudentForm);
+
+  const form = getInitialForm(studentDtoSchema.parse(validStudent), 100);
+  assert.equal(form.name, validStudent.name);
+  assert.equal(form.phone, "");
+  assert.equal(form.hourlyRate, "25");
+});
+
 test("normalizes a student DTO", () => {
   const student = studentDtoSchema.parse(validStudent);
 
@@ -50,6 +64,18 @@ test("normalizes the input used to create a student", () => {
 
   assert.equal(student.email, "sofia@example.com");
   assert.equal(student.phone, null);
+  assert.equal(student.nationalityCode, "AR");
+});
+
+test("validates and normalizes the input used to update a student", () => {
+  const student = updateStudentInputSchema.parse({
+    ...validStudent,
+    studentId: validStudent.id,
+  });
+
+  assert.equal(student.id, undefined);
+  assert.equal(student.studentId, "student-01");
+  assert.equal(student.email, "sofia@example.com");
   assert.equal(student.nationalityCode, "AR");
 });
 

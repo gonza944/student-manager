@@ -17,6 +17,7 @@ type StudentCardData = Omit<StudentCardDto, "id">;
 export function StudentCard({
   student,
   formatMoney,
+  editHref,
   onStatusChange,
   onDelete,
   pending,
@@ -25,6 +26,7 @@ export function StudentCard({
 }: {
   student: StudentCardData;
   formatMoney: (minor: number) => string;
+  editHref?: string;
   onStatusChange?: () => void;
   onDelete?: () => void;
   pending?: boolean;
@@ -80,12 +82,13 @@ export function StudentCard({
               {student.level}
             </Badge>
           </div>
-          {preview || !onStatusChange || !onDelete ? null : (
+          {preview || !editHref || !onStatusChange || !onDelete ? null : (
             <div className="pointer-events-auto">
               <StudentActionsMenu
                 name={student.name}
                 isActive={student.isActive}
                 pending={pending ?? false}
+                editHref={editHref}
                 onStatusChange={onStatusChange}
                 onDelete={onDelete}
               />
