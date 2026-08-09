@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { contactChannels } from "@/lib/students/contracts";
 import { studentCountries } from "@/lib/students/geography";
-import { cn } from "@/lib/utils";
 
+import { StudentBirthDatePicker } from "./student-birth-date-picker";
 import { StudentCountryCombobox } from "./student-country-combobox";
 import { StudentDropdown } from "./student-dropdown";
 import { StudentFormFieldError } from "./student-form-field-error";
@@ -22,23 +22,25 @@ export function StudentPersonalFields({
   invalidFields,
   updateField,
   emailConflict,
-  isEditing,
 }: {
   values: StudentFormValues;
   invalidFields: ReadonlySet<string>;
   updateField: UpdateStudentForm;
   emailConflict: boolean;
-  isEditing: boolean;
 }) {
   const t = useTranslations("Students");
   const locale = useLocale();
   const fieldError = t("errors.field");
+  const preferredContactError =
+    values.preferredContactChannel === "email"
+      ? t("errors.preferredContactEmail")
+      : values.preferredContactChannel === "phone" ||
+          values.preferredContactChannel === "whatsapp"
+        ? t("errors.preferredContactPhone")
+        : fieldError;
 
   return (
-    <fieldset
-      className={cn(
-        !isEditing && "lg:col-start-2 lg:row-start-1 xl:col-span-2",
-      )}>
+    <fieldset className="lg:col-start-2 lg:row-start-1 xl:col-span-2">
       <legend className="mb-3 text-sm font-black">{t("form.personal")}</legend>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <div className="space-y-2">
@@ -70,7 +72,6 @@ export function StudentPersonalFields({
             name="email"
             type="email"
             autoComplete="email"
-            required
             maxLength={320}
             aria-invalid={invalidFields.has("email")}
             aria-describedby={
@@ -109,6 +110,28 @@ export function StudentPersonalFields({
           />
         </div>
         <div className="space-y-2">
+          <Label htmlFor="student-birth-date">{t("form.birthDate")}</Label>
+          <StudentBirthDatePicker
+            value={values.birthDate}
+            locale={locale}
+            timeZone={values.timeZone}
+            placeholder={t("form.birthDatePlaceholder")}
+            openLabel={t("form.birthDateOpen")}
+            invalid={invalidFields.has("birthDate")}
+            describedBy={
+              invalidFields.has("birthDate")
+                ? "student-birth-date-error"
+                : undefined
+            }
+            onValueChange={(birthDate) => updateField("birthDate", birthDate)}
+          />
+          <StudentFormFieldError
+            id="student-birth-date-error"
+            invalid={invalidFields.has("birthDate")}
+            message={t("errors.birthDate")}
+          />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="student-contact-channel">
             {t("form.preferredContact")}
           </Label>
@@ -128,7 +151,7 @@ export function StudentPersonalFields({
           <StudentFormFieldError
             id="student-contact-channel-error"
             invalid={invalidFields.has("preferredContactChannel")}
-            message={fieldError}
+            message={preferredContactError}
           />
         </div>
         <div className="space-y-2">

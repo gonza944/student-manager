@@ -9,6 +9,7 @@ import { toMinorUnits } from "../../app/students/utils/to-minor-units";
 import {
   calculateStudentRate,
   createStudentInputSchema,
+  getDateOnlyToday,
   studentDtoSchema,
   studentIdInputSchema,
   studentListInputSchema,
@@ -19,6 +20,7 @@ const validStudent = {
   name: "Sofía Martínez",
   email: " SOFIA@EXAMPLE.COM ",
   phone: "",
+  birthDate: "1992-03-14",
   nationalityCode: "ar",
   timeZone: "America/Argentina/Cordoba",
   preferredContactChannel: "email" as const,
@@ -47,6 +49,7 @@ test("builds initial form values for add and edit", () => {
   const form = getInitialForm(studentDtoSchema.parse(validStudent), 100);
   assert.equal(form.name, validStudent.name);
   assert.equal(form.phone, "");
+  assert.equal(form.birthDate, validStudent.birthDate);
   assert.equal(form.hourlyRate, "25");
 });
 
@@ -123,7 +126,7 @@ test("rejects an unsupported country code", () => {
   assert.equal(result.success, false);
 });
 
-test("derives Preply and private rates from teacher settings", () => {
+test("derives Preply and Direct rates with integer rounding", () => {
   assert.deepEqual(calculateStudentRate(2_500, "preply", 1_800), {
     grossMinor: 2_500,
     platformFeeMinor: 450,
@@ -131,9 +134,117 @@ test("derives Preply and private rates from teacher settings", () => {
   });
   assert.deepEqual(calculateStudentRate(2_500, "private", 1_800), {
     grossMinor: 2_500,
-    platformFeeMinor: 0,
-    netMinor: 2_500,
+    platformFeeMinor: 121,
+    netMinor: 2_379,
   });
+  assert.deepEqual(calculateStudentRate(1_000, "private", 1_800), {
+    grossMinor: 1_000,
+    platformFeeMinor: 49,
+    netMinor: 951,
+  });
+});
+
+test("accepts null or empty optional student details", () => {
+  const empty = createStudentInputSchema.parse({
+    ...validStudent,
+    email: "",
+    phone: "",
+    birthDate: "",
+    preferredContactChannel: "other",
+  });
+  const nullable = updateStudentInputSchema.parse({
+    ...validStudent,
+    studentId: validStudent.id,
+    email: null,
+    phone: null,
+    birthDate: null,
+    preferredContactChannel: "other",
+  });
+
+  assert.equal(empty.email, null);
+  assert.equal(empty.phone, null);
+  assert.equal(empty.birthDate, null);
+  const omitted = createStudentInputSchema.parse({
+    ...validStudent,
+    email: undefined,
+    phone: undefined,
+    birthDate: undefined,
+    preferredContactChannel: "other",
+  });
+
+  assert.equal(nullable.email, null);
+  assert.equal(nullable.phone, null);
+  assert.equal(nullable.birthDate, null);
+  assert.equal(omitted.email, null);
+  assert.equal(omitted.phone, null);
+  assert.equal(omitted.birthDate, null);
+});
+
+test("validates optional emails and real, non-future birth dates", () => {
+  assert.equal(
+    createStudentInputSchema.safeParse({
+      ...validStudent,
+      email: "not-an-email",
+    }).success,
+    false,
+  );
+  assert.equal(
+    createStudentInputSchema.safeParse({
+      ...validStudent,
+      birthDate: "2023-02-29",
+    }).success,
+    false,
+  );
+  assert.equal(
+    createStudentInputSchema.safeParse({
+      ...validStudent,
+      birthDate: "2999-01-01",
+    }).success,
+    false,
+  );
+});
+
+test("resolves today in the student's time zone", () => {
+  const instant = new Date("2026-08-10T01:00:00.000Z");
+
+  assert.equal(
+    getDateOnlyToday("America/Argentina/Cordoba", instant),
+    "2026-08-09",
+  );
+  assert.equal(getDateOnlyToday("Asia/Tokyo", instant), "2026-08-10");
+});
+
+test("requires contact details for email, phone, and WhatsApp", () => {
+  for (const input of [
+    { email: "", phone: "", preferredContactChannel: "email" },
+    { email: "", phone: "", preferredContactChannel: "phone" },
+    { email: "", phone: "", preferredContactChannel: "whatsapp" },
+  ] as const) {
+    const result = createStudentInputSchema.safeParse({
+      ...validStudent,
+      ...input,
+    });
+    assert.equal(result.success, false);
+    if (!result.success) {
+      assert.equal(
+        result.error.issues.some(
+          (issue) => issue.path[0] === "preferredContactChannel",
+        ),
+        true,
+      );
+    }
+  }
+});
+
+test("keeps legacy students readable when preferred contact data is missing", () => {
+  const student = studentDtoSchema.parse({
+    ...validStudent,
+    phone: null,
+    preferredContactChannel: "whatsapp",
+  });
+
+  assert.equal(student.phone, null);
+  assert.equal(student.preferredContactChannel, "whatsapp");
 });
 
 test("accepts deterministic local seed identifiers", () => {

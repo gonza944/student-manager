@@ -49,6 +49,7 @@ INSERT INTO student (
   normalized_name,
   email,
   phone,
+  birth_date,
   nationality_code,
   time_zone,
   preferred_contact_channel,
@@ -69,8 +70,18 @@ SELECT
   (SELECT id FROM user WHERE lower(email) = 'gonza94.4@gmail.com' LIMIT 1),
   name,
   lower(name),
-  printf('local.student.%02d@example.test', n),
-  CASE WHEN n % 4 = 0 THEN NULL ELSE printf('+1-555-01%02d', n) END,
+  CASE
+    WHEN n % 5 = 0 AND n % 6 != 0 THEN NULL
+    ELSE printf('local.student.%02d@example.test', n)
+  END,
+  CASE
+    WHEN n % 4 = 0 AND n % 6 NOT IN (1, 2) THEN NULL
+    ELSE printf('+1-555-01%02d', n)
+  END,
+  CASE
+    WHEN n % 7 = 0 THEN NULL
+    ELSE date('1990-01-01', printf('+%d days', n * 137))
+  END,
   nationality_code,
   time_zone,
   CASE n % 6
@@ -132,6 +143,7 @@ ON CONFLICT(id) DO UPDATE SET
   normalized_name = excluded.normalized_name,
   email = excluded.email,
   phone = excluded.phone,
+  birth_date = excluded.birth_date,
   nationality_code = excluded.nationality_code,
   time_zone = excluded.time_zone,
   preferred_contact_channel = excluded.preferred_contact_channel,

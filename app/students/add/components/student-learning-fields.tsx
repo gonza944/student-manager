@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { studentLevels } from "@/lib/students/contracts";
-import { cn } from "@/lib/utils";
 
 import { StudentDropdown } from "./student-dropdown";
 import { StudentFormFieldError } from "./student-form-field-error";
@@ -21,23 +20,18 @@ export function StudentLearningFields({
   updateField,
   currency,
   minorFactor,
-  isEditing,
 }: {
   values: StudentFormValues;
   invalidFields: ReadonlySet<string>;
   updateField: UpdateStudentForm;
   currency: string;
   minorFactor: number;
-  isEditing: boolean;
 }) {
   const t = useTranslations("Students");
   const fieldError = t("errors.field");
 
   return (
-    <fieldset
-      className={cn(
-        !isEditing && "lg:col-start-2 lg:row-start-2 xl:col-span-2",
-      )}>
+    <fieldset className="lg:col-start-2 lg:row-start-2 xl:col-span-2">
       <legend className="mb-3 text-sm font-black">{t("form.learning")}</legend>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-2">

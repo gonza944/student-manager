@@ -11,6 +11,7 @@ export type StudentFormValues = {
   name: string;
   email: string;
   phone: string;
+  birthDate: string;
   nationalityCode: string;
   timeZone: string;
   preferredContactChannel: (typeof contactChannels)[number];
@@ -34,9 +35,10 @@ export const initialStudentForm: StudentFormValues = {
   name: "",
   email: "",
   phone: "",
+  birthDate: "",
   nationalityCode: "AR",
   timeZone: "America/Argentina/Buenos_Aires",
-  preferredContactChannel: "email",
+  preferredContactChannel: "other",
   level: "A1",
   preferences: [],
   interests: [],
@@ -55,8 +57,9 @@ export function getInitialForm(
   return student
     ? {
         name: student.name,
-        email: student.email,
+        email: student.email ?? "",
         phone: student.phone ?? "",
+        birthDate: student.birthDate ?? "",
         nationalityCode: student.nationalityCode,
         timeZone: student.timeZone,
         preferredContactChannel: student.preferredContactChannel,

@@ -39,8 +39,9 @@ export const student = sqliteTable(
       .references(() => user.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     normalizedName: text("normalized_name").notNull(),
-    email: text("email").notNull(),
+    email: text("email"),
     phone: text("phone"),
+    birthDate: text("birth_date"),
     nationalityCode: text("nationality_code").notNull(),
     timeZone: text("time_zone").notNull(),
     preferredContactChannel: text("preferred_contact_channel", {

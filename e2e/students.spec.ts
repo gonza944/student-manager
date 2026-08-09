@@ -10,6 +10,7 @@ test("teachers can filter, sort, and change student status", async ({
     {
       name: `Ana Alpha ${suffix}`,
       email: `ana-${suffix}@example.test`,
+      birthDate: "1990-05-20",
       country: "Argentina",
       level: "C2",
       rate: "10",
@@ -27,12 +28,12 @@ test("teachers can filter, sort, and change student status", async ({
     },
     {
       name: `Mia Gamma ${suffix}`,
-      email: `mia-${suffix}@example.test`,
+      email: null,
       country: "Canada",
       level: "B1",
       rate: "25",
       active: false,
-      contactChannel: "email",
+      contactChannel: "other",
     },
   ];
 
@@ -51,12 +52,37 @@ test("teachers can filter, sort, and change student status", async ({
     await page.getByRole("link", { name: "Add student" }).click();
     const dialog = page.getByRole("dialog", { name: "Add a student" });
     await dialog.getByLabel("Full name").fill(student.name);
-    await dialog.getByLabel("Email address").fill(student.email);
-    if (student.contactChannel === "preply") {
+    if (student.email) {
+      await dialog.getByLabel("Email address").fill(student.email);
+    }
+    if ("birthDate" in student) {
+      const calendarTrigger = dialog.getByRole("button", {
+        name: "Open calendar",
+      });
+      await expect(calendarTrigger).toHaveCSS("width", "44px");
+      await calendarTrigger.click();
+      const calendar = page.getByRole("grid");
+      const year = page.getByRole("combobox", { name: "Choose the Year" });
+      await expect(calendar).toBeVisible();
+      await expect(calendar.getByRole("button").first()).toHaveCSS(
+        "width",
+        "44px",
+      );
+      await year.click();
+      await expect(calendar).toBeVisible();
+      await year.selectOption(student.birthDate.slice(0, 4));
+      await page.keyboard.press("Escape");
+      await dialog.getByLabel("Birth date").fill(student.birthDate);
+    }
+    if (student.contactChannel !== "other") {
       await dialog
-        .getByRole("button", { name: "Preferred contact channel: Email" })
+        .getByRole("button", { name: "Preferred contact channel: Other" })
         .click();
-      await page.getByRole("menuitemradio", { name: "Preply" }).click();
+      await page
+        .getByRole("menuitemradio", {
+          name: student.contactChannel === "preply" ? "Preply" : "Email",
+        })
+        .click();
     }
 
     if (student.country !== "Argentina") {
@@ -82,6 +108,17 @@ test("teachers can filter, sort, and change student status", async ({
       .click();
     await expect(dialog).toBeHidden();
   }
+
+  await page.getByRole("link", { name: `Open profile for ${students[1].name}` }).click();
+  const rateCard = page.locator('[data-slot="card"]').filter({
+    has: page.getByText("Hourly rate", { exact: true }),
+  });
+  await expect(rateCard.getByText("Gross rate", { exact: true })).toBeVisible();
+  await expect(rateCard.getByText("Fee", { exact: true })).toBeVisible();
+  await expect(rateCard.getByText("Net rate", { exact: true })).toBeVisible();
+  await expect(rateCard.getByText("$1.94", { exact: true })).toBeVisible();
+  await expect(rateCard.getByText("$38.06", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Back to students" }).click();
 
   const cardNames = page.getByRole("article").getByRole("heading");
   await expect(page.getByText("3 students", { exact: true })).toBeVisible();
