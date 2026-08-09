@@ -149,13 +149,25 @@ export function StudentForm({
             formatMoney={formatMoney}
             preview
           />
-          <p className="self-center whitespace-pre-line text-center text-sm font-semibold text-muted-foreground">
-            {t("form.rateBreakdown", {
-              gross: formatMoney(rates.grossMinor),
-              fee: formatMoney(rates.platformFeeMinor),
-              net: formatMoney(rates.netMinor),
-            })}
-          </p>
+          <dl className="flex flex-col items-center text-center text-sm font-semibold text-muted-foreground">
+            <div className="flex flex-wrap justify-center gap-x-2">
+              <div>
+                <dt className="inline">{t("form.rateBreakdown.gross")}:</dt>{" "}
+                <dd className="inline">{formatMoney(rates.grossMinor)}</dd>
+              </div>
+              <span aria-hidden="true">·</span>
+              <div>
+                <dt className="inline">{t("form.rateBreakdown.fee")}:</dt>{" "}
+                <dd className="inline">
+                  {formatMoney(rates.platformFeeMinor)}
+                </dd>
+              </div>
+            </div>
+            <div>
+              <dt className="inline">{t("form.rateBreakdown.net")}:</dt>{" "}
+              <dd className="inline">{formatMoney(rates.netMinor)}</dd>
+            </div>
+          </dl>
         </aside>
 
         <StudentPersonalFields
