@@ -45,6 +45,7 @@ function toStudentDto(
     name: row.name,
     email: row.email,
     phone: row.phone,
+    birthDate: row.birthDate,
     nationalityCode: row.nationalityCode,
     timeZone: row.timeZone,
     preferredContactChannel: row.preferredContactChannel,

@@ -45,8 +45,27 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   const studentName = `Estudiante Playwright ${suffix}`;
   await drawer.getByLabel("Nombre completo").fill(studentName);
   await drawer
-    .getByLabel("Correo electrónico", { exact: true })
-    .fill(`estudiante-${suffix}@example.test`);
+    .getByRole("button", { name: "Canal de contacto preferido: Otro" })
+    .click();
+  await page
+    .getByRole("menuitemradio", { name: "Correo electrónico" })
+    .click();
+  await drawer
+    .getByRole("button", { name: "Agregar estudiante", exact: true })
+    .click();
+  await expect(
+    drawer.getByText(
+      "Agrega un correo electrónico para usarlo como contacto preferido.",
+    ),
+  ).toBeVisible();
+  await drawer
+    .getByRole("button", { name: "Canal de contacto preferido: Correo electrónico" })
+    .click();
+  await page.getByRole("menuitemradio", { name: "Otro" }).click();
+  await drawer.getByRole("button", { name: "Abrir calendario" }).click();
+  await expect(page.getByRole("grid")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(drawer.getByLabel("Fecha de nacimiento")).toHaveValue("");
   await drawer
     .getByRole("button", { name: "Agregar estudiante", exact: true })
     .click();
@@ -68,6 +87,10 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   await expect(editDialog.getByLabel("Nombre completo")).toHaveValue(
     studentName,
   );
+  await expect(
+    editDialog.getByLabel("Correo electrónico", { exact: true }),
+  ).toHaveValue("");
+  await editDialog.getByLabel("Fecha de nacimiento").fill("2000-02-29");
   await editDialog.getByLabel("Objetivos de aprendizaje").fill("Conversación");
   await editDialog.getByRole("button", { name: "Guardar cambios" }).click();
   await expect(editDialog).toBeHidden();
@@ -76,4 +99,5 @@ test("el directorio y el formulario móvil se muestran en español", async ({
       exact: true,
     }),
   ).toBeVisible();
+  await expect(page.getByText("29 de febrero de 2000")).toBeVisible();
 });

@@ -98,9 +98,14 @@ export function StudentCard({
 
         <CardContent className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-baseline justify-between gap-3 p-5 sm:p-6">
           <h2 className="text-balance text-2xl font-black">{student.name}</h2>
-          <p className="shrink-0 text-lg font-semibold">
-            {formatMoney(student.rates.grossMinor)}
-          </p>
+          <div className="shrink-0 text-end">
+            <p className="text-label font-bold uppercase tracking-widest opacity-65">
+              {t("grossRate")}
+            </p>
+            <p className="text-lg font-semibold">
+              {formatMoney(student.rates.grossMinor)}
+            </p>
+          </div>
         </CardContent>
       </Card>
     </article>

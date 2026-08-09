@@ -74,6 +74,14 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
       }),
     [locale],
   );
+  const dateOnly = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        dateStyle: "long",
+        timeZone: "UTC",
+      }),
+    [locale],
+  );
   const formatMoney = (minor: number) =>
     money.format(
       minor /
@@ -261,6 +269,11 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
                 <ProfileDetail label={t("profile.fields.nationality")}>
                   {countryName}
                 </ProfileDetail>
+                {student.birthDate ? (
+                  <ProfileDetail label={t("profile.fields.birthDate")}>
+                    {dateOnly.format(new Date(`${student.birthDate}T00:00:00Z`))}
+                  </ProfileDetail>
+                ) : null}
               </dl>
             </CardContent>
           </Card>
@@ -275,38 +288,32 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
               </CardTitle>
             </CardHeader>
             <CardContent className="px-5">
-              {student.source === "preply" ? (
-                <dl className="grid grid-cols-2 gap-3">
-                  <div>
-                    <dt className="text-label font-bold uppercase tracking-widest opacity-65">
-                      {t("grossRate")}
-                    </dt>
-                    <dd className="mt-1 text-lg font-black tracking-tighter">
-                      {formatMoney(student.rates.grossMinor)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-label font-bold uppercase tracking-widest opacity-65">
-                      {t("platformFee")}
-                    </dt>
-                    <dd className="mt-1 text-lg font-black tracking-tighter">
-                      {formatMoney(-student.rates.platformFeeMinor)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-label font-bold uppercase tracking-widest opacity-65">
-                      {t("netRate")}
-                    </dt>
-                    <dd className="mt-1 text-2xl font-black tracking-tighter">
-                      {formatMoney(student.rates.netMinor)}
-                    </dd>
-                  </div>
-                </dl>
-              ) : (
-                <p className="break-all text-[clamp(1.5rem,3vw,2.5rem)] font-black leading-none tracking-[-0.08em]">
-                  {formatMoney(student.rates.grossMinor)}
-                </p>
-              )}
+              <dl className="grid grid-cols-2 gap-3">
+                <div>
+                  <dt className="text-label font-bold uppercase tracking-widest opacity-65">
+                    {t("grossRate")}
+                  </dt>
+                  <dd className="mt-1 text-lg font-black tracking-tighter">
+                    {formatMoney(student.rates.grossMinor)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-label font-bold uppercase tracking-widest opacity-65">
+                    {t("platformFee")}
+                  </dt>
+                  <dd className="mt-1 text-lg font-black tracking-tighter">
+                    {formatMoney(student.rates.platformFeeMinor)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-label font-bold uppercase tracking-widest opacity-65">
+                    {t("netRate")}
+                  </dt>
+                  <dd className="mt-1 text-2xl font-black tracking-tighter">
+                    {formatMoney(student.rates.netMinor)}
+                  </dd>
+                </div>
+              </dl>
             </CardContent>
           </Card>
 
@@ -317,24 +324,24 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
             />
             <CardContent>
               <dl className="grid gap-x-8 sm:grid-cols-2">
-                <ProfileDetail label={t("profile.fields.email")}>
-                  <a
-                    className="underline underline-offset-4"
-                    href={`mailto:${student.email}`}>
-                    {student.email}
-                  </a>
-                </ProfileDetail>
-                <ProfileDetail label={t("profile.fields.phone")}>
-                  {student.phone ? (
+                {student.email ? (
+                  <ProfileDetail label={t("profile.fields.email")}>
+                    <a
+                      className="underline underline-offset-4"
+                      href={`mailto:${student.email}`}>
+                      {student.email}
+                    </a>
+                  </ProfileDetail>
+                ) : null}
+                {student.phone ? (
+                  <ProfileDetail label={t("profile.fields.phone")}>
                     <a
                       className="underline underline-offset-4"
                       href={`tel:${student.phone}`}>
                       {student.phone}
                     </a>
-                  ) : (
-                    t("profile.notProvided")
-                  )}
-                </ProfileDetail>
+                  </ProfileDetail>
+                ) : null}
                 <ProfileDetail label={t("profile.fields.timeZone")}>
                   {student.timeZone}
                 </ProfileDetail>

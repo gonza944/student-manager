@@ -120,9 +120,10 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(dialog.getByText("Travel", { exact: true })).toBeVisible();
 
   await dialog
-    .getByRole("button", { name: "Preferred contact channel: Email" })
+    .getByRole("button", { name: "Preferred contact channel: Other" })
     .click();
   await page.getByRole("menuitemradio", { name: "WhatsApp" }).click();
+  await dialog.getByLabel("Phone number").fill("+1 555 0100");
   await expect(
     dialog.getByRole("button", {
       name: "Preferred contact channel: WhatsApp",
@@ -171,7 +172,13 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(directoryEditDialog.getByLabel("Full name")).toHaveValue(
     studentName,
   );
+  await expect(
+    directoryEditDialog.getByRole("heading", { name: studentName }),
+  ).toBeVisible();
   await directoryEditDialog.getByLabel("Full name").fill(editedStudentName);
+  await expect(
+    directoryEditDialog.getByRole("heading", { name: editedStudentName }),
+  ).toBeVisible();
   await directoryEditDialog
     .getByRole("button", { name: "Level: B2" })
     .click();
@@ -201,7 +208,7 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(page.getByText("Travel", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Preply" })).toBeVisible();
   await expect(page.getByText("Gross rate", { exact: true })).toBeVisible();
-  await expect(page.getByText("Discount", { exact: true })).toBeVisible();
+  await expect(page.getByText("Fee", { exact: true })).toBeVisible();
   await expect(page.getByText("Net rate", { exact: true })).toBeVisible();
   await expect(page.getByText("Created", { exact: true })).toBeVisible();
   await expect(page.getByText("Last updated", { exact: true })).toBeVisible();

@@ -6,6 +6,7 @@ import { currencySchema } from "../currencies";
 import { studentCountries } from "./geography";
 
 export const studentSources = ["private", "preply"] as const;
+export const directCommissionBps = 485;
 export const contactChannels = [
   "email",
   "phone",
@@ -63,15 +64,32 @@ const studentCountryCodes = new Set<string>(
   studentCountries.map((country) => country.code),
 );
 
+function normalizeOptionalText(value: unknown) {
+  if (value == null) return null;
+  if (typeof value !== "string") return value;
+  return value.trim() || null;
+}
+
+function normalizeOptionalEmail(value: unknown) {
+  const normalized = normalizeOptionalText(value);
+  return typeof normalized === "string" ? normalized.toLowerCase() : normalized;
+}
+
 const optionalTrimmedText = (maximum: number) =>
-  z
-    .string()
-    .trim()
-    .max(maximum)
-    .transform((value) => value || null)
-    .nullable()
-    .optional()
-    .transform((value) => value ?? null);
+  z.preprocess(normalizeOptionalText, z.string().max(maximum).nullable());
+
+const optionalEmail = z.preprocess(
+  normalizeOptionalEmail,
+  z.email().max(320).nullable(),
+);
+
+const optionalBirthDate = z.preprocess(
+  normalizeOptionalText,
+  z.iso
+    .date()
+    .refine((value) => value <= new Date().toISOString().slice(0, 10))
+    .nullable(),
+);
 
 const timeZoneSchema = z.string().trim().min(1).max(80).refine((timeZone) => {
   try {
@@ -84,8 +102,9 @@ const timeZoneSchema = z.string().trim().min(1).max(80).refine((timeZone) => {
 
 const studentDetailsSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  email: z.string().trim().toLowerCase().check(z.email()).max(320),
+  email: optionalEmail,
   phone: optionalTrimmedText(40),
+  birthDate: optionalBirthDate,
   nationalityCode: z
     .string()
     .trim()
@@ -104,15 +123,50 @@ const studentDetailsSchema = z.object({
   themeColor: z.enum(studentThemeColors),
 });
 
-export const createStudentInputSchema = studentDetailsSchema;
+function validatePreferredContact(
+  {
+    email,
+    phone,
+    preferredContactChannel,
+  }: {
+    email: string | null;
+    phone: string | null;
+    preferredContactChannel: (typeof contactChannels)[number];
+  },
+  context: z.RefinementCtx,
+) {
+  if (preferredContactChannel === "email" && !email) {
+    context.addIssue({
+      code: "custom",
+      path: ["preferredContactChannel"],
+      message: "Email contact requires an email address.",
+    });
+  }
+  if (
+    (preferredContactChannel === "phone" ||
+      preferredContactChannel === "whatsapp") &&
+    !phone
+  ) {
+    context.addIssue({
+      code: "custom",
+      path: ["preferredContactChannel"],
+      message: "Phone contact requires a phone number.",
+    });
+  }
+}
+
+export const createStudentInputSchema =
+  studentDetailsSchema.superRefine(validatePreferredContact);
 
 export const studentIdInputSchema = z.object({
   studentId: z.string().trim().min(1).max(128).regex(/^[A-Za-z0-9_-]+$/),
 });
 
-export const updateStudentInputSchema = studentDetailsSchema.extend({
-  studentId: studentIdInputSchema.shape.studentId,
-});
+export const updateStudentInputSchema = studentDetailsSchema
+  .extend({
+    studentId: studentIdInputSchema.shape.studentId,
+  })
+  .superRefine(validatePreferredContact);
 
 export const setStudentActiveInputSchema = studentIdInputSchema.extend({
   isActive: z.boolean(),
@@ -129,23 +183,27 @@ export const studentRateSchema = z.object({
   netMinor: z.int().nonnegative(),
 });
 
-export const studentDtoSchema = studentDetailsSchema.extend({
-  id: z.string().min(1).max(128),
-  rates: studentRateSchema,
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
-});
+export const studentDtoSchema = studentDetailsSchema
+  .extend({
+    id: z.string().min(1).max(128),
+    rates: studentRateSchema,
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
+  });
 
-export const studentCardDtoSchema = studentDtoSchema.pick({
-  id: true,
-  name: true,
-  source: true,
-  level: true,
-  isActive: true,
-  avatarKey: true,
-  themeColor: true,
-  rates: true,
-});
+export const studentCardDtoSchema = studentDetailsSchema
+  .pick({
+    name: true,
+    source: true,
+    level: true,
+    isActive: true,
+    avatarKey: true,
+    themeColor: true,
+  })
+  .extend({
+    id: z.string().min(1).max(128),
+    rates: studentRateSchema,
+  });
 
 const namedStudentCursorSchema = z.object({
   sort: z.literal("name"),
@@ -218,10 +276,11 @@ export function calculateStudentRate(
   source: (typeof studentSources)[number],
   preplyCommissionBps: number,
 ) {
-  const platformFeeMinor =
-    source === "preply"
-      ? Math.floor((grossMinor * preplyCommissionBps + 5_000) / 10_000)
-      : 0;
+  const commissionBps =
+    source === "preply" ? preplyCommissionBps : directCommissionBps;
+  const platformFeeMinor = Math.floor(
+    (grossMinor * commissionBps + 5_000) / 10_000,
+  );
 
   return studentRateSchema.parse({
     grossMinor,

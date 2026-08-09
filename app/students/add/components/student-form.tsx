@@ -13,7 +13,6 @@ import {
   type CreateStudentInput,
   type StudentDto,
 } from "@/lib/students/contracts";
-import { cn } from "@/lib/utils";
 
 import { createStudentAction, updateStudentAction } from "../../actions";
 import { StudentCard } from "../../components/student-card";
@@ -113,11 +112,7 @@ export function StudentForm({
       </div>
 
       <form
-        className={cn(
-          "grid gap-6",
-          !isEditing &&
-            "lg:grid-cols-[minmax(15rem,0.7fr)_minmax(0,1.3fr)] xl:grid-cols-[minmax(16rem,0.7fr)_repeat(2,minmax(0,1fr))]",
-        )}
+        className="grid gap-6 lg:grid-cols-[minmax(15rem,0.7fr)_minmax(0,1.3fr)] xl:grid-cols-[minmax(16rem,0.7fr)_repeat(2,minmax(0,1fr))]"
         onSubmit={(event) => {
           event.preventDefault();
           setClientInvalidFields([]);
@@ -140,38 +135,34 @@ export function StudentForm({
 
           saveMutation.mutate(input.data);
         }}>
-        {isEditing ? null : (
-          <aside className="flex h-fit flex-col gap-4 p-4 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-3 lg:row-start-1">
-            <StudentCard
-              student={{
-                name: form.name || t("form.previewName"),
-                source: form.source,
-                level: form.level,
-                isActive: form.isActive,
-                avatarKey: form.avatarKey,
-                themeColor: form.themeColor,
-                rates,
-              }}
-              formatMoney={formatMoney}
-              preview
-            />
-            {form.source === "preply" ? (
-              <p className="self-center text-sm font-semibold text-muted-foreground">
-                {t("form.preplyRate", {
-                  fee: formatMoney(rates.platformFeeMinor),
-                  net: formatMoney(rates.netMinor),
-                })}
-              </p>
-            ) : null}
-          </aside>
-        )}
+        <aside className="flex h-fit flex-col gap-4 p-4 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-3 lg:row-start-1">
+          <StudentCard
+            student={{
+              name: form.name || t("form.previewName"),
+              source: form.source,
+              level: form.level,
+              isActive: form.isActive,
+              avatarKey: form.avatarKey,
+              themeColor: form.themeColor,
+              rates,
+            }}
+            formatMoney={formatMoney}
+            preview
+          />
+          <p className="self-center text-center text-sm font-semibold text-muted-foreground">
+            {t("form.rateBreakdown", {
+              gross: formatMoney(rates.grossMinor),
+              fee: formatMoney(rates.platformFeeMinor),
+              net: formatMoney(rates.netMinor),
+            })}
+          </p>
+        </aside>
 
         <StudentPersonalFields
           values={form}
           invalidFields={invalidFields}
           updateField={updateField}
           emailConflict={saveMutation.error?.message === "conflict"}
-          isEditing={isEditing}
         />
         <StudentLearningFields
           values={form}
@@ -179,15 +170,8 @@ export function StudentForm({
           updateField={updateField}
           currency={currency}
           minorFactor={minorFactor}
-          isEditing={isEditing}
         />
-
-        <div
-          className={cn(
-            "space-y-6",
-            !isEditing &&
-              "lg:col-start-2 lg:row-start-3 xl:col-span-2 xl:row-start-3",
-          )}>
+        <div className="space-y-6 lg:col-start-2 lg:row-start-3 xl:col-span-2 xl:row-start-3">
           <StudentSettingsFields values={form} updateField={updateField} />
 
           {clientInvalidFields.length ? (
