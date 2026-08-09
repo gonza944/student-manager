@@ -1,5 +1,5 @@
 import { format, isValid, parse } from "date-fns";
-import { enUS, es } from "date-fns/locale";
+import { enUS, es } from "react-day-picker/locale";
 
 const isoDateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
 

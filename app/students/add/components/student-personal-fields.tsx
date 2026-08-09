@@ -114,6 +114,7 @@ export function StudentPersonalFields({
           <StudentBirthDatePicker
             value={values.birthDate}
             locale={locale}
+            timeZone={values.timeZone}
             placeholder={t("form.birthDatePlaceholder")}
             openLabel={t("form.birthDateOpen")}
             invalid={invalidFields.has("birthDate")}

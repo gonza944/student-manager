@@ -64,6 +64,9 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   await page.getByRole("menuitemradio", { name: "Otro" }).click();
   await drawer.getByRole("button", { name: "Abrir calendario" }).click();
   await expect(page.getByRole("grid")).toBeVisible();
+  await expect(
+    page.getByRole("combobox", { name: "Elegir el año" }),
+  ).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(drawer.getByLabel("Fecha de nacimiento")).toHaveValue("");
   await drawer

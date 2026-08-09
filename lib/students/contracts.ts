@@ -85,10 +85,7 @@ const optionalEmail = z.preprocess(
 
 const optionalBirthDate = z.preprocess(
   normalizeOptionalText,
-  z.iso
-    .date()
-    .refine((value) => value <= new Date().toISOString().slice(0, 10))
-    .nullable(),
+  z.iso.date().nullable(),
 );
 
 const timeZoneSchema = z.string().trim().min(1).max(80).refine((timeZone) => {
@@ -155,8 +152,55 @@ function validatePreferredContact(
   }
 }
 
+export function getDateOnlyToday(timeZone: string, now = new Date()) {
+  try {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+        .formatToParts(now)
+        .map(({ type, value }) => [type, value]),
+    );
+
+    return `${parts.year}-${parts.month}-${parts.day}`;
+  } catch {
+    return undefined;
+  }
+}
+
+function validateBirthDate(
+  {
+    birthDate,
+    timeZone,
+  }: {
+    birthDate: string | null;
+    timeZone: string;
+  },
+  context: z.RefinementCtx,
+) {
+  const today = getDateOnlyToday(timeZone);
+  if (birthDate && today && birthDate > today) {
+    context.addIssue({
+      code: "custom",
+      path: ["birthDate"],
+      message: "Birth date cannot be in the future.",
+    });
+  }
+}
+
+function validateStudentInput(
+  details: z.output<typeof studentDetailsSchema>,
+  context: z.RefinementCtx,
+) {
+  validatePreferredContact(details, context);
+  validateBirthDate(details, context);
+}
+
 export const createStudentInputSchema =
-  studentDetailsSchema.superRefine(validatePreferredContact);
+  studentDetailsSchema.superRefine(validateStudentInput);
 
 export const studentIdInputSchema = z.object({
   studentId: z.string().trim().min(1).max(128).regex(/^[A-Za-z0-9_-]+$/),
@@ -166,7 +210,7 @@ export const updateStudentInputSchema = studentDetailsSchema
   .extend({
     studentId: studentIdInputSchema.shape.studentId,
   })
-  .superRefine(validatePreferredContact);
+  .superRefine(validateStudentInput);
 
 export const setStudentActiveInputSchema = studentIdInputSchema.extend({
   isActive: z.boolean(),
@@ -189,7 +233,8 @@ export const studentDtoSchema = studentDetailsSchema
     rates: studentRateSchema,
     createdAt: z.iso.datetime(),
     updatedAt: z.iso.datetime(),
-  });
+  })
+  .superRefine(validateBirthDate);
 
 export const studentCardDtoSchema = studentDetailsSchema
   .pick({

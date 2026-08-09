@@ -56,8 +56,21 @@ test("teachers can filter, sort, and change student status", async ({
       await dialog.getByLabel("Email address").fill(student.email);
     }
     if ("birthDate" in student) {
-      await dialog.getByRole("button", { name: "Open calendar" }).click();
-      await expect(page.getByRole("grid")).toBeVisible();
+      const calendarTrigger = dialog.getByRole("button", {
+        name: "Open calendar",
+      });
+      await expect(calendarTrigger).toHaveCSS("width", "44px");
+      await calendarTrigger.click();
+      const calendar = page.getByRole("grid");
+      const year = page.getByRole("combobox", { name: "Choose the Year" });
+      await expect(calendar).toBeVisible();
+      await expect(calendar.getByRole("button").first()).toHaveCSS(
+        "width",
+        "44px",
+      );
+      await year.click();
+      await expect(calendar).toBeVisible();
+      await year.selectOption(student.birthDate.slice(0, 4));
       await page.keyboard.press("Escape");
       await dialog.getByLabel("Birth date").fill(student.birthDate);
     }

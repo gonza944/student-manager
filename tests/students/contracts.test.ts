@@ -9,6 +9,7 @@ import { toMinorUnits } from "../../app/students/utils/to-minor-units";
 import {
   calculateStudentRate,
   createStudentInputSchema,
+  getDateOnlyToday,
   studentDtoSchema,
   studentIdInputSchema,
   studentListInputSchema,
@@ -201,6 +202,16 @@ test("validates optional emails and real, non-future birth dates", () => {
     }).success,
     false,
   );
+});
+
+test("resolves today in the student's time zone", () => {
+  const instant = new Date("2026-08-10T01:00:00.000Z");
+
+  assert.equal(
+    getDateOnlyToday("America/Argentina/Cordoba", instant),
+    "2026-08-09",
+  );
+  assert.equal(getDateOnlyToday("Asia/Tokyo", instant), "2026-08-10");
 });
 
 test("requires contact details for email, phone, and WhatsApp", () => {
