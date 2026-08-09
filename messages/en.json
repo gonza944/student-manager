@@ -254,7 +254,7 @@
       "preferredContact": "Preferred contact channel",
       "source": "Student source",
       "active": "Active student",
-      "rateBreakdown": "Gross: {gross} · Fee: {fee} · Net: {net}",
+      "rateBreakdown": "Gross: {gross} · Fee: {fee}\nNet: {net}",
       "avatar": "Avatar",
       "avatarOption": "Avatar {number}",
       "color": "Card color",

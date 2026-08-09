@@ -254,7 +254,7 @@
       "preferredContact": "Canal de contacto preferido",
       "source": "Origen del estudiante",
       "active": "Estudiante activo",
-      "rateBreakdown": "Bruta: {gross} · Comisión: {fee} · Neta: {net}",
+      "rateBreakdown": "Bruta: {gross} · Comisión: {fee}\nNeta: {net}",
       "avatar": "Avatar",
       "avatarOption": "Avatar {number}",
       "color": "Color de la tarjeta",

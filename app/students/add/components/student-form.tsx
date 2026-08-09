@@ -149,7 +149,7 @@ export function StudentForm({
             formatMoney={formatMoney}
             preview
           />
-          <p className="self-center text-center text-sm font-semibold text-muted-foreground">
+          <p className="self-center whitespace-pre-line text-center text-sm font-semibold text-muted-foreground">
             {t("form.rateBreakdown", {
               gross: formatMoney(rates.grossMinor),
               fee: formatMoney(rates.platformFeeMinor),
