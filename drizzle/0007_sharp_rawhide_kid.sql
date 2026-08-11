@@ -1,0 +1,1 @@
+ALTER TABLE `user` ADD `direct_commission_bps` integer DEFAULT 485 NOT NULL;

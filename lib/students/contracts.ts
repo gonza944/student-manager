@@ -6,7 +6,7 @@ import { currencySchema } from "../currencies";
 import { studentCountries } from "./geography";
 
 export const studentSources = ["private", "preply"] as const;
-export const directCommissionBps = 485;
+export const defaultDirectCommissionBps = 485;
 export const contactChannels = [
   "email",
   "phone",
@@ -212,6 +212,11 @@ export const updateStudentInputSchema = studentDetailsSchema
   })
   .superRefine(validateStudentInput);
 
+export const updateStudentRateInputSchema = studentIdInputSchema.extend({
+  hourlyRateMinor: z.int().positive().max(100_000_000),
+  source: z.enum(studentSources),
+});
+
 export const setStudentActiveInputSchema = studentIdInputSchema.extend({
   isActive: z.boolean(),
 });
@@ -219,12 +224,36 @@ export const setStudentActiveInputSchema = studentIdInputSchema.extend({
 export const teacherRateSettingsSchema = z.object({
   currency: currencySchema,
   preplyCommissionBps: z.int().min(0).max(10_000),
+  directCommissionBps: z.int().min(0).max(10_000),
+});
+
+export const updateCommissionSettingsInputSchema = z.object({
+  preplyCommissionBps: z.int().min(0).max(10_000),
+  directCommissionBps: z.int().min(0).max(10_000),
 });
 
 export const studentRateSchema = z.object({
   grossMinor: z.int().nonnegative(),
   platformFeeMinor: z.int().nonnegative(),
   netMinor: z.int().nonnegative(),
+});
+
+export const studentRateHistoryEntrySchema = z.object({
+  id: z.string().min(1).max(256),
+  grossMinor: z.int().positive(),
+  feeBps: z.int().min(0).max(10_000),
+  feeMinor: z.int().nonnegative(),
+  netMinor: z.int().nonnegative(),
+  source: z.enum(studentSources),
+  effectiveAt: z.iso.datetime(),
+  effectiveUntil: z.iso.datetime().nullable(),
+  durationMs: z.int().nonnegative(),
+  differenceFromPreviousMinor: z.int().nullable(),
+});
+
+export const studentRateTimelineSchema = z.object({
+  current: studentRateHistoryEntrySchema,
+  previous: z.array(studentRateHistoryEntrySchema),
 });
 
 export const studentDtoSchema = studentDetailsSchema
@@ -298,6 +327,8 @@ export const studentListPageSchema = teacherRateSettingsSchema.extend({
 
 export const studentProfileSchema = teacherRateSettingsSchema.extend({
   student: studentDtoSchema,
+  rateTimeline: studentRateTimelineSchema,
+  hasOlderRateHistory: z.boolean(),
 });
 
 export const studentCountsSchema = z.object({
@@ -308,21 +339,40 @@ export const studentCountsSchema = z.object({
 export type SetStudentActiveInput = z.input<typeof setStudentActiveInputSchema>;
 export type CreateStudentInput = z.output<typeof createStudentInputSchema>;
 export type UpdateStudentInput = z.output<typeof updateStudentInputSchema>;
+export type UpdateStudentRateInput = z.output<
+  typeof updateStudentRateInputSchema
+>;
 export type StudentDto = z.output<typeof studentDtoSchema>;
 export type StudentCardDto = z.output<typeof studentCardDtoSchema>;
+export type StudentRateHistoryEntry = z.output<
+  typeof studentRateHistoryEntrySchema
+>;
+export type StudentRateTimeline = z.output<typeof studentRateTimelineSchema>;
 export type StudentListInput = z.output<typeof studentListInputSchema>;
 export type StudentCursor = z.output<typeof studentCursorSchema>;
 export type StudentListPage = z.output<typeof studentListPageSchema>;
 export type StudentProfile = z.output<typeof studentProfileSchema>;
 export type StudentCounts = z.output<typeof studentCountsSchema>;
 
+export function getStudentCommissionBps(
+  source: (typeof studentSources)[number],
+  preplyCommissionBps: number,
+  directCommissionBps = defaultDirectCommissionBps,
+) {
+  return source === "preply" ? preplyCommissionBps : directCommissionBps;
+}
+
 export function calculateStudentRate(
   grossMinor: number,
   source: (typeof studentSources)[number],
   preplyCommissionBps: number,
+  directCommissionBps = defaultDirectCommissionBps,
 ) {
-  const commissionBps =
-    source === "preply" ? preplyCommissionBps : directCommissionBps;
+  const commissionBps = getStudentCommissionBps(
+    source,
+    preplyCommissionBps,
+    directCommissionBps,
+  );
   const platformFeeMinor = Math.floor(
     (grossMinor * commissionBps + 5_000) / 10_000,
   );

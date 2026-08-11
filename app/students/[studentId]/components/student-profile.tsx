@@ -46,6 +46,7 @@ import {
 import { ProfileCardHeader } from "./profile-card-header";
 import { ProfileDetail } from "./profile-detail";
 import { ProfileTags } from "./profile-tags";
+import { StudentRateHistory } from "./student-rate-history";
 
 export function StudentProfile({ profile }: { profile: StudentProfileData }) {
   const { student, currency } = profile;
@@ -407,6 +408,13 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
               </div>
             </CardContent>
           </Card>
+
+          <StudentRateHistory
+            currency={currency}
+            hasOlderHistory={profile.hasOlderRateHistory}
+            studentId={student.id}
+            timeline={profile.rateTimeline}
+          />
         </section>
 
         <DeleteStudentConfirmation

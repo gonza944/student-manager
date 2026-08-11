@@ -21,6 +21,7 @@ export const user = sqliteTable("user", {
     .notNull(),
   currency: text("currency").default("USD").notNull(),
   preplyCommissionBps: integer("preply_commission_bps").default(1800).notNull(),
+  directCommissionBps: integer("direct_commission_bps").default(485).notNull(),
 });
 
 export const session = sqliteTable(

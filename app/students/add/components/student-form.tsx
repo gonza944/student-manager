@@ -32,10 +32,12 @@ type StudentFormError = Error & { fields?: string[] };
 export function StudentForm({
   currency,
   preplyCommissionBps,
+  directCommissionBps,
   student,
 }: {
   currency: string;
   preplyCommissionBps: number;
+  directCommissionBps: number;
   student?: StudentDto;
 }) {
   const t = useTranslations("Students");
@@ -60,6 +62,7 @@ export function StudentForm({
     hourlyRateMinor,
     form.source,
     preplyCommissionBps,
+    directCommissionBps,
   );
   const formatMoney = (minor: number) =>
     currencyFormatter.format(minor / minorFactor);

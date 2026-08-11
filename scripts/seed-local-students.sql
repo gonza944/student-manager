@@ -158,3 +158,50 @@ ON CONFLICT(id) DO UPDATE SET
   theme_color = excluded.theme_color,
   created_at = excluded.created_at,
   updated_at = excluded.updated_at;
+
+WITH current_rates AS (
+  SELECT
+    student.id AS student_id,
+    student.teacher_id,
+    student.hourly_rate_minor AS gross_rate_minor,
+    CASE
+      WHEN student.source = 'preply' THEN user.preply_commission_bps
+      ELSE user.direct_commission_bps
+    END AS fee_bps,
+    student.source,
+    student.created_at AS effective_at
+  FROM student
+  INNER JOIN user ON user.id = student.teacher_id
+  WHERE student.id LIKE 'local-seed-student-%'
+)
+INSERT INTO student_rate_history (
+  id,
+  student_id,
+  teacher_id,
+  gross_rate_minor,
+  fee_bps,
+  fee_amount_minor,
+  net_rate_minor,
+  source,
+  effective_at
+)
+SELECT
+  student_id || '-rate-initial',
+  student_id,
+  teacher_id,
+  gross_rate_minor,
+  fee_bps,
+  CAST((gross_rate_minor * fee_bps + 5000) / 10000 AS integer),
+  gross_rate_minor - CAST((gross_rate_minor * fee_bps + 5000) / 10000 AS integer),
+  source,
+  effective_at
+FROM current_rates
+WHERE true
+ON CONFLICT(id) DO UPDATE SET
+  teacher_id = excluded.teacher_id,
+  gross_rate_minor = excluded.gross_rate_minor,
+  fee_bps = excluded.fee_bps,
+  fee_amount_minor = excluded.fee_amount_minor,
+  net_rate_minor = excluded.net_rate_minor,
+  source = excluded.source,
+  effective_at = excluded.effective_at;

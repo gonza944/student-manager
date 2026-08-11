@@ -15,6 +15,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - Prefer an existing shadcn component over a raw HTML element when it fits the use case.
 - Preserve shadcn registry component behavior unless a functional change is explicitly requested; performance-only changes are allowed.
+- Keep each React component focused on one responsibility. Separate display components from dialogs, mutation state, and editing workflows.
 
 ## Production deployment safety
 
