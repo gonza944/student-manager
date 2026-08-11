@@ -12,9 +12,11 @@ function historyEntry(
   id: string,
   effectiveAt: string,
   grossRateMinor: number,
+  sequence = 0,
 ): StoredRateHistoryEntry {
   return {
     id,
+    sequence,
     ...createRateSnapshot(grossRateMinor, "preply", 1_800),
     effectiveAt: new Date(effectiveAt),
   };
@@ -42,6 +44,17 @@ test("creates snapshots with integer-based Direct and Preply fees", () => {
     netRateMinor: 2_050,
     source: "preply",
   });
+});
+
+test("uses insertion order when changes share a timestamp", () => {
+  const effectiveAt = "2026-01-01T00:00:00.000Z";
+  const timeline = buildStudentRateTimeline([
+    historyEntry("ffff", effectiveAt, 2_000, 1),
+    historyEntry("0000", effectiveAt, 3_000, 2),
+  ]);
+
+  assert.equal(timeline.current.id, "0000");
+  assert.equal(timeline.current.grossMinor, 3_000);
 });
 
 test("detects gross, source, and applicable fee changes", () => {

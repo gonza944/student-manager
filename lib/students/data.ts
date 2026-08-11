@@ -7,8 +7,11 @@ import {
   asc,
   desc,
   eq,
+  getTableColumns,
   gt,
+  isNull,
   lt,
+  ne,
   or,
   sql,
   type SQL,
@@ -43,6 +46,9 @@ type TeacherSettings = {
   preplyCommissionBps: number;
   directCommissionBps: number;
 };
+
+const rateHistoryPageSize = 50;
+const historySequence = sql<number>`${studentRateHistory}.rowid`;
 
 function toStudentDto(
   row: typeof student.$inferSelect,
@@ -240,7 +246,10 @@ export async function getTeacherStudentProfile(
       .where(and(eq(student.id, studentId), eq(student.teacherId, teacherId)))
       .limit(1),
     db
-      .select()
+      .select({
+        ...getTableColumns(studentRateHistory),
+        sequence: historySequence,
+      })
       .from(studentRateHistory)
       .where(
         and(
@@ -248,11 +257,15 @@ export async function getTeacherStudentProfile(
           eq(studentRateHistory.teacherId, teacherId),
         ),
       )
-      .orderBy(asc(studentRateHistory.effectiveAt), asc(studentRateHistory.id)),
+      .orderBy(desc(studentRateHistory.effectiveAt), desc(historySequence))
+      .limit(rateHistoryPageSize + 1),
   ]);
   const row = studentRows[0];
 
   if (!row) return null;
+
+  const rateTimeline = buildStudentRateTimeline(historyRows);
+  const hasOlderRateHistory = historyRows.length > rateHistoryPageSize;
 
   return studentProfileSchema.parse({
     ...settings,
@@ -261,7 +274,11 @@ export async function getTeacherStudentProfile(
       settings.preplyCommissionBps,
       settings.directCommissionBps,
     ),
-    rateTimeline: buildStudentRateTimeline(historyRows),
+    rateTimeline: {
+      ...rateTimeline,
+      previous: rateTimeline.previous.slice(0, rateHistoryPageSize - 1),
+    },
+    hasOlderRateHistory,
   });
 }
 
@@ -349,7 +366,7 @@ export async function updateTeacherStudentRate(
           eq(studentRateHistory.teacherId, teacherId),
         ),
       )
-      .orderBy(desc(studentRateHistory.effectiveAt), desc(studentRateHistory.id))
+      .orderBy(desc(studentRateHistory.effectiveAt), desc(historySequence))
       .limit(1),
   ]);
   if (!studentRows[0]) return null;
@@ -426,7 +443,7 @@ export async function updateTeacherStudent(
           eq(studentRateHistory.teacherId, teacherId),
         ),
       )
-      .orderBy(desc(studentRateHistory.effectiveAt), desc(studentRateHistory.id))
+      .orderBy(desc(studentRateHistory.effectiveAt), desc(historySequence))
       .limit(1),
   ]);
   if (!studentRows[0]) return null;
@@ -491,55 +508,68 @@ export async function updateTeacherCommissions(
   preplyCommissionBps: number,
   directCommissionBps: number,
 ) {
-  const [studentRows, historyRows] = await db.batch([
-    db.select().from(student).where(eq(student.teacherId, teacherId)),
-    db
-      .select()
-      .from(studentRateHistory)
-      .where(eq(studentRateHistory.teacherId, teacherId))
-      .orderBy(
-        desc(studentRateHistory.effectiveAt),
-        desc(studentRateHistory.id),
-      ),
-  ]);
-  const latestHistoryByStudent = new Map<
-    string,
-    typeof studentRateHistory.$inferSelect
-  >();
-  for (const history of historyRows) {
-    if (!latestHistoryByStudent.has(history.studentId)) {
-      latestHistoryByStudent.set(history.studentId, history);
-    }
-  }
-
   const now = new Date();
-  const historyInserts = studentRows.flatMap((row) => {
-    const snapshot = createRateSnapshot(
-      row.hourlyRateMinor,
-      row.source,
-      preplyCommissionBps,
-      directCommissionBps,
+  const feeBps = sql<number>`case when ${student.source} = 'preply' then ${preplyCommissionBps} else ${directCommissionBps} end`;
+  const feeAmountMinor = sql<number>`cast((${student.hourlyRateMinor} * ${feeBps} + 5000) / 10000 as integer)`;
+  const rankedHistory = db.$with("ranked_rate_history").as(
+    db
+      .select({
+        studentId: studentRateHistory.studentId,
+        grossRateMinor: studentRateHistory.grossRateMinor,
+        feeBps: studentRateHistory.feeBps,
+        source: studentRateHistory.source,
+        rank: sql<number>`row_number() over (partition by ${studentRateHistory.studentId} order by ${studentRateHistory.effectiveAt} desc, ${historySequence} desc)`.as(
+          "rank",
+        ),
+      })
+      .from(studentRateHistory)
+      .where(eq(studentRateHistory.teacherId, teacherId)),
+  );
+  const insertChangedRates = db
+    .with(rankedHistory)
+    .insert(studentRateHistory)
+    .select(
+      db
+        .select({
+          id: sql<string>`lower(hex(randomblob(16)))`.as("id"),
+          studentId: student.id,
+          teacherId: student.teacherId,
+          grossRateMinor: student.hourlyRateMinor,
+          feeBps: feeBps.as("fee_bps"),
+          feeAmountMinor: feeAmountMinor.as("fee_amount_minor"),
+          netRateMinor: sql<number>`${student.hourlyRateMinor} - ${feeAmountMinor}`.as(
+            "net_rate_minor",
+          ),
+          source: student.source,
+          effectiveAt: sql<Date>`${now.getTime()}`.as("effective_at"),
+        })
+        .from(student)
+        .leftJoin(
+          rankedHistory,
+          and(
+            eq(rankedHistory.studentId, student.id),
+            eq(rankedHistory.rank, 1),
+          ),
+        )
+        .where(
+          and(
+            eq(student.teacherId, teacherId),
+            or(
+              isNull(rankedHistory.studentId),
+              ne(rankedHistory.grossRateMinor, student.hourlyRateMinor),
+              ne(rankedHistory.source, student.source),
+              ne(rankedHistory.feeBps, feeBps),
+            ),
+          ),
+        ),
     );
-
-    return hasRateChanged(latestHistoryByStudent.get(row.id), snapshot)
-      ? [
-          db.insert(studentRateHistory).values({
-            id: crypto.randomUUID(),
-            studentId: row.id,
-            teacherId,
-            ...snapshot,
-            effectiveAt: now,
-          }),
-        ]
-      : [];
-  });
 
   await db.batch([
     db
       .update(user)
       .set({ preplyCommissionBps, directCommissionBps })
       .where(eq(user.id, teacherId)),
-    ...historyInserts,
+    insertChangedRates,
   ]);
 
   return { preplyCommissionBps, directCommissionBps };

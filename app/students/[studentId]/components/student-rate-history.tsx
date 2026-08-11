@@ -19,10 +19,12 @@ import { StudentRateEditor } from "./student-rate-editor";
 
 export function StudentRateHistory({
   currency,
+  hasOlderHistory,
   studentId,
   timeline,
 }: {
   currency: string;
+  hasOlderHistory: boolean;
   studentId: string;
   timeline: StudentRateTimeline;
 }) {
@@ -153,6 +155,11 @@ export function StudentRateHistory({
               </tbody>
             </table>
           </div>
+          {hasOlderHistory ? (
+            <p className="border-t border-orbit-ink/15 px-5 py-3 text-sm text-muted-foreground sm:px-6">
+              {t("profile.rateHistory.olderEntriesOmitted")}
+            </p>
+          ) : null}
         </CardContent>
     </Card>
   );

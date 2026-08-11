@@ -48,6 +48,7 @@ export function StudentRateEditor({
   const [open, setOpen] = useState(false);
   const [hourlyRate, setHourlyRate] = useState("");
   const [source, setSource] = useState(initialSource);
+  const minorFactor = 10 ** fractionDigits;
   const mutation = useMutation({
     mutationFn: async () => {
       const result = await updateStudentRateAction({
@@ -119,9 +120,9 @@ export function StudentRateEditor({
               id="student-quick-rate"
               name="hourlyRate"
               type="number"
-              min="0.01"
-              max="1000000"
-              step="0.01"
+              min={1 / minorFactor}
+              max={100_000_000 / minorFactor}
+              step={1 / minorFactor}
               inputMode="decimal"
               value={hourlyRate}
               required

@@ -328,6 +328,7 @@ export const studentListPageSchema = teacherRateSettingsSchema.extend({
 export const studentProfileSchema = teacherRateSettingsSchema.extend({
   student: studentDtoSchema,
   rateTimeline: studentRateTimelineSchema,
+  hasOlderRateHistory: z.boolean(),
 });
 
 export const studentCountsSchema = z.object({

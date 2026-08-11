@@ -207,6 +207,7 @@
       },
       "rateHistory": {
         "title": "Historial de tarifas",
+        "olderEntriesOmitted": "Solo se muestran las 50 tarifas más recientes.",
         "current": "Tarifa actual",
         "caption": "Historial de tarifas con la tarifa actual primero.",
         "ongoing": "Actual",

@@ -411,6 +411,7 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
 
           <StudentRateHistory
             currency={currency}
+            hasOlderHistory={profile.hasOlderRateHistory}
             studentId={student.id}
             timeline={profile.rateTimeline}
           />

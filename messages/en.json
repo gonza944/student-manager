@@ -207,6 +207,7 @@
       },
       "rateHistory": {
         "title": "Rate history",
+        "olderEntriesOmitted": "Only the latest 50 rate entries are shown.",
         "current": "Current rate",
         "caption": "Rate history with the current rate first.",
         "ongoing": "Current",

@@ -18,6 +18,7 @@ export type RateSnapshot = {
 
 export type StoredRateHistoryEntry = RateSnapshot & {
   id: string;
+  sequence: number;
   effectiveAt: Date;
 };
 
@@ -70,7 +71,7 @@ export function buildStudentRateTimeline(
   const chronological = [...history].sort(
     (left, right) =>
       left.effectiveAt.getTime() - right.effectiveAt.getTime() ||
-      left.id.localeCompare(right.id),
+      left.sequence - right.sequence,
   );
   const nowMs = now.getTime();
   const entries = chronological.map((entry, index) => {
