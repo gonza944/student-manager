@@ -254,9 +254,6 @@ export const studentRateHistoryEntrySchema = z.object({
 export const studentRateTimelineSchema = z.object({
   current: studentRateHistoryEntrySchema,
   previous: z.array(studentRateHistoryEntrySchema),
-  averageChangeIntervalMs: z.int().nonnegative().nullable(),
-  timeSinceLatestChangeMs: z.int().nonnegative(),
-  totalChanges: z.int().nonnegative(),
 });
 
 export const studentDtoSchema = studentDetailsSchema

@@ -87,7 +87,7 @@ test("detects gross, source, and applicable fee changes", () => {
   );
 });
 
-test("calculates chronological intervals, differences, and averages", () => {
+test("calculates chronological intervals and differences", () => {
   const day = 24 * 60 * 60 * 1_000;
   const timeline = buildStudentRateTimeline(
     [
@@ -109,9 +109,6 @@ test("calculates chronological intervals, differences, and averages", () => {
   assert.equal(timeline.previous[0].differenceFromPreviousMinor, 410);
   assert.equal(timeline.previous[1].durationMs, 10 * day);
   assert.equal(timeline.previous[1].differenceFromPreviousMinor, null);
-  assert.equal(timeline.averageChangeIntervalMs, 15 * day);
-  assert.equal(timeline.timeSinceLatestChangeMs, 10 * day);
-  assert.equal(timeline.totalChanges, 2);
 });
 
 test("keeps one-entry timelines meaningful", () => {
@@ -123,8 +120,6 @@ test("keeps one-entry timelines meaningful", () => {
   assert.equal(timeline.current.id, "initial");
   assert.equal(timeline.current.effectiveUntil, null);
   assert.equal(timeline.previous.length, 0);
-  assert.equal(timeline.averageChangeIntervalMs, null);
-  assert.equal(timeline.totalChanges, 0);
 });
 
 test("rejects an empty timeline", () => {

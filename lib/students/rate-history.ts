@@ -97,18 +97,9 @@ export function buildStudentRateTimeline(
     };
   });
   const latest = entries.at(-1)!;
-  const firstEffectiveAt = chronological[0].effectiveAt.getTime();
-  const latestEffectiveAt = chronological.at(-1)!.effectiveAt.getTime();
-  const totalChanges = entries.length - 1;
 
   return studentRateTimelineSchema.parse({
     current: latest,
     previous: entries.slice(0, -1).reverse(),
-    averageChangeIntervalMs:
-      totalChanges > 0
-        ? Math.round((latestEffectiveAt - firstEffectiveAt) / totalChanges)
-        : null,
-    timeSinceLatestChangeMs: Math.max(0, nowMs - latestEffectiveAt),
-    totalChanges,
   });
 }
