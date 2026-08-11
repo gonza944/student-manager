@@ -9,6 +9,7 @@ import {
   Clock03Icon,
   Message01Icon,
   Orbit02Icon,
+  Settings02Icon,
   TeacherIcon,
   UserMultipleIcon,
 } from "@hugeicons/core-free-icons";
@@ -159,6 +160,19 @@ export default async function Home() {
 
           <div className="flex items-center gap-3">
             <ThemeToggle label={t("toggleTheme")} />
+            <Button asChild variant="outline" className="rounded-full">
+              <Link href="/settings">
+                <HugeiconsIcon
+                  data-icon="inline-start"
+                  icon={Settings02Icon}
+                  size={18}
+                  color="currentColor"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
+                {t("settings")}
+              </Link>
+            </Button>
             <DashboardLogoutButton
               copy={{
                 label: t("logout"),

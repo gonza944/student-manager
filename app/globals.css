@@ -10,11 +10,13 @@
   --orbit-ink-soft: oklch(32.396% 0.01361 261.72); /* #30343B */
   --yellow-base-light: oklch(81.533% 0.16715 84.80); /* #F4B800 */
   --red-base-light: oklch(61.750% 0.18559 27.05); /* #DF4B43 */
+  --rose-base-light: oklch(69.993% 0.14089 349.77); /* #DE77AB */
   --purple-base-light: oklch(78.000% 0.10000 297.02); /* #BEAAF0 */
   --green-base-light: oklch(72.059% 0.12925 145.21); /* #6DBA71 */
   --blue-gray-base-light: oklch(77.453% 0.02019 235.82); /* #AAB8C1 */
   --yellow-base: var(--yellow-base-light);
   --red-base: var(--red-base-light);
+  --rose-base: var(--rose-base-light);
   --purple-base: var(--purple-base-light);
   --green-base: var(--green-base-light);
   --blue-gray-base: var(--blue-gray-base-light);
@@ -56,6 +58,7 @@
   color-scheme: dark;
   --yellow-base: oklch(from var(--yellow-base-light) 0.775 calc(c * 0.84) h); /* #DFAE38 */
   --red-base: oklch(from var(--red-base-light) 0.600 calc(c * 0.84) h); /* #CD544A */
+  --rose-base: oklch(from var(--rose-base-light) 0.660 calc(c * 0.82) h); /* #C7739C */
   --purple-base: oklch(from var(--purple-base-light) 0.730 calc(c * 0.78) h); /* #AC9ED3 */
   --green-base: oklch(from var(--green-base-light) 0.680 calc(c * 0.84) h); /* #6BAA6E */
   --blue-gray-base: oklch(from var(--blue-gray-base-light) 0.710 calc(c * 0.85) h); /* #98A3AB */
@@ -111,6 +114,18 @@
   --color-red-800: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* red */
   --color-red-900: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* red */
   --color-red-950: oklch(from var(--red-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* red */
+
+  --color-rose-50: oklch(from var(--rose-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* rose */
+  --color-rose-100: oklch(from var(--rose-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* rose */
+  --color-rose-200: oklch(from var(--rose-base) calc(l + (0.99 - l) * 0.5) calc(c * 0.5) h); /* rose */
+  --color-rose-300: oklch(from var(--rose-base) calc(l + (0.99 - l) * 0.25) calc(c * 0.75) h); /* rose */
+  --color-rose-400: var(--rose-base); /* rose */
+  --color-rose-500: oklch(from var(--rose-base) calc(l + (0.21 - l) * 0.166667) calc(c * 0.833333) h); /* rose */
+  --color-rose-600: oklch(from var(--rose-base) calc(l + (0.21 - l) * 0.333333) calc(c * 0.666667) h); /* rose */
+  --color-rose-700: oklch(from var(--rose-base) calc(l + (0.21 - l) * 0.5) calc(c * 0.5) h); /* rose */
+  --color-rose-800: oklch(from var(--rose-base) calc(l + (0.21 - l) * 0.666667) calc(c * 0.333333) h); /* rose */
+  --color-rose-900: oklch(from var(--rose-base) calc(l + (0.21 - l) * 0.833333) calc(c * 0.166667) h); /* rose */
+  --color-rose-950: oklch(from var(--rose-base) calc(l + (0.21 - l) * 0.916667) calc(c * 0.083333) h); /* rose */
 
   --color-purple-50: oklch(from var(--purple-base) calc(l + (0.99 - l) * 0.875) calc(c * 0.125) h); /* purple */
   --color-purple-100: oklch(from var(--purple-base) calc(l + (0.99 - l) * 0.75) calc(c * 0.25) h); /* purple */

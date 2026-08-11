@@ -51,6 +51,12 @@ export function createAuth(
           defaultValue: 1800,
           input: false,
         },
+        directCommissionBps: {
+          type: "number",
+          required: true,
+          defaultValue: 485,
+          input: false,
+        },
       },
     },
     rateLimit: {

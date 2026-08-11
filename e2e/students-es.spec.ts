@@ -103,4 +103,45 @@ test("el directorio y el formulario móvil se muestran en español", async ({
     }),
   ).toBeVisible();
   await expect(page.getByText("29 de febrero de 2000")).toBeVisible();
+
+  const historyCard = page.locator('[data-slot="card"]').filter({
+    has: page.getByRole("heading", { name: "Historial de tarifas" }),
+  });
+  await expect(
+    historyCard.getByText("Tiempo con la tarifa actual"),
+  ).toHaveCount(0);
+  const rows = historyCard
+    .getByRole("table", {
+      name: "Historial de tarifas con la tarifa actual primero.",
+    })
+    .getByRole("row");
+  await expect(rows).toHaveCount(2);
+  await expect(rows.nth(1)).toHaveClass(/bg-orbit-ink/);
+  await expect(rows.nth(1)).toContainText("Directo");
+
+  await historyCard.getByRole("button", { name: "Editar tarifa" }).click();
+  const rateDialog = page.getByRole("dialog", { name: "Editar tarifa" });
+  await expect(rateDialog.getByLabel("Tarifa por hora (USD)")).toBeVisible();
+  await expect(
+    rateDialog.getByRole("radio", { name: "Directo" }),
+  ).toBeChecked();
+  await expect(
+    rateDialog.getByText(
+      "Preply usa tu comisión configurada. Directo usa tu comisión configurada para Directo.",
+    ),
+  ).toBeVisible();
+  await rateDialog.getByRole("button", { name: "Cancelar" }).click();
+  await expect(rateDialog).toBeHidden();
+
+  await page.goto("/");
+  await page.getByRole("link", { name: "Configuración" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Configuración" }),
+  ).toBeVisible();
+  await expect(
+    page.getByLabel("Comisión de Preply"),
+  ).toHaveValue("18.00");
+  await expect(
+    page.getByLabel("Comisión de estudiantes directos"),
+  ).toHaveValue("4.85");
 });

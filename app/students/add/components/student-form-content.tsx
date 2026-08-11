@@ -40,6 +40,7 @@ export async function StudentFormContent({
     <StudentForm
       currency={settings.currency}
       preplyCommissionBps={settings.preplyCommissionBps}
+      directCommissionBps={settings.directCommissionBps}
       student={student}
     />
   );

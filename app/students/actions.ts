@@ -14,6 +14,7 @@ import {
   studentListInputSchema,
   teacherRateSettingsSchema,
   updateStudentInputSchema,
+  updateStudentRateInputSchema,
   type StudentDto,
   type StudentListPage,
 } from "../../lib/students/contracts";
@@ -23,6 +24,7 @@ import {
   listTeacherStudentsPage,
   setTeacherStudentActive,
   updateTeacherStudent,
+  updateTeacherStudentRate,
 } from "../../lib/students/data";
 
 type ActionError =
@@ -97,6 +99,7 @@ export async function createStudentAction(
       context.teacherId,
       parsed.data,
       context.settings.preplyCommissionBps,
+      context.settings.directCommissionBps,
     );
     revalidatePath("/students");
     revalidatePath("/");
@@ -128,6 +131,7 @@ export async function updateStudentAction(
       context.teacherId,
       parsed.data,
       context.settings.preplyCommissionBps,
+      context.settings.directCommissionBps,
     );
     if (!data) return { ok: false, error: "notFound" };
 
@@ -145,6 +149,30 @@ export async function updateStudentAction(
     }
     throw error;
   }
+}
+
+export async function updateStudentRateAction(
+  input: unknown,
+): Promise<ActionResult<StudentDto>> {
+  const parsed = updateStudentRateInputSchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+
+  const context = await getTeacherContext();
+  if (!context.ok) return context;
+
+  const data = await updateTeacherStudentRate(
+    await getDb(),
+    context.teacherId,
+    parsed.data,
+    context.settings.preplyCommissionBps,
+    context.settings.directCommissionBps,
+  );
+  if (!data) return { ok: false, error: "notFound" };
+
+  revalidatePath("/students");
+  revalidatePath(`/students/${parsed.data.studentId}`);
+  revalidatePath("/");
+  return { ok: true, data };
 }
 
 export async function setStudentActiveAction(

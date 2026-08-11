@@ -206,10 +206,13 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(page.getByText("WhatsApp", { exact: true })).toBeVisible();
   await expect(page.getByText("Visual summaries", { exact: true })).toBeVisible();
   await expect(page.getByText("Travel", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Preply" })).toBeVisible();
-  await expect(page.getByText("Gross rate", { exact: true })).toBeVisible();
-  await expect(page.getByText("Fee", { exact: true })).toBeVisible();
-  await expect(page.getByText("Net rate", { exact: true })).toBeVisible();
+  const rateCard = page.locator('[data-slot="card"]').filter({
+    has: page.getByText("Hourly rate", { exact: true }),
+  });
+  await expect(rateCard.getByRole("heading", { name: "Preply" })).toBeVisible();
+  await expect(rateCard.getByText("Gross rate", { exact: true })).toBeVisible();
+  await expect(rateCard.getByText("Fee", { exact: true })).toBeVisible();
+  await expect(rateCard.getByText("Net rate", { exact: true })).toBeVisible();
   await expect(page.getByText("Created", { exact: true })).toBeVisible();
   await expect(page.getByText("Last updated", { exact: true })).toBeVisible();
   await expect(page.getByText("Learning goals", { exact: true })).toHaveCount(0);

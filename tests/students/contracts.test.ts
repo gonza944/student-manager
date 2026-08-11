@@ -7,6 +7,10 @@ import {
 } from "../../app/students/add/utils/student-form-model";
 import { toMinorUnits } from "../../app/students/utils/to-minor-units";
 import {
+  studentThemeStyles,
+  studentThemeSwatches,
+} from "../../app/students/const/student-card-config";
+import {
   calculateStudentRate,
   createStudentInputSchema,
   getDateOnlyToday,
@@ -14,6 +18,8 @@ import {
   studentIdInputSchema,
   studentListInputSchema,
   updateStudentInputSchema,
+  updateStudentRateInputSchema,
+  updateCommissionSettingsInputSchema,
 } from "../../lib/students/contracts";
 
 const validStudent = {
@@ -82,6 +88,68 @@ test("validates and normalizes the input used to update a student", () => {
   assert.equal(student.nationalityCode, "AR");
 });
 
+test("validates the quick rate and source update", () => {
+  assert.deepEqual(
+    updateStudentRateInputSchema.parse({
+      studentId: "student-01",
+      hourlyRateMinor: 2_500,
+      source: "preply",
+    }),
+    {
+      studentId: "student-01",
+      hourlyRateMinor: 2_500,
+      source: "preply",
+    },
+  );
+  assert.equal(
+    updateStudentRateInputSchema.safeParse({
+      studentId: "student-01",
+      hourlyRateMinor: 0,
+      source: "private",
+    }).success,
+    false,
+  );
+  assert.equal(
+    updateStudentRateInputSchema.safeParse({
+      studentId: "student-01",
+      hourlyRateMinor: 2_500,
+      source: "other",
+    }).success,
+    false,
+  );
+});
+
+test("validates teacher commission settings", () => {
+  assert.deepEqual(
+    updateCommissionSettingsInputSchema.parse({
+      preplyCommissionBps: 2_000,
+      directCommissionBps: 650,
+    }),
+    {
+      preplyCommissionBps: 2_000,
+      directCommissionBps: 650,
+    },
+  );
+  assert.equal(
+    updateCommissionSettingsInputSchema.safeParse({
+      preplyCommissionBps: 10_001,
+      directCommissionBps: 650,
+    }).success,
+    false,
+  );
+});
+
+test("uses a distinct visual style for every student card color", () => {
+  assert.equal(
+    new Set(Object.values(studentThemeStyles)).size,
+    Object.keys(studentThemeStyles).length,
+  );
+  assert.equal(
+    new Set(Object.values(studentThemeSwatches)).size,
+    Object.keys(studentThemeSwatches).length,
+  );
+});
+
 test("accepts Preply and rejects the removed Zoom contact channel", () => {
   assert.equal(
     createStudentInputSchema.safeParse({
@@ -141,6 +209,11 @@ test("derives Preply and Direct rates with integer rounding", () => {
     grossMinor: 1_000,
     platformFeeMinor: 49,
     netMinor: 951,
+  });
+  assert.deepEqual(calculateStudentRate(1_000, "private", 1_800, 650), {
+    grossMinor: 1_000,
+    platformFeeMinor: 65,
+    netMinor: 935,
   });
 });
 
