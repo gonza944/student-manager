@@ -9,19 +9,24 @@ import { getDb } from "../../db";
 import { requireRole } from "../../lib/auth/server";
 import {
   createStudentInputSchema,
+  deleteStudentRateInputSchema,
   setStudentActiveInputSchema,
   studentIdInputSchema,
   studentListInputSchema,
+  studentRateHistoryListInputSchema,
   teacherRateSettingsSchema,
   updateStudentInputSchema,
   updateStudentRateInputSchema,
   type StudentDto,
   type StudentListPage,
+  type StudentRateHistoryPage,
 } from "../../lib/students/contracts";
 import {
   createTeacherStudent,
+  deleteTeacherStudentRate,
   deleteTeacherStudent,
   listTeacherStudentsPage,
+  listTeacherStudentRatesPage,
   setTeacherStudentActive,
   updateTeacherStudent,
   updateTeacherStudentRate,
@@ -30,7 +35,14 @@ import {
 type ActionError =
   | {
       ok: false;
-      error: "unauthenticated" | "forbidden" | "notFound" | "conflict";
+      error:
+        | "unauthenticated"
+        | "forbidden"
+        | "notFound"
+        | "conflict"
+        | "invalidRateDate"
+        | "rateOverlap"
+        | "protectedRate";
     }
   | { ok: false; error: "validation"; fields: string[] };
 type ActionResult<T> = { ok: true; data: T } | ActionError;
@@ -79,6 +91,23 @@ export async function listStudentsAction(
     await getDb(),
     context.teacherId,
     context.settings,
+    parsed.data,
+  );
+  return { ok: true, data };
+}
+
+export async function listStudentRatesAction(
+  input: unknown,
+): Promise<ActionResult<StudentRateHistoryPage>> {
+  const parsed = studentRateHistoryListInputSchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+
+  const context = await getTeacherContext();
+  if (!context.ok) return context;
+
+  const data = await listTeacherStudentRatesPage(
+    await getDb(),
+    context.teacherId,
     parsed.data,
   );
   return { ok: true, data };
@@ -160,19 +189,50 @@ export async function updateStudentRateAction(
   const context = await getTeacherContext();
   if (!context.ok) return context;
 
-  const data = await updateTeacherStudentRate(
+  const result = await updateTeacherStudentRate(
     await getDb(),
     context.teacherId,
     parsed.data,
     context.settings.preplyCommissionBps,
     context.settings.directCommissionBps,
   );
-  if (!data) return { ok: false, error: "notFound" };
+  if (result.status === "notFound") return { ok: false, error: "notFound" };
+  if (result.status === "invalidDate") {
+    return { ok: false, error: "invalidRateDate" };
+  }
+  if (result.status === "overlap") {
+    return { ok: false, error: "rateOverlap" };
+  }
 
   revalidatePath("/students");
   revalidatePath(`/students/${parsed.data.studentId}`);
   revalidatePath("/");
-  return { ok: true, data };
+  return { ok: true, data: result.data };
+}
+
+export async function deleteStudentRateAction(
+  input: unknown,
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = deleteStudentRateInputSchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+
+  const context = await getTeacherContext();
+  if (!context.ok) return context;
+
+  const result = await deleteTeacherStudentRate(
+    await getDb(),
+    context.teacherId,
+    parsed.data,
+  );
+  if (result.status === "notFound") return { ok: false, error: "notFound" };
+  if (result.status === "protected") {
+    return { ok: false, error: "protectedRate" };
+  }
+
+  revalidatePath("/students");
+  revalidatePath(`/students/${parsed.data.studentId}`);
+  revalidatePath("/");
+  return { ok: true, data: result.data };
 }
 
 export async function setStudentActiveAction(

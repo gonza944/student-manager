@@ -14,7 +14,8 @@ type RateHistoryColumn =
   | "change"
   | "duration"
   | "startDate"
-  | "endDate";
+  | "endDate"
+  | "actions";
 
 export const rateHistoryColumns: RateHistoryColumn[] = [
   "source",
@@ -25,6 +26,7 @@ export const rateHistoryColumns: RateHistoryColumn[] = [
   "duration",
   "startDate",
   "endDate",
+  "actions",
 ];
 
 export function formatDuration(durationMs: number, locale: string) {

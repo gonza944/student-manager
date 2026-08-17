@@ -13,6 +13,7 @@ import {
 import {
   calculateStudentRate,
   createStudentInputSchema,
+  deleteStudentRateInputSchema,
   getDateOnlyToday,
   studentDtoSchema,
   studentIdInputSchema,
@@ -99,6 +100,9 @@ test("validates the quick rate and source update", () => {
       studentId: "student-01",
       hourlyRateMinor: 2_500,
       source: "preply",
+      hasCustomPeriod: false,
+      startDate: null,
+      endDate: null,
     },
   );
   assert.equal(
@@ -114,6 +118,48 @@ test("validates the quick rate and source update", () => {
       studentId: "student-01",
       hourlyRateMinor: 2_500,
       source: "other",
+    }).success,
+    false,
+  );
+  assert.equal(
+    updateStudentRateInputSchema.safeParse({
+      studentId: "student-01",
+      hourlyRateMinor: 2_500,
+      source: "private",
+      hasCustomPeriod: true,
+      startDate: null,
+      endDate: null,
+    }).success,
+    false,
+  );
+  assert.equal(
+    updateStudentRateInputSchema.safeParse({
+      studentId: "student-01",
+      hourlyRateMinor: 2_500,
+      source: "private",
+      hasCustomPeriod: true,
+      startDate: "2026-05-10",
+      endDate: "2026-05-09",
+    }).success,
+    false,
+  );
+});
+
+test("validates rate deletion identifiers", () => {
+  assert.deepEqual(
+    deleteStudentRateInputSchema.parse({
+      studentId: "student-01",
+      rateId: "student-01-rate-initial",
+    }),
+    {
+      studentId: "student-01",
+      rateId: "student-01-rate-initial",
+    },
+  );
+  assert.equal(
+    deleteStudentRateInputSchema.safeParse({
+      studentId: "student-01",
+      rateId: "../another-rate",
     }).success,
     false,
   );

@@ -66,7 +66,20 @@ test("records rate changes once and keeps histories teacher-scoped", async ({
 
   await historyCard.getByRole("button", { name: "Edit rate" }).click();
   let rateDialog = page.getByRole("dialog", { name: "Edit rate" });
-  await expect(rateDialog.locator("input")).toHaveCount(1);
+  const customPeriod = rateDialog.getByLabel("Set when this rate applied");
+  await expect(customPeriod).not.toBeChecked();
+  await expect(rateDialog.getByLabel("Start date")).toHaveCount(0);
+  await expect(rateDialog.getByLabel("End date")).toHaveCount(0);
+  await customPeriod.check();
+  await expect(rateDialog.getByLabel("Start date")).toBeVisible();
+  await expect(rateDialog.getByLabel("End date")).toBeVisible();
+  await expect(rateDialog.getByLabel("Start date")).toHaveAttribute(
+    "max",
+    /\d{4}-\d{2}-\d{2}/,
+  );
+  await customPeriod.uncheck();
+  await expect(rateDialog.getByLabel("Start date")).toHaveCount(0);
+  await customPeriod.check();
   await expect(rateDialog.getByLabel("Hourly rate (USD)")).toHaveValue("20");
   await rateDialog.getByRole("radio", { name: "Preply" }).click();
   await rateDialog.getByRole("button", { name: "Save rate" }).click();
@@ -87,6 +100,35 @@ test("records rate changes once and keeps histories teacher-scoped", async ({
   await expect(rateDialog).toBeHidden();
   await expect(rows).toHaveCount(4);
   await expect(rows.nth(1)).toContainText("+$8.20");
+  await expect(
+    rows.nth(3).getByRole("button", { name: /Delete rate starting/ }),
+  ).toHaveCount(0);
+
+  await rows
+    .nth(1)
+    .getByRole("button", { name: /Delete rate starting/ })
+    .click();
+  const deleteDialog = page.getByRole("dialog", {
+    name: "Delete this rate?",
+  });
+  await expect(deleteDialog).toBeVisible();
+  let releaseDeleteRequest = () => {};
+  const deleteRequestGate = new Promise<void>((resolve) => {
+    releaseDeleteRequest = resolve;
+  });
+  await page.route(`**${studentProfileUrl}`, async (route) => {
+    if (route.request().method() === "POST") await deleteRequestGate;
+    await route.continue();
+  });
+  await deleteDialog.getByRole("button", { name: "Delete rate" }).click();
+  await expect(deleteDialog).toBeHidden();
+  await expect(rows).toHaveCount(3);
+  releaseDeleteRequest();
+  await expect(page.getByText("Rate deleted.")).toBeVisible();
+  await page.unroute(`**${studentProfileUrl}`);
+  await expect(rows.nth(1)).toHaveClass(/bg-orbit-ink/);
+  await expect(rows.nth(1)).toContainText("Preply");
+  await expect(rows.nth(1)).toContainText("$20.00");
 
   await page.goto("/");
   await page.getByRole("button", { name: "Log out" }).click();

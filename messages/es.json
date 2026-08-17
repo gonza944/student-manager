@@ -207,7 +207,8 @@
       },
       "rateHistory": {
         "title": "Historial de tarifas",
-        "olderEntriesOmitted": "Solo se muestran las 50 tarifas más recientes.",
+        "loadingMore": "Cargando tarifas anteriores…",
+        "loadError": "No pudimos cargar las tarifas anteriores. Desplázate para volver a intentarlo.",
         "current": "Tarifa actual",
         "caption": "Historial de tarifas con la tarifa actual primero.",
         "ongoing": "Actual",
@@ -218,11 +219,26 @@
         "rate": "Tarifa por hora ({currency})",
         "source": "Origen del estudiante",
         "feeHint": "Preply usa tu comisión configurada. Directo usa tu comisión configurada para Directo.",
+        "customPeriod": "Definir cuándo se aplicó esta tarifa",
+        "customPeriodHint": "Déjalo desmarcado para que la tarifa sea actual desde ahora.",
+        "startDate": "Fecha inicial",
+        "endDate": "Fecha final",
+        "endDateHint": "Deja la fecha final vacía si esta es la tarifa actual.",
+        "dateError": "Elige fechas válidas. La fecha inicial no puede ser posterior a hoy y la fecha final debe ser anterior a hoy.",
+        "overlapError": "Este período se superpone con otra tarifa registrada. Elige fechas dentro de un período de tarifa ininterrumpido.",
         "cancel": "Cancelar",
         "save": "Guardar tarifa",
         "saving": "Guardando…",
         "success": "Se actualizó la tarifa del estudiante.",
         "error": "No pudimos actualizar esta tarifa. Revisa los valores e inténtalo de nuevo.",
+        "delete": "Eliminar tarifa que comienza el {date}",
+        "deleteTitle": "¿Eliminar esta tarifa?",
+        "deleteDescription": "La tarifa anterior se extenderá hasta que comience la siguiente. Esta acción no se puede deshacer.",
+        "deleteConfirm": "Eliminar tarifa",
+        "deleting": "Eliminando…",
+        "deleteSuccess": "Se eliminó la tarifa.",
+        "deleteError": "No pudimos eliminar esta tarifa. Inténtalo de nuevo.",
+        "protectedRate": "La tarifa más antigua no se puede eliminar.",
         "columns": {
           "source": "Origen",
           "gross": "Bruta",
@@ -231,7 +247,8 @@
           "change": "Cambio respecto de la anterior",
           "duration": "Duración",
           "startDate": "Fecha inicial",
-          "endDate": "Fecha final"
+          "endDate": "Fecha final",
+          "actions": "Acciones"
         }
       },
       "fields": {

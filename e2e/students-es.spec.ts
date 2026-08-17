@@ -130,6 +130,14 @@ test("el directorio y el formulario móvil se muestran en español", async ({
       "Preply usa tu comisión configurada. Directo usa tu comisión configurada para Directo.",
     ),
   ).toBeVisible();
+  const customPeriod = rateDialog.getByLabel(
+    "Definir cuándo se aplicó esta tarifa",
+  );
+  await expect(customPeriod).not.toBeChecked();
+  await expect(rateDialog.getByLabel("Fecha inicial")).toHaveCount(0);
+  await customPeriod.check();
+  await expect(rateDialog.getByLabel("Fecha inicial")).toBeVisible();
+  await expect(rateDialog.getByLabel("Fecha final")).toBeVisible();
   await rateDialog.getByRole("button", { name: "Cancelar" }).click();
   await expect(rateDialog).toBeHidden();
 
