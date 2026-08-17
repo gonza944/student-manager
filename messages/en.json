@@ -207,7 +207,8 @@
       },
       "rateHistory": {
         "title": "Rate history",
-        "olderEntriesOmitted": "Only the latest 50 rate entries are shown.",
+        "loadingMore": "Loading older rates…",
+        "loadError": "We couldn't load older rates. Scroll to try again.",
         "current": "Current rate",
         "caption": "Rate history with the current rate first.",
         "ongoing": "Current",
@@ -218,11 +219,26 @@
         "rate": "Hourly rate ({currency})",
         "source": "Student source",
         "feeHint": "Preply uses your configured commission. Direct uses your configured Direct fee.",
+        "customPeriod": "Set when this rate applied",
+        "customPeriodHint": "Leave this off to make the rate current from now.",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "endDateHint": "Leave the end date empty if this is the current rate.",
+        "dateError": "Choose valid dates. The start cannot be after today, and a filled end date must be before today.",
+        "overlapError": "This period overlaps another recorded rate. Choose dates within one uninterrupted rate period.",
         "cancel": "Cancel",
         "save": "Save rate",
         "saving": "Saving…",
         "success": "Student rate updated.",
         "error": "We couldn't update this rate. Check the values and try again.",
+        "delete": "Delete rate starting {date}",
+        "deleteTitle": "Delete this rate?",
+        "deleteDescription": "The previous rate will extend until the next rate starts. This can't be undone.",
+        "deleteConfirm": "Delete rate",
+        "deleting": "Deleting…",
+        "deleteSuccess": "Rate deleted.",
+        "deleteError": "We couldn't delete this rate. Try again.",
+        "protectedRate": "The oldest and current rates can't be deleted.",
         "columns": {
           "source": "Source",
           "gross": "Gross",
@@ -231,7 +247,8 @@
           "change": "Change from previous",
           "duration": "Duration",
           "startDate": "Start date",
-          "endDate": "End date"
+          "endDate": "End date",
+          "actions": "Actions"
         }
       },
       "fields": {

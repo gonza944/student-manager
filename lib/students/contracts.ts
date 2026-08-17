@@ -215,6 +215,28 @@ export const updateStudentInputSchema = studentDetailsSchema
 export const updateStudentRateInputSchema = studentIdInputSchema.extend({
   hourlyRateMinor: z.int().positive().max(100_000_000),
   source: z.enum(studentSources),
+  hasCustomPeriod: z.boolean().default(false),
+  startDate: z.iso.date().nullable().default(null),
+  endDate: z.iso.date().nullable().default(null),
+}).superRefine(({ hasCustomPeriod, startDate, endDate }, context) => {
+  if (hasCustomPeriod && !startDate) {
+    context.addIssue({
+      code: "custom",
+      path: ["startDate"],
+      message: "A custom rate period requires a start date.",
+    });
+  }
+  if (hasCustomPeriod && startDate && endDate && endDate < startDate) {
+    context.addIssue({
+      code: "custom",
+      path: ["endDate"],
+      message: "The end date cannot be before the start date.",
+    });
+  }
+});
+
+export const deleteStudentRateInputSchema = studentIdInputSchema.extend({
+  rateId: z.string().trim().min(1).max(256).regex(/^[A-Za-z0-9_-]+$/),
 });
 
 export const setStudentActiveInputSchema = studentIdInputSchema.extend({
@@ -254,6 +276,21 @@ export const studentRateHistoryEntrySchema = z.object({
 export const studentRateTimelineSchema = z.object({
   current: studentRateHistoryEntrySchema,
   previous: z.array(studentRateHistoryEntrySchema),
+});
+
+export const studentRateHistoryCursorSchema = z.object({
+  effectiveAt: z.iso.datetime(),
+  sequence: z.int().positive(),
+});
+
+export const studentRateHistoryListInputSchema = studentIdInputSchema.extend({
+  limit: z.int().min(1).max(50).default(20),
+  cursor: studentRateHistoryCursorSchema.nullable().default(null),
+});
+
+export const studentRateHistoryPageSchema = z.object({
+  entries: z.array(studentRateHistoryEntrySchema),
+  nextCursor: studentRateHistoryCursorSchema.nullable(),
 });
 
 export const studentDtoSchema = studentDetailsSchema
@@ -327,8 +364,7 @@ export const studentListPageSchema = teacherRateSettingsSchema.extend({
 
 export const studentProfileSchema = teacherRateSettingsSchema.extend({
   student: studentDtoSchema,
-  rateTimeline: studentRateTimelineSchema,
-  hasOlderRateHistory: z.boolean(),
+  rateHistory: studentRateHistoryPageSchema,
 });
 
 export const studentCountsSchema = z.object({
@@ -342,12 +378,24 @@ export type UpdateStudentInput = z.output<typeof updateStudentInputSchema>;
 export type UpdateStudentRateInput = z.output<
   typeof updateStudentRateInputSchema
 >;
+export type DeleteStudentRateInput = z.output<
+  typeof deleteStudentRateInputSchema
+>;
 export type StudentDto = z.output<typeof studentDtoSchema>;
 export type StudentCardDto = z.output<typeof studentCardDtoSchema>;
 export type StudentRateHistoryEntry = z.output<
   typeof studentRateHistoryEntrySchema
 >;
 export type StudentRateTimeline = z.output<typeof studentRateTimelineSchema>;
+export type StudentRateHistoryCursor = z.output<
+  typeof studentRateHistoryCursorSchema
+>;
+export type StudentRateHistoryListInput = z.output<
+  typeof studentRateHistoryListInputSchema
+>;
+export type StudentRateHistoryPage = z.output<
+  typeof studentRateHistoryPageSchema
+>;
 export type StudentListInput = z.output<typeof studentListInputSchema>;
 export type StudentCursor = z.output<typeof studentCursorSchema>;
 export type StudentListPage = z.output<typeof studentListPageSchema>;

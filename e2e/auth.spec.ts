@@ -245,6 +245,14 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
       exact: true,
     }),
   ).toBeVisible();
+  await expect(
+    page
+      .getByRole("table", {
+        name: "Rate history with the current rate first.",
+      })
+      .getByRole("row")
+      .nth(1),
+  ).toContainText("$35.00");
 
   await page.goto(profileEditUrl);
   await expect(page.getByRole("dialog")).toHaveCount(0);

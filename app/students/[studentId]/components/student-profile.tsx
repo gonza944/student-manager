@@ -34,7 +34,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { StudentProfile as StudentProfileData } from "@/lib/students/contracts";
+import type {
+  StudentProfile as StudentProfileData,
+  StudentRateHistoryEntry,
+} from "@/lib/students/contracts";
 import { cn } from "@/lib/utils";
 
 import { deleteStudentAction, setStudentActiveAction } from "../../actions";
@@ -55,6 +58,9 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
   const router = useRouter();
   const [isActive, setIsActive] = useState(student.isActive);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [currentRate, setCurrentRate] = useState<StudentRateHistoryEntry>(
+    profile.rateHistory.entries[0],
+  );
 
   const countryName = useMemo(
     () =>
@@ -89,7 +95,7 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
         10 ** (money.resolvedOptions().maximumFractionDigits ?? 2),
     );
   const status = isActive ? t("active") : t("inactive");
-  const source = t(`sources.${student.source}`);
+  const source = t(`sources.${currentRate.source}`);
 
   const statusMutation = useMutation({
     mutationFn: async (nextIsActive: boolean) => {
@@ -295,7 +301,7 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
                     {t("grossRate")}
                   </dt>
                   <dd className="mt-1 text-lg font-black tracking-tighter">
-                    {formatMoney(student.rates.grossMinor)}
+                    {formatMoney(currentRate.grossMinor)}
                   </dd>
                 </div>
                 <div>
@@ -303,7 +309,7 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
                     {t("platformFee")}
                   </dt>
                   <dd className="mt-1 text-lg font-black tracking-tighter">
-                    {formatMoney(student.rates.platformFeeMinor)}
+                    {formatMoney(currentRate.feeMinor)}
                   </dd>
                 </div>
                 <div>
@@ -311,7 +317,7 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
                     {t("netRate")}
                   </dt>
                   <dd className="mt-1 text-2xl font-black tracking-tighter">
-                    {formatMoney(student.rates.netMinor)}
+                    {formatMoney(currentRate.netMinor)}
                   </dd>
                 </div>
               </dl>
@@ -411,9 +417,10 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
 
           <StudentRateHistory
             currency={currency}
-            hasOlderHistory={profile.hasOlderRateHistory}
+            initialData={profile.rateHistory}
+            onCurrentRateChange={setCurrentRate}
             studentId={student.id}
-            timeline={profile.rateTimeline}
+            timeZone={student.timeZone}
           />
         </section>
 

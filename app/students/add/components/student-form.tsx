@@ -84,7 +84,15 @@ export function StudentForm({
       return result.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["students"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["students"] }),
+        student &&
+          queryClient.refetchQueries({
+            queryKey: ["student-rate-history", student.id],
+            exact: true,
+            type: "all",
+          }),
+      ]);
       setForm(initialStudentForm);
       setClientInvalidFields([]);
       if (student) toast.success(t("edit.success"));
