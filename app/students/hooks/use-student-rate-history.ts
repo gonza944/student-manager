@@ -44,7 +44,10 @@ async function refreshRateHistory(queryClient: QueryClient, studentId: string) {
         }
       : data,
   );
-  await queryClient.invalidateQueries({ queryKey, exact: true });
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey, exact: true }),
+    queryClient.invalidateQueries({ queryKey: ["students"] }),
+  ]);
 }
 
 export function useUpdateStudentRateMutation(

@@ -238,7 +238,7 @@
         "deleting": "Deleting…",
         "deleteSuccess": "Rate deleted.",
         "deleteError": "We couldn't delete this rate. Try again.",
-        "protectedRate": "The oldest rate can't be deleted.",
+        "protectedRate": "The oldest and current rates can't be deleted.",
         "columns": {
           "source": "Source",
           "gross": "Gross",

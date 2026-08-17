@@ -238,7 +238,7 @@
         "deleting": "Eliminando…",
         "deleteSuccess": "Se eliminó la tarifa.",
         "deleteError": "No pudimos eliminar esta tarifa. Inténtalo de nuevo.",
-        "protectedRate": "La tarifa más antigua no se puede eliminar.",
+        "protectedRate": "Las tarifas más antigua y actual no se pueden eliminar.",
         "columns": {
           "source": "Origen",
           "gross": "Bruta",

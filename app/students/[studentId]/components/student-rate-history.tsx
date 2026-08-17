@@ -141,7 +141,8 @@ export function StudentRateHistory({
                   const entry = entries[virtualRow.index];
                   const index = virtualRow.index;
                   const current = index === 0;
-                  const canDelete = hasNextPage || index < entries.length - 1;
+                  const canDelete =
+                    !current && (hasNextPage || index < entries.length - 1);
                   const startDate = date.format(new Date(entry.effectiveAt));
 
                   return (

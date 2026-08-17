@@ -588,7 +588,9 @@ export async function deleteTeacherStudentRate(
   const targetIndex = history.findIndex(({ id }) => id === input.rateId);
 
   if (targetIndex < 0) return { status: "notFound" } as const;
-  if (targetIndex === 0) return { status: "protected" } as const;
+  if (targetIndex === 0 || targetIndex === history.length - 1) {
+    return { status: "protected" } as const;
+  }
 
   const deleteQuery = db
     .delete(studentRateHistory)
@@ -600,31 +602,6 @@ export async function deleteTeacherStudentRate(
       ),
     )
     .returning({ id: studentRateHistory.id });
-
-  if (targetIndex === history.length - 1) {
-    const previous = history[targetIndex - 1];
-    const [updatedRows, deletedRows] = await db.batch([
-      db
-        .update(student)
-        .set({
-          hourlyRateMinor: previous.grossRateMinor,
-          source: previous.source,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(student.id, input.studentId),
-            eq(student.teacherId, teacherId),
-          ),
-        )
-        .returning({ id: student.id }),
-      deleteQuery,
-    ]);
-
-    return updatedRows[0] && deletedRows[0]
-      ? ({ status: "ok", data: deletedRows[0] } as const)
-      : ({ status: "notFound" } as const);
-  }
 
   const [deleted] = await deleteQuery;
   return deleted
