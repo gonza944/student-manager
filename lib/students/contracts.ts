@@ -102,6 +102,7 @@ const studentDetailsSchema = z.object({
   email: optionalEmail,
   phone: optionalTrimmedText(40),
   birthDate: optionalBirthDate,
+  studentSince: z.iso.date(),
   nationalityCode: z
     .string()
     .trim()
@@ -194,23 +195,51 @@ function validateBirthDate(
 function validateStudentInput(
   details: z.output<typeof studentDetailsSchema>,
   context: z.RefinementCtx,
+  teacherTimeZone = details.timeZone,
+  now = new Date(),
 ) {
   validatePreferredContact(details, context);
   validateBirthDate(details, context);
+  const today = getDateOnlyToday(teacherTimeZone, now);
+
+  if (today && details.studentSince > today) {
+    context.addIssue({
+      code: "custom",
+      path: ["studentSince"],
+      message: "Student since cannot be in the future.",
+    });
+  }
 }
 
-export const createStudentInputSchema =
-  studentDetailsSchema.superRefine(validateStudentInput);
+export function getCreateStudentInputSchema(
+  teacherTimeZone?: string,
+  now?: Date,
+) {
+  return studentDetailsSchema.superRefine((details, context) =>
+    validateStudentInput(details, context, teacherTimeZone, now),
+  );
+}
+
+export const createStudentInputSchema = getCreateStudentInputSchema();
 
 export const studentIdInputSchema = z.object({
   studentId: z.string().trim().min(1).max(128).regex(/^[A-Za-z0-9_-]+$/),
 });
 
-export const updateStudentInputSchema = studentDetailsSchema
-  .extend({
-    studentId: studentIdInputSchema.shape.studentId,
-  })
-  .superRefine(validateStudentInput);
+export function getUpdateStudentInputSchema(
+  teacherTimeZone?: string,
+  now?: Date,
+) {
+  return studentDetailsSchema
+    .extend({
+      studentId: studentIdInputSchema.shape.studentId,
+    })
+    .superRefine((details, context) =>
+      validateStudentInput(details, context, teacherTimeZone, now),
+    );
+}
+
+export const updateStudentInputSchema = getUpdateStudentInputSchema();
 
 export const updateStudentRateInputSchema = studentIdInputSchema.extend({
   hourlyRateMinor: z.int().positive().max(100_000_000),

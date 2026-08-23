@@ -26,7 +26,9 @@ import {
   toIsoDateOnly,
 } from "../utils/date-only";
 
-export function StudentBirthDatePicker({
+export function StudentDatePicker({
+  id,
+  name,
   value,
   locale,
   timeZone,
@@ -34,8 +36,12 @@ export function StudentBirthDatePicker({
   openLabel,
   invalid,
   describedBy,
+  autoComplete,
+  required = false,
   onValueChange,
 }: {
+  id: string;
+  name: string;
   value: string;
   locale: string;
   timeZone: string;
@@ -43,6 +49,8 @@ export function StudentBirthDatePicker({
   openLabel: string;
   invalid: boolean;
   describedBy?: string;
+  autoComplete?: string;
+  required?: boolean;
   onValueChange: (value: string) => void;
 }) {
   const dateLocale = getDateInputLocale(locale);
@@ -62,11 +70,12 @@ export function StudentBirthDatePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <InputGroup className="h-11 rounded-xl border-orbit-ink/20 bg-orbit-paper-strong/70 transition-[border-color,box-shadow,transform] focus-within:-translate-y-px focus-within:border-orbit-ink/60 focus-within:ring-4 focus-within:ring-orbit-ink/10">
         <InputGroupInput
-          id="student-birth-date"
-          name="birthDate"
+          id={id}
+          name={name}
           value={inputValue}
           placeholder={placeholder}
-          autoComplete="bday"
+          autoComplete={autoComplete}
+          required={required}
           aria-invalid={invalid}
           aria-describedby={describedBy}
           onChange={(event) => {
@@ -126,7 +135,7 @@ export function StudentBirthDatePicker({
           selected={selectedDate}
           month={month}
           onMonthChange={setMonth}
-          disabled={today ? { after: today } : undefined}
+          disabled={today ? (date) => date > today : undefined}
           onSelect={(date) => {
             onValueChange(date ? toIsoDateOnly(date) : "");
             setInputValue(date ? formatDate(date) : "");

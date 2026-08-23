@@ -43,6 +43,10 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   ).toBeVisible();
 
   const studentName = `Estudiante Playwright ${suffix}`;
+  const studentSince = await drawer
+    .getByLabel("Estudiante desde")
+    .inputValue();
+  expect(studentSince).not.toBe("");
   await drawer.getByLabel("Nombre completo").fill(studentName);
   await drawer
     .getByRole("button", { name: "Canal de contacto preferido: Otro" })
@@ -62,7 +66,9 @@ test("el directorio y el formulario móvil se muestran en español", async ({
     .getByRole("button", { name: "Canal de contacto preferido: Correo electrónico" })
     .click();
   await page.getByRole("menuitemradio", { name: "Otro" }).click();
-  await drawer.getByRole("button", { name: "Abrir calendario" }).click();
+  await drawer
+    .getByRole("button", { name: "Abrir calendario", exact: true })
+    .click();
   await expect(page.getByRole("grid")).toBeVisible();
   await expect(
     page.getByRole("combobox", { name: "Elegir el año" }),
@@ -93,6 +99,9 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   await expect(
     editDialog.getByLabel("Correo electrónico", { exact: true }),
   ).toHaveValue("");
+  await expect(editDialog.getByLabel("Estudiante desde")).toHaveValue(
+    studentSince,
+  );
   await editDialog.getByLabel("Fecha de nacimiento").fill("2000-02-29");
   await editDialog.getByLabel("Objetivos de aprendizaje").fill("Conversación");
   await editDialog.getByRole("button", { name: "Guardar cambios" }).click();

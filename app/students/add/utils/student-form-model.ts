@@ -1,5 +1,6 @@
 import {
   contactChannels,
+  getDateOnlyToday,
   studentAvatarKeys,
   studentLevels,
   studentSources,
@@ -12,6 +13,7 @@ export type StudentFormValues = {
   email: string;
   phone: string;
   birthDate: string;
+  studentSince: string;
   nationalityCode: string;
   timeZone: string;
   preferredContactChannel: (typeof contactChannels)[number];
@@ -36,6 +38,7 @@ export const initialStudentForm: StudentFormValues = {
   email: "",
   phone: "",
   birthDate: "",
+  studentSince: "",
   nationalityCode: "AR",
   timeZone: "America/Argentina/Buenos_Aires",
   preferredContactChannel: "other",
@@ -53,6 +56,8 @@ export const initialStudentForm: StudentFormValues = {
 export function getInitialForm(
   student: StudentDto | undefined,
   minorFactor: number,
+  teacherTimeZone: string,
+  now = new Date(),
 ): StudentFormValues {
   return student
     ? {
@@ -60,6 +65,7 @@ export function getInitialForm(
         email: student.email ?? "",
         phone: student.phone ?? "",
         birthDate: student.birthDate ?? "",
+        studentSince: student.studentSince,
         nationalityCode: student.nationalityCode,
         timeZone: student.timeZone,
         preferredContactChannel: student.preferredContactChannel,
@@ -73,5 +79,8 @@ export function getInitialForm(
         avatarKey: student.avatarKey,
         themeColor: student.themeColor,
       }
-    : initialStudentForm;
+    : {
+        ...initialStudentForm,
+        studentSince: getDateOnlyToday(teacherTimeZone, now) ?? "",
+      };
 }

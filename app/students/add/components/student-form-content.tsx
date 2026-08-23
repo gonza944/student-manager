@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth/server";
 import {
   studentIdInputSchema,
   teacherRateSettingsSchema,
+  timeZoneSchema,
   type StudentDto,
 } from "@/lib/students/contracts";
 import { getTeacherStudentProfile } from "@/lib/students/data";
@@ -20,6 +21,7 @@ export async function StudentFormContent({
   if ("error" in auth) redirect("/login");
 
   const settings = teacherRateSettingsSchema.parse(auth.session.user);
+  const teacherTimeZone = timeZoneSchema.parse(auth.session.user.timeZone);
   let student: StudentDto | undefined;
 
   if (studentId) {
@@ -39,6 +41,7 @@ export async function StudentFormContent({
   return (
     <StudentForm
       currency={settings.currency}
+      teacherTimeZone={teacherTimeZone}
       preplyCommissionBps={settings.preplyCommissionBps}
       directCommissionBps={settings.directCommissionBps}
       student={student}

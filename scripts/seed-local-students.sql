@@ -50,6 +50,7 @@ INSERT INTO student (
   email,
   phone,
   birth_date,
+  student_since,
   nationality_code,
   time_zone,
   preferred_contact_channel,
@@ -82,6 +83,7 @@ SELECT
     WHEN n % 7 = 0 THEN NULL
     ELSE date('1990-01-01', printf('+%d days', n * 137))
   END,
+  date(datetime('2026-06-01', printf('+%d days', n)), '-3 hours'),
   nationality_code,
   time_zone,
   CASE n % 6
@@ -144,6 +146,7 @@ ON CONFLICT(id) DO UPDATE SET
   email = excluded.email,
   phone = excluded.phone,
   birth_date = excluded.birth_date,
+  student_since = excluded.student_since,
   nationality_code = excluded.nationality_code,
   time_zone = excluded.time_zone,
   preferred_contact_channel = excluded.preferred_contact_channel,
