@@ -16,11 +16,16 @@ const { DatabaseSync } = createRequire(import.meta.url)("node:sqlite") as {
   DatabaseSync: new (path: string) => TestDatabase;
 };
 
-test("backfills studentSince and extends only the oldest rate", () => {
+test("preserves every rate while backfilling studentSince", () => {
   const db = new DatabaseSync(":memory:");
 
   db.exec(`
-    CREATE TABLE user (id text PRIMARY KEY NOT NULL);
+    PRAGMA foreign_keys=ON;
+    CREATE TABLE user (
+      id text PRIMARY KEY NOT NULL,
+      preply_commission_bps integer DEFAULT 1800 NOT NULL,
+      direct_commission_bps integer DEFAULT 650 NOT NULL
+    );
     CREATE TABLE student (
       id text PRIMARY KEY NOT NULL,
       teacher_id text NOT NULL,
@@ -83,7 +88,8 @@ test("backfills studentSince and extends only the oldest rate", () => {
   const migration = readFileSync(
     new URL("../../drizzle/0008_unusual_terror.sql", import.meta.url),
     "utf8",
-  ).replaceAll("--> statement-breakpoint", "");
+  )
+    .replaceAll("--> statement-breakpoint", "");
   db.exec(migration);
 
   const student = db.prepare(`
@@ -94,20 +100,42 @@ test("backfills studentSince and extends only the oldest rate", () => {
   assert.equal(student?.teacherTimeZone, "America/Argentina/Cordoba");
   assert.deepEqual(
     db.prepare(`
-      SELECT id, strftime('%Y-%m-%dT%H:%M:%SZ', effective_at / 1000, 'unixepoch') AS effectiveAt
+      SELECT rowid AS historyRowId, id, student_id AS studentId, teacher_id AS teacherId,
+        gross_rate_minor AS grossRateMinor, fee_bps AS feeBps,
+        fee_amount_minor AS feeAmountMinor, net_rate_minor AS netRateMinor,
+        source, strftime('%Y-%m-%dT%H:%M:%SZ', effective_at / 1000, 'unixepoch') AS effectiveAt
       FROM student_rate_history ORDER BY effective_at, rowid
     `).all().map((row) => ({ ...row })),
     [
-      { id: "rate-old", effectiveAt: "2026-08-19T03:00:00Z" },
-      { id: "rate-new", effectiveAt: "2026-08-21T12:00:00Z" },
+      {
+        historyRowId: 1,
+        id: "rate-old",
+        studentId: "student-1",
+        teacherId: "teacher-1",
+        grossRateMinor: 1000,
+        feeBps: 485,
+        feeAmountMinor: 49,
+        netRateMinor: 951,
+        source: "private",
+        effectiveAt: "2026-08-19T03:00:00Z",
+      },
+      {
+        historyRowId: 2,
+        id: "rate-new",
+        studentId: "student-1",
+        teacherId: "teacher-1",
+        grossRateMinor: 1200,
+        feeBps: 485,
+        feeAmountMinor: 58,
+        netRateMinor: 1142,
+        source: "private",
+        effectiveAt: "2026-08-21T12:00:00Z",
+      },
     ],
   );
-  assert.equal(
-    db.prepare(`
-      SELECT "notnull" AS required
-      FROM pragma_table_info('student') WHERE name = 'student_since'
-    `).get()?.required,
-    1,
+  assert.throws(
+    () => db.exec("UPDATE student SET student_since = NULL WHERE id = 'student-1'"),
+    /student\.student_since is required/,
   );
   assert.deepEqual(db.prepare("PRAGMA foreign_key_check").all(), []);
 

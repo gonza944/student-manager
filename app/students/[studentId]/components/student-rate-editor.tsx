@@ -3,7 +3,7 @@
 import { PencilEdit01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 import {
@@ -29,12 +29,14 @@ import { addDateOnlyDays } from "@/lib/students/rate-history";
 
 import { useUpdateStudentRateMutation } from "../../hooks/use-student-rate-history";
 import { toMinorUnits } from "../../utils/to-minor-units";
+import { StudentDatePicker } from "../../add/components/student-date-picker";
 
 export function StudentRateEditor({
   currency,
   fractionDigits,
   grossMinor,
   initialSource,
+  studentSince,
   studentId,
   timeZone,
 }: {
@@ -42,10 +44,12 @@ export function StudentRateEditor({
   fractionDigits: number;
   grossMinor: number;
   initialSource: StudentRateHistoryEntry["source"];
+  studentSince: string;
   studentId: string;
   timeZone: string;
 }) {
   const t = useTranslations("Students");
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const [hourlyRate, setHourlyRate] = useState("");
   const [source, setSource] = useState(initialSource);
@@ -204,22 +208,29 @@ export function StudentRateEditor({
                         <Label htmlFor="student-rate-start-date">
                           {t("profile.rateHistory.startDate")}
                         </Label>
-                        <Input
+                        <StudentDatePicker
                           id="student-rate-start-date"
                           name="startDate"
-                          type="date"
                           value={startDate}
-                          max={today}
+                          locale={locale}
+                          timeZone={timeZone}
+                          placeholder={t(
+                            "profile.rateHistory.startDatePlaceholder",
+                          )}
+                          openLabel={t(
+                            "profile.rateHistory.startDateOpen",
+                          )}
+                          minDate={studentSince}
+                          maxDate={today}
                           required
-                          aria-invalid={
+                          invalid={
                             mutation.error?.message === "invalidRateDate" ||
                             mutation.error?.message === "rateOverlap"
                           }
-                          aria-describedby="student-rate-date-hint student-rate-date-error"
-                          className="h-11 rounded-xl"
-                          onChange={(event) => {
-                            setStartDate(event.target.value);
-                            if (endDate && endDate < event.target.value) {
+                          describedBy="student-rate-date-hint student-rate-date-error"
+                          onValueChange={(value) => {
+                            setStartDate(value);
+                            if (endDate && endDate < value) {
                               setEndDate("");
                             }
                           }}
@@ -229,19 +240,23 @@ export function StudentRateEditor({
                         <Label htmlFor="student-rate-end-date">
                           {t("profile.rateHistory.endDate")}
                         </Label>
-                        <Input
+                        <StudentDatePicker
                           id="student-rate-end-date"
                           name="endDate"
-                          type="date"
                           value={endDate}
-                          min={startDate}
-                          max={yesterday}
-                          aria-invalid={
+                          locale={locale}
+                          timeZone={timeZone}
+                          placeholder={t(
+                            "profile.rateHistory.endDatePlaceholder",
+                          )}
+                          openLabel={t("profile.rateHistory.endDateOpen")}
+                          minDate={startDate || studentSince}
+                          maxDate={yesterday}
+                          invalid={
                             mutation.error?.message === "invalidRateDate"
                           }
-                          aria-describedby="student-rate-date-hint student-rate-date-error"
-                          className="h-11 rounded-xl"
-                          onChange={(event) => setEndDate(event.target.value)}
+                          describedBy="student-rate-date-hint student-rate-date-error"
+                          onValueChange={setEndDate}
                         />
                       </div>
                       <p

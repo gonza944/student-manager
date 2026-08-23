@@ -132,6 +132,7 @@ export async function createStudentAction(
       parsed.data,
       context.settings.preplyCommissionBps,
       context.settings.directCommissionBps,
+      context.timeZone,
     );
     revalidatePath("/students");
     revalidatePath("/");
@@ -163,6 +164,7 @@ export async function updateStudentAction(
       parsed.data,
       context.settings.preplyCommissionBps,
       context.settings.directCommissionBps,
+      context.timeZone,
     );
     if (!data) return { ok: false, error: "notFound" };
 
@@ -197,6 +199,7 @@ export async function updateStudentRateAction(
     parsed.data,
     context.settings.preplyCommissionBps,
     context.settings.directCommissionBps,
+    context.timeZone,
   );
   if (result.status === "notFound") return { ok: false, error: "notFound" };
   if (result.status === "invalidDate") {

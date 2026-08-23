@@ -37,6 +37,8 @@ export function StudentDatePicker({
   invalid,
   describedBy,
   autoComplete,
+  minDate,
+  maxDate,
   required = false,
   onValueChange,
 }: {
@@ -50,21 +52,27 @@ export function StudentDatePicker({
   invalid: boolean;
   describedBy?: string;
   autoComplete?: string;
+  minDate?: string;
+  maxDate?: string;
   required?: boolean;
   onValueChange: (value: string) => void;
 }) {
   const dateLocale = getDateInputLocale(locale);
   const selectedDate = parseIsoDateOnly(value);
   const today = parseIsoDateOnly(getDateOnlyToday(timeZone) ?? "");
-  const startMonth = today
-    ? new Date(today.getFullYear() - 120, 0, 1)
-    : undefined;
+  const minimumDate = parseIsoDateOnly(minDate ?? "");
+  const maximumDate = parseIsoDateOnly(maxDate ?? "") ?? today;
+  const startMonth =
+    minimumDate && maximumDate && minimumDate > maximumDate
+      ? maximumDate
+      : minimumDate ??
+        (today ? new Date(today.getFullYear() - 120, 0, 1) : undefined);
   const formatDate = (date: Date) => formatDateInput(date, locale);
   const [open, setOpen] = useState(false);
-  const [month, setMonth] = useState<Date | undefined>(selectedDate ?? today);
-  const [inputValue, setInputValue] = useState(() =>
-    selectedDate ? formatDate(selectedDate) : value,
+  const [month, setMonth] = useState<Date | undefined>(
+    selectedDate ?? maximumDate ?? today,
   );
+  const inputValue = selectedDate ? formatDate(selectedDate) : value;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -82,7 +90,6 @@ export function StudentDatePicker({
             const nextValue = event.target.value;
             const parsedDate = parseDateInput(nextValue, locale);
 
-            setInputValue(nextValue);
             if (!nextValue.trim()) {
               onValueChange("");
             } else if (parsedDate) {
@@ -130,15 +137,17 @@ export function StudentDatePicker({
           navLayout="after"
           reverseYears
           startMonth={startMonth}
-          endMonth={today}
+          endMonth={maximumDate}
           today={today}
           selected={selectedDate}
           month={month}
           onMonthChange={setMonth}
-          disabled={today ? (date) => date > today : undefined}
+          disabled={(date) =>
+            (minimumDate ? date < minimumDate : false) ||
+            (maximumDate ? date > maximumDate : false)
+          }
           onSelect={(date) => {
             onValueChange(date ? toIsoDateOnly(date) : "");
-            setInputValue(date ? formatDate(date) : "");
             if (date) setMonth(date);
             setOpen(false);
           }}

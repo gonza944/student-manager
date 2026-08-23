@@ -392,6 +392,7 @@ export const studentListPageSchema = teacherRateSettingsSchema.extend({
 });
 
 export const studentProfileSchema = teacherRateSettingsSchema.extend({
+  teacherTimeZone: timeZoneSchema,
   student: studentDtoSchema,
   rateHistory: studentRateHistoryPageSchema,
 });

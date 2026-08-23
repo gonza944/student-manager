@@ -8,6 +8,7 @@ import { requireRole } from "@/lib/auth/server";
 import {
   studentIdInputSchema,
   teacherRateSettingsSchema,
+  timeZoneSchema,
 } from "@/lib/students/contracts";
 import { getTeacherStudentProfile } from "@/lib/students/data";
 
@@ -21,10 +22,11 @@ const loadProfile = cache(async (studentId: string) => {
   if ("error" in auth) redirect("/login");
 
   const settings = teacherRateSettingsSchema.parse(auth.session.user);
+  const timeZone = timeZoneSchema.parse(auth.session.user.timeZone);
   const profile = await getTeacherStudentProfile(
     await getDb(),
     auth.session.user.id,
-    settings,
+    { ...settings, timeZone },
     parsed.data.studentId,
   );
   if (!profile) notFound();

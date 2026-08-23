@@ -172,7 +172,7 @@ WITH current_rates AS (
       ELSE user.direct_commission_bps
     END AS fee_bps,
     student.source,
-    student.created_at AS effective_at
+    unixepoch(student.student_since || 'T03:00:00Z') * 1000 AS effective_at
   FROM student
   INNER JOIN user ON user.id = student.teacher_id
   WHERE student.id LIKE 'local-seed-student-%'

@@ -143,10 +143,26 @@ test("el directorio y el formulario móvil se muestran en español", async ({
     "Definir cuándo se aplicó esta tarifa",
   );
   await expect(customPeriod).not.toBeChecked();
-  await expect(rateDialog.getByLabel("Fecha inicial")).toHaveCount(0);
+  await expect(
+    rateDialog.getByLabel("Fecha inicial", { exact: true }),
+  ).toHaveCount(0);
   await customPeriod.check();
-  await expect(rateDialog.getByLabel("Fecha inicial")).toBeVisible();
-  await expect(rateDialog.getByLabel("Fecha final")).toBeVisible();
+  await expect(
+    rateDialog.getByLabel("Fecha inicial", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    rateDialog.getByRole("button", {
+      name: "Abrir calendario de fecha inicial",
+    }),
+  ).toBeVisible();
+  await expect(
+    rateDialog.getByLabel("Fecha final", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    rateDialog.getByRole("button", {
+      name: "Abrir calendario de fecha final",
+    }),
+  ).toBeVisible();
   await rateDialog.getByRole("button", { name: "Cancelar" }).click();
   await expect(rateDialog).toBeHidden();
 

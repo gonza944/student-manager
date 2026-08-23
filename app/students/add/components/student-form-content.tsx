@@ -31,7 +31,7 @@ export async function StudentFormContent({
     const profile = await getTeacherStudentProfile(
       await getDb(),
       auth.session.user.id,
-      settings,
+      { ...settings, timeZone: teacherTimeZone },
       parsed.data.studentId,
     );
     if (!profile) notFound();

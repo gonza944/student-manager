@@ -9,6 +9,7 @@ import {
   eq,
   getTableColumns,
   gt,
+  inArray,
   isNull,
   lt,
   ne,
@@ -39,7 +40,9 @@ import {
 import {
   buildStudentRateHistoryPage,
   createRateSnapshot,
+  getZonedDateStart,
   hasRateChanged,
+  resolveRateHistoryStart,
   resolveRatePeriod,
 } from "./rate-history";
 
@@ -49,6 +52,7 @@ type TeacherSettings = {
   preplyCommissionBps: number;
   directCommissionBps: number;
 };
+type TeacherProfileSettings = TeacherSettings & { timeZone: string };
 type StudentRateUpdateResult =
   | { status: "ok"; data: StudentDto }
   | { status: "notFound" }
@@ -263,7 +267,7 @@ export async function listTeacherStudentsPage(
 export async function getTeacherStudentProfile(
   db: Database,
   teacherId: string,
-  settings: TeacherSettings,
+  settings: TeacherProfileSettings,
   studentId: string,
 ) {
   const [studentRows, rateHistory] = await Promise.all([
@@ -284,6 +288,7 @@ export async function getTeacherStudentProfile(
 
   return studentProfileSchema.parse({
     ...settings,
+    teacherTimeZone: settings.timeZone,
     student: toStudentDto(
       row,
       settings.preplyCommissionBps,
@@ -328,6 +333,7 @@ export async function createTeacherStudent(
   input: CreateStudentInput,
   preplyCommissionBps: number,
   directCommissionBps: number,
+  teacherTimeZone: string,
 ) {
   const studentId = crypto.randomUUID();
   const now = new Date();
@@ -351,7 +357,7 @@ export async function createTeacherStudent(
       studentId,
       teacherId,
       ...snapshot,
-      effectiveAt: now,
+      effectiveAt: getZonedDateStart(input.studentSince, teacherTimeZone),
     }),
   ]);
   const created = createdRows[0];
@@ -388,6 +394,7 @@ export async function updateTeacherStudentRate(
   input: UpdateStudentRateInput,
   preplyCommissionBps: number,
   directCommissionBps: number,
+  teacherTimeZone: string,
 ): Promise<StudentRateUpdateResult> {
   const [studentRows, historyRows] = await db.batch([
     db
@@ -442,7 +449,8 @@ export async function updateTeacherStudentRate(
       historyRows,
       input.startDate!,
       input.endDate,
-      studentRow.timeZone,
+      studentRow.studentSince,
+      teacherTimeZone,
       now,
     );
     if (!period.ok) return { status: period.error } as const;
@@ -616,6 +624,7 @@ export async function updateTeacherStudent(
   input: UpdateStudentInput,
   preplyCommissionBps: number,
   directCommissionBps: number,
+  teacherTimeZone: string,
 ) {
   const { studentId, ...details } = input;
   const [studentRows, historyRows] = await db.batch([
@@ -625,7 +634,10 @@ export async function updateTeacherStudent(
       .where(and(eq(student.id, studentId), eq(student.teacherId, teacherId)))
       .limit(1),
     db
-      .select()
+      .select({
+        ...getTableColumns(studentRateHistory),
+        sequence: historySequence,
+      })
       .from(studentRateHistory)
       .where(
         and(
@@ -633,10 +645,10 @@ export async function updateTeacherStudent(
           eq(studentRateHistory.teacherId, teacherId),
         ),
       )
-      .orderBy(desc(studentRateHistory.effectiveAt), desc(historySequence))
-      .limit(1),
+      .orderBy(asc(studentRateHistory.effectiveAt), asc(historySequence)),
   ]);
-  if (!studentRows[0]) return null;
+  const studentRow = studentRows[0];
+  if (!studentRow) return null;
 
   const now = new Date();
   const snapshot = createRateSnapshot(
@@ -652,7 +664,66 @@ export async function updateTeacherStudent(
     })
     .where(and(eq(student.id, studentId), eq(student.teacherId, teacherId)))
     .returning();
-  const latestHistory = historyRows[0];
+  const latestHistory = historyRows.at(-1);
+  const rateHistoryStart =
+    details.studentSince !== studentRow.studentSince
+      ? resolveRateHistoryStart(
+          historyRows,
+          details.studentSince,
+          teacherTimeZone,
+        )
+      : null;
+
+  if (rateHistoryStart) {
+    const deleteInapplicableRates = db
+      .delete(studentRateHistory)
+      .where(
+        and(
+          eq(studentRateHistory.studentId, studentId),
+          eq(studentRateHistory.teacherId, teacherId),
+          inArray(studentRateHistory.id, rateHistoryStart.deletedRateIds),
+        ),
+      );
+    const extendFirstRate = db
+      .update(studentRateHistory)
+      .set({ effectiveAt: rateHistoryStart.effectiveAt })
+      .where(
+        and(
+          eq(studentRateHistory.id, rateHistoryStart.firstRate.id),
+          eq(studentRateHistory.studentId, studentId),
+          eq(studentRateHistory.teacherId, teacherId),
+        ),
+      );
+
+    if (hasRateChanged(latestHistory, snapshot)) {
+      const [updatedRows] = await db.batch([
+        updateQuery,
+        deleteInapplicableRates,
+        extendFirstRate,
+        db.insert(studentRateHistory).values({
+          id: crypto.randomUUID(),
+          studentId,
+          teacherId,
+          ...snapshot,
+          effectiveAt: now,
+        }),
+      ]);
+      const updated = updatedRows[0];
+      return updated
+        ? toStudentDto(updated, preplyCommissionBps, directCommissionBps)
+        : null;
+    }
+
+    const [updatedRows] = await db.batch([
+      updateQuery,
+      deleteInapplicableRates,
+      extendFirstRate,
+    ]);
+    const updated = updatedRows[0];
+    return updated
+      ? toStudentDto(updated, preplyCommissionBps, directCommissionBps)
+      : null;
+  }
 
   if (hasRateChanged(latestHistory, snapshot)) {
     const [updatedRows] = await db.batch([

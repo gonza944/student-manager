@@ -52,7 +52,7 @@ import { ProfileTags } from "./profile-tags";
 import { StudentRateHistory } from "./student-rate-history";
 
 export function StudentProfile({ profile }: { profile: StudentProfileData }) {
-  const { student, currency } = profile;
+  const { student, currency, teacherTimeZone } = profile;
   const t = useTranslations("Students");
   const locale = useLocale();
   const router = useRouter();
@@ -419,8 +419,9 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
             currency={currency}
             initialData={profile.rateHistory}
             onCurrentRateChange={setCurrentRate}
+            studentSince={student.studentSince}
             studentId={student.id}
-            timeZone={student.timeZone}
+            timeZone={teacherTimeZone}
           />
         </section>
 

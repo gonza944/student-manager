@@ -29,12 +29,14 @@ export function StudentRateHistory({
   currency,
   initialData,
   onCurrentRateChange,
+  studentSince,
   studentId,
   timeZone,
 }: {
   currency: string;
   initialData: StudentRateHistoryPage;
   onCurrentRateChange: (rate: StudentRateHistoryEntry) => void;
+  studentSince: string;
   studentId: string;
   timeZone: string;
 }) {
@@ -101,6 +103,7 @@ export function StudentRateHistory({
             fractionDigits={fractionDigits}
             grossMinor={currentRate.grossMinor}
             initialSource={currentRate.source}
+            studentSince={studentSince}
             studentId={studentId}
             timeZone={timeZone}
           />
