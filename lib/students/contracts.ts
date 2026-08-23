@@ -88,7 +88,7 @@ const optionalBirthDate = z.preprocess(
   z.iso.date().nullable(),
 );
 
-const timeZoneSchema = z.string().trim().min(1).max(80).refine((timeZone) => {
+export const timeZoneSchema = z.string().trim().min(1).max(80).refine((timeZone) => {
   try {
     new Intl.DateTimeFormat("en", { timeZone }).format();
     return true;

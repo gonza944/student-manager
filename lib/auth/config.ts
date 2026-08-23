@@ -4,6 +4,7 @@ import { betterAuth } from "better-auth/minimal";
 import type { createDb } from "@/db";
 import * as schema from "@/db/schema";
 import { currencySchema } from "@/lib/currencies";
+import { timeZoneSchema } from "@/lib/students/contracts";
 
 export const userRoles = ["teacher", "student"] as const;
 export type UserRole = (typeof userRoles)[number];
@@ -44,6 +45,13 @@ export function createAuth(
           defaultValue: "USD",
           input: true,
           validator: { input: currencySchema },
+        },
+        timeZone: {
+          type: "string",
+          required: true,
+          defaultValue: "America/Argentina/Cordoba",
+          input: true,
+          validator: { input: timeZoneSchema },
         },
         preplyCommissionBps: {
           type: "number",

@@ -51,6 +51,7 @@ async function getTeacherContext(): Promise<
   | {
       ok: true;
       teacherId: string;
+      timeZone: string;
       settings: z.output<typeof teacherRateSettingsSchema>;
     }
   | ActionError
@@ -66,6 +67,7 @@ async function getTeacherContext(): Promise<
   return {
     ok: true,
     teacherId: auth.session.user.id,
+    timeZone: auth.session.user.timeZone,
     settings: settings.data,
   };
 }
@@ -129,6 +131,7 @@ export async function createStudentAction(
       parsed.data,
       context.settings.preplyCommissionBps,
       context.settings.directCommissionBps,
+      context.timeZone,
     );
     revalidatePath("/students");
     revalidatePath("/");

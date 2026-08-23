@@ -22,6 +22,7 @@ import { user } from "../../db/schema";
 import { student, studentRateHistory } from "../../db/student-schema";
 import {
   calculateStudentRate,
+  getDateOnlyToday,
   type CreateStudentInput,
   type DeleteStudentRateInput,
   type StudentCursor,
@@ -327,9 +328,12 @@ export async function createTeacherStudent(
   input: CreateStudentInput,
   preplyCommissionBps: number,
   directCommissionBps: number,
+  teacherTimeZone: string,
 ) {
   const studentId = crypto.randomUUID();
   const now = new Date();
+  const studentSince = getDateOnlyToday(teacherTimeZone, now);
+  if (!studentSince) throw new Error("The teacher has an invalid time zone.");
   const snapshot = createRateSnapshot(
     input.hourlyRateMinor,
     input.source,
@@ -342,6 +346,7 @@ export async function createTeacherStudent(
       teacherId,
       ...input,
       normalizedName: normalizeStudentName(input.name),
+      studentSince,
       createdAt: now,
       updatedAt: now,
     }).returning(),
