@@ -72,7 +72,16 @@ export function StudentDatePicker({
   const [month, setMonth] = useState<Date | undefined>(
     selectedDate ?? maximumDate ?? today,
   );
-  const inputValue = selectedDate ? formatDate(selectedDate) : value;
+  const formattedValue = selectedDate ? formatDate(selectedDate) : value;
+  const [draft, setDraft] = useState({
+    locale,
+    value,
+    text: formattedValue,
+  });
+  const inputValue =
+    draft.locale === locale && draft.value === value
+      ? draft.text
+      : formattedValue;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -89,15 +98,17 @@ export function StudentDatePicker({
           onChange={(event) => {
             const nextValue = event.target.value;
             const parsedDate = parseDateInput(nextValue, locale);
+            let normalizedValue = nextValue;
 
             if (!nextValue.trim()) {
-              onValueChange("");
+              normalizedValue = "";
             } else if (parsedDate) {
-              onValueChange(toIsoDateOnly(parsedDate));
+              normalizedValue = toIsoDateOnly(parsedDate);
               setMonth(parsedDate);
-            } else {
-              onValueChange(nextValue);
             }
+
+            setDraft({ locale, value: normalizedValue, text: nextValue });
+            onValueChange(normalizedValue);
           }}
           onKeyDown={(event) => {
             if (event.key === "ArrowDown") {
@@ -147,7 +158,13 @@ export function StudentDatePicker({
             (maximumDate ? date > maximumDate : false)
           }
           onSelect={(date) => {
-            onValueChange(date ? toIsoDateOnly(date) : "");
+            const nextValue = date ? toIsoDateOnly(date) : "";
+            setDraft({
+              locale,
+              value: nextValue,
+              text: date ? formatDate(date) : "",
+            });
+            onValueChange(nextValue);
             if (date) setMonth(date);
             setOpen(false);
           }}

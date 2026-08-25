@@ -102,7 +102,9 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   await expect(editDialog.getByLabel("Estudiante desde")).toHaveValue(
     studentSince,
   );
-  await editDialog.getByLabel("Fecha de nacimiento").fill("2000-02-29");
+  const birthDate = editDialog.getByLabel("Fecha de nacimiento");
+  await birthDate.pressSequentially("29/02/2000");
+  await expect(birthDate).toHaveValue("29/02/2000");
   await editDialog.getByLabel("Objetivos de aprendizaje").fill("Conversación");
   await editDialog.getByRole("button", { name: "Guardar cambios" }).click();
   await expect(editDialog).toBeHidden();
