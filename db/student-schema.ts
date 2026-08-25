@@ -42,6 +42,7 @@ export const student = sqliteTable(
     email: text("email"),
     phone: text("phone"),
     birthDate: text("birth_date"),
+    studentSince: text("student_since").notNull(),
     nationalityCode: text("nationality_code").notNull(),
     timeZone: text("time_zone").notNull(),
     preferredContactChannel: text("preferred_contact_channel", {

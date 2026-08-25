@@ -15,6 +15,7 @@ import {
   createStudentInputSchema,
   deleteStudentRateInputSchema,
   getDateOnlyToday,
+  getCreateStudentInputSchema,
   studentDtoSchema,
   studentIdInputSchema,
   studentListInputSchema,
@@ -28,6 +29,7 @@ const validStudent = {
   email: " SOFIA@EXAMPLE.COM ",
   phone: "",
   birthDate: "1992-03-14",
+  studentSince: "2026-06-15",
   nationalityCode: "ar",
   timeZone: "America/Argentina/Cordoba",
   preferredContactChannel: "email" as const,
@@ -51,12 +53,24 @@ const validStudent = {
 };
 
 test("builds initial form values for add and edit", () => {
-  assert.equal(getInitialForm(undefined, 100), initialStudentForm);
+  const initial = getInitialForm(
+    undefined,
+    100,
+    "America/Argentina/Cordoba",
+    new Date("2026-08-20T01:30:00.000Z"),
+  );
+  assert.equal(initial.studentSince, "2026-08-19");
+  assert.deepEqual({ ...initial, studentSince: "" }, initialStudentForm);
 
-  const form = getInitialForm(studentDtoSchema.parse(validStudent), 100);
+  const form = getInitialForm(
+    studentDtoSchema.parse(validStudent),
+    100,
+    "America/Argentina/Cordoba",
+  );
   assert.equal(form.name, validStudent.name);
   assert.equal(form.phone, "");
   assert.equal(form.birthDate, validStudent.birthDate);
+  assert.equal(form.studentSince, validStudent.studentSince);
   assert.equal(form.hourlyRate, "25");
 });
 
@@ -75,6 +89,39 @@ test("normalizes the input used to create a student", () => {
   assert.equal(student.email, "sofia@example.com");
   assert.equal(student.phone, null);
   assert.equal(student.nationalityCode, "AR");
+});
+
+test("validates studentSince against the teacher time zone", () => {
+  const now = new Date("2026-08-20T04:00:00.000Z");
+
+  assert.equal(
+    getCreateStudentInputSchema("America/Argentina/Cordoba", now).safeParse({
+      ...validStudent,
+      studentSince: "2026-08-20",
+    }).success,
+    true,
+  );
+  assert.equal(
+    getCreateStudentInputSchema("Pacific/Honolulu", now).safeParse({
+      ...validStudent,
+      studentSince: "2026-08-20",
+    }).success,
+    false,
+  );
+  assert.equal(
+    getCreateStudentInputSchema("America/Argentina/Cordoba", now).safeParse({
+      ...validStudent,
+      studentSince: "1992-03-13",
+    }).success,
+    true,
+  );
+  assert.equal(
+    getCreateStudentInputSchema("America/Argentina/Cordoba", now).safeParse({
+      ...validStudent,
+      studentSince: "",
+    }).success,
+    false,
+  );
 });
 
 test("validates and normalizes the input used to update a student", () => {

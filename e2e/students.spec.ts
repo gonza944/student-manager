@@ -51,6 +51,7 @@ test("teachers can filter, sort, and change student status", async ({
   for (const student of students) {
     await page.getByRole("link", { name: "Add student" }).click();
     const dialog = page.getByRole("dialog", { name: "Add a student" });
+    await expect(dialog.getByLabel("Student since")).not.toHaveValue("");
     await dialog.getByLabel("Full name").fill(student.name);
     if (student.email) {
       await dialog.getByLabel("Email address").fill(student.email);

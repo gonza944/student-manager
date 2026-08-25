@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   calculateStudentRate,
-  createStudentInputSchema,
+  getCreateStudentInputSchema,
   type CreateStudentInput,
   type StudentDto,
 } from "@/lib/students/contracts";
@@ -20,7 +20,6 @@ import { toMinorUnits } from "../../utils/to-minor-units";
 import { StudentLearningFields } from "./student-learning-fields";
 import {
   getInitialForm,
-  initialStudentForm,
   type StudentFormValues,
   type UpdateStudentForm,
 } from "../utils/student-form-model";
@@ -31,11 +30,13 @@ type StudentFormError = Error & { fields?: string[] };
 
 export function StudentForm({
   currency,
+  teacherTimeZone,
   preplyCommissionBps,
   directCommissionBps,
   student,
 }: {
   currency: string;
+  teacherTimeZone: string;
   preplyCommissionBps: number;
   directCommissionBps: number;
   student?: StudentDto;
@@ -51,8 +52,12 @@ export function StudentForm({
   const currencyFractionDigits =
     currencyFormatter.resolvedOptions().maximumFractionDigits ?? 2;
   const minorFactor = 10 ** currencyFractionDigits;
+  const inputSchema = useMemo(
+    () => getCreateStudentInputSchema(teacherTimeZone),
+    [teacherTimeZone],
+  );
   const [form, setForm] = useState<StudentFormValues>(() =>
-    getInitialForm(student, minorFactor),
+    getInitialForm(student, minorFactor, teacherTimeZone),
   );
   const [clientInvalidFields, setClientInvalidFields] = useState<string[]>([]);
   const updateField: UpdateStudentForm = (field, value) =>
@@ -93,7 +98,7 @@ export function StudentForm({
             type: "all",
           }),
       ]);
-      setForm(initialStudentForm);
+      setForm(getInitialForm(undefined, minorFactor, teacherTimeZone));
       setClientInvalidFields([]);
       if (student) toast.success(t("edit.success"));
       router.push(student ? `/students/${student.id}` : "/students");
@@ -128,7 +133,7 @@ export function StudentForm({
           event.preventDefault();
           setClientInvalidFields([]);
 
-          const input = createStudentInputSchema.safeParse({
+          const input = inputSchema.safeParse({
             ...form,
             hourlyRateMinor,
           });
@@ -180,6 +185,7 @@ export function StudentForm({
 
         <StudentPersonalFields
           values={form}
+          teacherTimeZone={teacherTimeZone}
           invalidFields={invalidFields}
           updateField={updateField}
           emailConflict={saveMutation.error?.message === "conflict"}

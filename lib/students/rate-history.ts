@@ -36,6 +36,12 @@ export type RatePeriodResolution =
     }
   | { ok: false; error: "invalidDate" | "overlap" };
 
+export type RateHistoryStartResolution = {
+  effectiveAt: Date;
+  firstRate: StoredRateHistoryEntry;
+  deletedRateIds: string[];
+};
+
 export function addDateOnlyDays(value: string, days: number) {
   const date = new Date(`${value}T00:00:00.000Z`);
   date.setUTCDate(date.getUTCDate() + days);
@@ -82,12 +88,14 @@ export function resolveRatePeriod(
   history: StoredRateHistoryEntry[],
   startDate: string,
   endDate: string | null,
+  studentSince: string,
   timeZone: string,
   now = new Date(),
 ): RatePeriodResolution {
   const today = getDateOnlyToday(timeZone, now);
   if (
     !today ||
+    startDate < studentSince ||
     startDate > today ||
     (endDate !== null && (endDate < startDate || endDate >= today))
   ) {
@@ -107,7 +115,7 @@ export function resolveRatePeriod(
   const effectiveMs = effectiveAt.getTime();
   const restoreMs = restoreAt?.getTime() ?? Number.POSITIVE_INFINITY;
   const activeIndex = chronological.findLastIndex(
-    (entry) => entry.effectiveAt.getTime() < effectiveMs,
+    (entry) => entry.effectiveAt.getTime() <= effectiveMs,
   );
 
   if (activeIndex < 0) return { ok: false, error: "overlap" };
@@ -130,6 +138,35 @@ export function resolveRatePeriod(
     hasRestoreBoundary: following.some(
       (entry) => entry.effectiveAt.getTime() === restoreMs,
     ),
+  };
+}
+
+export function resolveRateHistoryStart(
+  history: StoredRateHistoryEntry[],
+  studentSince: string,
+  timeZone: string,
+): RateHistoryStartResolution {
+  if (history.length === 0) {
+    throw new Error("A student rate timeline requires at least one entry.");
+  }
+
+  const effectiveAt = getZonedDateStart(studentSince, timeZone);
+  const chronological = [...history].sort(
+    (left, right) =>
+      left.effectiveAt.getTime() - right.effectiveAt.getTime() ||
+      left.sequence - right.sequence,
+  );
+  const activeIndex = chronological.findLastIndex(
+    (entry) => entry.effectiveAt <= effectiveAt,
+  );
+  const firstRateIndex = Math.max(0, activeIndex);
+
+  return {
+    effectiveAt,
+    firstRate: chronological[firstRateIndex],
+    deletedRateIds: chronological
+      .slice(0, firstRateIndex)
+      .map(({ id }) => id),
   };
 }
 

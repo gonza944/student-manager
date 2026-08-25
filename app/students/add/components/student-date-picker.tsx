@@ -26,7 +26,9 @@ import {
   toIsoDateOnly,
 } from "../utils/date-only";
 
-export function StudentBirthDatePicker({
+export function StudentDatePicker({
+  id,
+  name,
   value,
   locale,
   timeZone,
@@ -34,8 +36,14 @@ export function StudentBirthDatePicker({
   openLabel,
   invalid,
   describedBy,
+  autoComplete,
+  minDate,
+  maxDate,
+  required = false,
   onValueChange,
 }: {
+  id: string;
+  name: string;
   value: string;
   locale: string;
   timeZone: string;
@@ -43,45 +51,64 @@ export function StudentBirthDatePicker({
   openLabel: string;
   invalid: boolean;
   describedBy?: string;
+  autoComplete?: string;
+  minDate?: string;
+  maxDate?: string;
+  required?: boolean;
   onValueChange: (value: string) => void;
 }) {
   const dateLocale = getDateInputLocale(locale);
   const selectedDate = parseIsoDateOnly(value);
   const today = parseIsoDateOnly(getDateOnlyToday(timeZone) ?? "");
-  const startMonth = today
-    ? new Date(today.getFullYear() - 120, 0, 1)
-    : undefined;
+  const minimumDate = parseIsoDateOnly(minDate ?? "");
+  const maximumDate = parseIsoDateOnly(maxDate ?? "") ?? today;
+  const startMonth =
+    minimumDate && maximumDate && minimumDate > maximumDate
+      ? maximumDate
+      : minimumDate ??
+        (today ? new Date(today.getFullYear() - 120, 0, 1) : undefined);
   const formatDate = (date: Date) => formatDateInput(date, locale);
   const [open, setOpen] = useState(false);
-  const [month, setMonth] = useState<Date | undefined>(selectedDate ?? today);
-  const [inputValue, setInputValue] = useState(() =>
-    selectedDate ? formatDate(selectedDate) : value,
+  const [month, setMonth] = useState<Date | undefined>(
+    selectedDate ?? maximumDate ?? today,
   );
+  const formattedValue = selectedDate ? formatDate(selectedDate) : value;
+  const [draft, setDraft] = useState({
+    locale,
+    value,
+    text: formattedValue,
+  });
+  const inputValue =
+    draft.locale === locale && draft.value === value
+      ? draft.text
+      : formattedValue;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <InputGroup className="h-11 rounded-xl border-orbit-ink/20 bg-orbit-paper-strong/70 transition-[border-color,box-shadow,transform] focus-within:-translate-y-px focus-within:border-orbit-ink/60 focus-within:ring-4 focus-within:ring-orbit-ink/10">
         <InputGroupInput
-          id="student-birth-date"
-          name="birthDate"
+          id={id}
+          name={name}
           value={inputValue}
           placeholder={placeholder}
-          autoComplete="bday"
+          autoComplete={autoComplete}
+          required={required}
           aria-invalid={invalid}
           aria-describedby={describedBy}
           onChange={(event) => {
             const nextValue = event.target.value;
             const parsedDate = parseDateInput(nextValue, locale);
+            let normalizedValue = nextValue;
 
-            setInputValue(nextValue);
             if (!nextValue.trim()) {
-              onValueChange("");
+              normalizedValue = "";
             } else if (parsedDate) {
-              onValueChange(toIsoDateOnly(parsedDate));
+              normalizedValue = toIsoDateOnly(parsedDate);
               setMonth(parsedDate);
-            } else {
-              onValueChange(nextValue);
             }
+
+            setDraft({ locale, value: normalizedValue, text: nextValue });
+            onValueChange(normalizedValue);
           }}
           onKeyDown={(event) => {
             if (event.key === "ArrowDown") {
@@ -121,15 +148,23 @@ export function StudentBirthDatePicker({
           navLayout="after"
           reverseYears
           startMonth={startMonth}
-          endMonth={today}
+          endMonth={maximumDate}
           today={today}
           selected={selectedDate}
           month={month}
           onMonthChange={setMonth}
-          disabled={today ? { after: today } : undefined}
+          disabled={(date) =>
+            (minimumDate ? date < minimumDate : false) ||
+            (maximumDate ? date > maximumDate : false)
+          }
           onSelect={(date) => {
-            onValueChange(date ? toIsoDateOnly(date) : "");
-            setInputValue(date ? formatDate(date) : "");
+            const nextValue = date ? toIsoDateOnly(date) : "";
+            setDraft({
+              locale,
+              value: nextValue,
+              text: date ? formatDate(date) : "",
+            });
+            onValueChange(nextValue);
             if (date) setMonth(date);
             setOpen(false);
           }}

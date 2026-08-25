@@ -20,6 +20,9 @@ export const user = sqliteTable("user", {
     .default("student")
     .notNull(),
   currency: text("currency").default("USD").notNull(),
+  timeZone: text("time_zone")
+    .default("America/Argentina/Cordoba")
+    .notNull(),
   preplyCommissionBps: integer("preply_commission_bps").default(1800).notNull(),
   directCommissionBps: integer("direct_commission_bps").default(485).notNull(),
 });

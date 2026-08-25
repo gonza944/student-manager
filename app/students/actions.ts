@@ -8,14 +8,15 @@ import { z } from "zod";
 import { getDb } from "../../db";
 import { requireRole } from "../../lib/auth/server";
 import {
-  createStudentInputSchema,
   deleteStudentRateInputSchema,
+  getCreateStudentInputSchema,
+  getUpdateStudentInputSchema,
   setStudentActiveInputSchema,
   studentIdInputSchema,
   studentListInputSchema,
   studentRateHistoryListInputSchema,
   teacherRateSettingsSchema,
-  updateStudentInputSchema,
+  timeZoneSchema,
   updateStudentRateInputSchema,
   type StudentDto,
   type StudentListPage,
@@ -51,6 +52,7 @@ async function getTeacherContext(): Promise<
   | {
       ok: true;
       teacherId: string;
+      timeZone: string;
       settings: z.output<typeof teacherRateSettingsSchema>;
     }
   | ActionError
@@ -59,13 +61,15 @@ async function getTeacherContext(): Promise<
   if ("error" in auth) return { ok: false, error: auth.error };
 
   const settings = teacherRateSettingsSchema.safeParse(auth.session.user);
-  if (!settings.success) {
-    throw new Error("The authenticated teacher has invalid rate settings.");
+  const timeZone = timeZoneSchema.safeParse(auth.session.user.timeZone);
+  if (!settings.success || !timeZone.success) {
+    throw new Error("The authenticated teacher has invalid settings.");
   }
 
   return {
     ok: true,
     teacherId: auth.session.user.id,
+    timeZone: timeZone.data,
     settings: settings.data,
   };
 }
@@ -116,11 +120,10 @@ export async function listStudentRatesAction(
 export async function createStudentAction(
   input: unknown,
 ): Promise<ActionResult<StudentDto>> {
-  const parsed = createStudentInputSchema.safeParse(input);
-  if (!parsed.success) return validationError(parsed.error);
-
   const context = await getTeacherContext();
   if (!context.ok) return context;
+  const parsed = getCreateStudentInputSchema(context.timeZone).safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
 
   try {
     const data = await createTeacherStudent(
@@ -129,6 +132,7 @@ export async function createStudentAction(
       parsed.data,
       context.settings.preplyCommissionBps,
       context.settings.directCommissionBps,
+      context.timeZone,
     );
     revalidatePath("/students");
     revalidatePath("/");
@@ -148,11 +152,10 @@ export async function createStudentAction(
 export async function updateStudentAction(
   input: unknown,
 ): Promise<ActionResult<StudentDto>> {
-  const parsed = updateStudentInputSchema.safeParse(input);
-  if (!parsed.success) return validationError(parsed.error);
-
   const context = await getTeacherContext();
   if (!context.ok) return context;
+  const parsed = getUpdateStudentInputSchema(context.timeZone).safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
 
   try {
     const data = await updateTeacherStudent(
@@ -161,6 +164,7 @@ export async function updateStudentAction(
       parsed.data,
       context.settings.preplyCommissionBps,
       context.settings.directCommissionBps,
+      context.timeZone,
     );
     if (!data) return { ok: false, error: "notFound" };
 
@@ -195,6 +199,7 @@ export async function updateStudentRateAction(
     parsed.data,
     context.settings.preplyCommissionBps,
     context.settings.directCommissionBps,
+    context.timeZone,
   );
   if (result.status === "notFound") return { ok: false, error: "notFound" };
   if (result.status === "invalidDate") {

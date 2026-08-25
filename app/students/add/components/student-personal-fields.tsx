@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { contactChannels } from "@/lib/students/contracts";
 import { studentCountries } from "@/lib/students/geography";
 
-import { StudentBirthDatePicker } from "./student-birth-date-picker";
+import { StudentDatePicker } from "./student-date-picker";
 import { StudentCountryCombobox } from "./student-country-combobox";
 import { StudentDropdown } from "./student-dropdown";
 import { StudentFormFieldError } from "./student-form-field-error";
@@ -19,11 +19,13 @@ import { StudentTimeZoneCombobox } from "./student-time-zone-combobox";
 
 export function StudentPersonalFields({
   values,
+  teacherTimeZone,
   invalidFields,
   updateField,
   emailConflict,
 }: {
   values: StudentFormValues;
+  teacherTimeZone: string;
   invalidFields: ReadonlySet<string>;
   updateField: UpdateStudentForm;
   emailConflict: boolean;
@@ -111,12 +113,15 @@ export function StudentPersonalFields({
         </div>
         <div className="space-y-2">
           <Label htmlFor="student-birth-date">{t("form.birthDate")}</Label>
-          <StudentBirthDatePicker
+          <StudentDatePicker
+            id="student-birth-date"
+            name="birthDate"
             value={values.birthDate}
             locale={locale}
             timeZone={values.timeZone}
             placeholder={t("form.birthDatePlaceholder")}
             openLabel={t("form.birthDateOpen")}
+            autoComplete="bday"
             invalid={invalidFields.has("birthDate")}
             describedBy={
               invalidFields.has("birthDate")
@@ -129,6 +134,33 @@ export function StudentPersonalFields({
             id="student-birth-date-error"
             invalid={invalidFields.has("birthDate")}
             message={t("errors.birthDate")}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="student-since">{t("form.studentSince")}</Label>
+          <StudentDatePicker
+            id="student-since"
+            name="studentSince"
+            value={values.studentSince}
+            locale={locale}
+            timeZone={teacherTimeZone}
+            placeholder={t("form.studentSincePlaceholder")}
+            openLabel={t("form.studentSinceOpen")}
+            required
+            invalid={invalidFields.has("studentSince")}
+            describedBy={
+              invalidFields.has("studentSince")
+                ? "student-since-error"
+                : undefined
+            }
+            onValueChange={(studentSince) =>
+              updateField("studentSince", studentSince)
+            }
+          />
+          <StudentFormFieldError
+            id="student-since-error"
+            invalid={invalidFields.has("studentSince")}
+            message={t("errors.studentSince")}
           />
         </div>
         <div className="space-y-2">

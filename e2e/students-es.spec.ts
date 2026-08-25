@@ -43,6 +43,10 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   ).toBeVisible();
 
   const studentName = `Estudiante Playwright ${suffix}`;
+  const studentSince = await drawer
+    .getByLabel("Estudiante desde")
+    .inputValue();
+  expect(studentSince).not.toBe("");
   await drawer.getByLabel("Nombre completo").fill(studentName);
   await drawer
     .getByRole("button", { name: "Canal de contacto preferido: Otro" })
@@ -62,7 +66,9 @@ test("el directorio y el formulario móvil se muestran en español", async ({
     .getByRole("button", { name: "Canal de contacto preferido: Correo electrónico" })
     .click();
   await page.getByRole("menuitemradio", { name: "Otro" }).click();
-  await drawer.getByRole("button", { name: "Abrir calendario" }).click();
+  await drawer
+    .getByRole("button", { name: "Abrir calendario", exact: true })
+    .click();
   await expect(page.getByRole("grid")).toBeVisible();
   await expect(
     page.getByRole("combobox", { name: "Elegir el año" }),
@@ -93,7 +99,12 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   await expect(
     editDialog.getByLabel("Correo electrónico", { exact: true }),
   ).toHaveValue("");
-  await editDialog.getByLabel("Fecha de nacimiento").fill("2000-02-29");
+  await expect(editDialog.getByLabel("Estudiante desde")).toHaveValue(
+    studentSince,
+  );
+  const birthDate = editDialog.getByLabel("Fecha de nacimiento");
+  await birthDate.pressSequentially("29/02/2000");
+  await expect(birthDate).toHaveValue("29/02/2000");
   await editDialog.getByLabel("Objetivos de aprendizaje").fill("Conversación");
   await editDialog.getByRole("button", { name: "Guardar cambios" }).click();
   await expect(editDialog).toBeHidden();
@@ -134,10 +145,26 @@ test("el directorio y el formulario móvil se muestran en español", async ({
     "Definir cuándo se aplicó esta tarifa",
   );
   await expect(customPeriod).not.toBeChecked();
-  await expect(rateDialog.getByLabel("Fecha inicial")).toHaveCount(0);
+  await expect(
+    rateDialog.getByLabel("Fecha inicial", { exact: true }),
+  ).toHaveCount(0);
   await customPeriod.check();
-  await expect(rateDialog.getByLabel("Fecha inicial")).toBeVisible();
-  await expect(rateDialog.getByLabel("Fecha final")).toBeVisible();
+  await expect(
+    rateDialog.getByLabel("Fecha inicial", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    rateDialog.getByRole("button", {
+      name: "Abrir calendario de fecha inicial",
+    }),
+  ).toBeVisible();
+  await expect(
+    rateDialog.getByLabel("Fecha final", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    rateDialog.getByRole("button", {
+      name: "Abrir calendario de fecha final",
+    }),
+  ).toBeVisible();
   await rateDialog.getByRole("button", { name: "Cancelar" }).click();
   await expect(rateDialog).toBeHidden();
 

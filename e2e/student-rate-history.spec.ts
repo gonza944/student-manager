@@ -68,17 +68,29 @@ test("records rate changes once and keeps histories teacher-scoped", async ({
   let rateDialog = page.getByRole("dialog", { name: "Edit rate" });
   const customPeriod = rateDialog.getByLabel("Set when this rate applied");
   await expect(customPeriod).not.toBeChecked();
-  await expect(rateDialog.getByLabel("Start date")).toHaveCount(0);
-  await expect(rateDialog.getByLabel("End date")).toHaveCount(0);
+  await expect(
+    rateDialog.getByLabel("Start date", { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    rateDialog.getByLabel("End date", { exact: true }),
+  ).toHaveCount(0);
   await customPeriod.check();
-  await expect(rateDialog.getByLabel("Start date")).toBeVisible();
-  await expect(rateDialog.getByLabel("End date")).toBeVisible();
-  await expect(rateDialog.getByLabel("Start date")).toHaveAttribute(
-    "max",
-    /\d{4}-\d{2}-\d{2}/,
-  );
+  await expect(
+    rateDialog.getByLabel("Start date", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    rateDialog.getByLabel("End date", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    rateDialog.getByRole("button", { name: "Open start date calendar" }),
+  ).toBeVisible();
+  await expect(
+    rateDialog.getByRole("button", { name: "Open end date calendar" }),
+  ).toBeVisible();
   await customPeriod.uncheck();
-  await expect(rateDialog.getByLabel("Start date")).toHaveCount(0);
+  await expect(
+    rateDialog.getByLabel("Start date", { exact: true }),
+  ).toHaveCount(0);
   await customPeriod.check();
   await expect(rateDialog.getByLabel("Hourly rate (USD)")).toHaveValue("20");
   await rateDialog.getByRole("radio", { name: "Preply" }).click();

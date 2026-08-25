@@ -9,6 +9,7 @@ import {
   getZonedDateStart,
   hasRateChanged,
   recalculateStudentRateHistoryEntries,
+  resolveRateHistoryStart,
   resolveRatePeriod,
   type StoredRateHistoryEntry,
 } from "../../lib/students/rate-history";
@@ -170,6 +171,7 @@ test("resolves closed and ongoing retroactive periods", () => {
     [initial],
     "2026-03-01",
     "2026-03-31",
+    "2026-01-01",
     "America/Argentina/Cordoba",
     now,
   );
@@ -185,11 +187,22 @@ test("resolves closed and ongoing retroactive periods", () => {
     [initial],
     "2026-07-01",
     null,
+    "2026-01-01",
     "America/Argentina/Cordoba",
     now,
   );
   assert.equal(ongoing.ok, true);
   if (ongoing.ok) assert.equal(ongoing.restoreAt, null);
+
+  const fromStudentSince = resolveRatePeriod(
+    [initial],
+    "2026-01-01",
+    null,
+    "2026-01-01",
+    "America/Argentina/Cordoba",
+    now,
+  );
+  assert.equal(fromStudentSince.ok, true);
 });
 
 test("rejects invalid, overlapping, and before-first rate periods", () => {
@@ -207,7 +220,14 @@ test("rejects invalid, overlapping, and before-first rate periods", () => {
   const timeZone = "America/Argentina/Cordoba";
 
   assert.deepEqual(
-    resolveRatePeriod([initial], "2026-08-12", null, timeZone, now),
+    resolveRatePeriod(
+      [initial],
+      "2026-08-12",
+      null,
+      "2026-01-01",
+      timeZone,
+      now,
+    ),
     { ok: false, error: "invalidDate" },
   );
   assert.deepEqual(
@@ -215,6 +235,7 @@ test("rejects invalid, overlapping, and before-first rate periods", () => {
       [initial],
       "2026-07-01",
       "2026-08-11",
+      "2026-01-01",
       timeZone,
       now,
     ),
@@ -225,6 +246,7 @@ test("rejects invalid, overlapping, and before-first rate periods", () => {
       [initial, later],
       "2026-03-01",
       "2026-05-01",
+      "2026-01-01",
       timeZone,
       now,
     ),
@@ -235,10 +257,11 @@ test("rejects invalid, overlapping, and before-first rate periods", () => {
       [initial],
       "2025-12-01",
       "2025-12-31",
+      "2026-01-01",
       timeZone,
       now,
     ),
-    { ok: false, error: "overlap" },
+    { ok: false, error: "invalidDate" },
   );
 });
 
@@ -257,12 +280,46 @@ test("reuses an existing rate at the restoration boundary", () => {
     [initial, following],
     "2026-03-01",
     "2026-03-31",
+    "2026-01-01",
     "America/Argentina/Cordoba",
     new Date("2026-08-11T15:00:00.000Z"),
   );
 
   assert.equal(period.ok, true);
   if (period.ok) assert.equal(period.hasRestoreBoundary, true);
+});
+
+test("reconciles the first applicable rate when studentSince changes", () => {
+  const history = [
+    historyEntry("first", "2026-01-01T03:00:00.000Z", 2_000, 1),
+    historyEntry("second", "2026-03-01T03:00:00.000Z", 2_500, 2),
+    historyEntry("third", "2026-05-01T03:00:00.000Z", 3_000, 3),
+  ];
+  const expanded = resolveRateHistoryStart(
+    history,
+    "2025-12-01",
+    "America/Argentina/Cordoba",
+  );
+  assert.equal(expanded.firstRate.id, "first");
+  assert.equal(expanded.effectiveAt.toISOString(), "2025-12-01T03:00:00.000Z");
+  assert.deepEqual(expanded.deletedRateIds, []);
+
+  const shrunk = resolveRateHistoryStart(
+    history,
+    "2026-04-01",
+    "America/Argentina/Cordoba",
+  );
+  assert.equal(shrunk.firstRate.id, "second");
+  assert.equal(shrunk.effectiveAt.toISOString(), "2026-04-01T03:00:00.000Z");
+  assert.deepEqual(shrunk.deletedRateIds, ["first"]);
+
+  const afterAllChanges = resolveRateHistoryStart(
+    history,
+    "2026-06-01",
+    "America/Argentina/Cordoba",
+  );
+  assert.equal(afterAllChanges.firstRate.id, "third");
+  assert.deepEqual(afterAllChanges.deletedRateIds, ["first", "second"]);
 });
 
 test("deleting a middle change extends the previous timeline entry", () => {
