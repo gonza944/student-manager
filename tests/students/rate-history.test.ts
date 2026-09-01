@@ -9,6 +9,7 @@ import {
   getZonedDateStart,
   hasRateChanged,
   recalculateStudentRateHistoryEntries,
+  resolveRateHistoryDeletion,
   resolveRateHistoryStart,
   resolveRatePeriod,
   type StoredRateHistoryEntry,
@@ -179,7 +180,7 @@ test("resolves closed and ongoing retroactive periods", () => {
   assert.equal(closed.ok, true);
   if (!closed.ok) return;
   assert.equal(closed.effectiveAt.toISOString(), "2026-03-01T03:00:00.000Z");
-  assert.equal(closed.restoreAt?.toISOString(), "2026-04-01T03:00:00.000Z");
+  assert.equal(closed.restoreAt?.toISOString(), "2026-03-31T03:00:00.000Z");
   assert.equal(closed.activeRate.id, "initial");
   assert.equal(closed.hasRestoreBoundary, false);
 
@@ -265,7 +266,7 @@ test("rejects invalid, overlapping, and before-first rate periods", () => {
   );
 });
 
-test("reuses an existing rate at the restoration boundary", () => {
+test("allows a historical rate to end when the next rate starts", () => {
   const initial = historyEntry(
     "initial",
     "2026-01-01T03:00:00.000Z",
@@ -279,7 +280,7 @@ test("reuses an existing rate at the restoration boundary", () => {
   const period = resolveRatePeriod(
     [initial, following],
     "2026-03-01",
-    "2026-03-31",
+    "2026-04-01",
     "2026-01-01",
     "America/Argentina/Cordoba",
     new Date("2026-08-11T15:00:00.000Z"),
@@ -333,6 +334,26 @@ test("deleting a middle change extends the previous timeline entry", () => {
 
   assert.equal(timeline.previous[0].id, "first");
   assert.equal(timeline.previous[0].effectiveUntil, "2026-03-01T00:00:00.000Z");
+});
+
+test("deleting the oldest rate extends its replacement to studentSince", () => {
+  const history = [
+    historyEntry("oldest", "2026-01-01T03:00:00.000Z", 2_000),
+    historyEntry("replacement", "2026-03-01T03:00:00.000Z", 2_500),
+    historyEntry("current", "2026-05-01T03:00:00.000Z", 3_000),
+  ];
+
+  assert.deepEqual(resolveRateHistoryDeletion(history, "oldest"), {
+    ok: true,
+    extend: {
+      id: "replacement",
+      effectiveAt: history[0].effectiveAt,
+    },
+  });
+  assert.deepEqual(resolveRateHistoryDeletion(history, "current"), {
+    ok: false,
+    error: "protected",
+  });
 });
 
 test("recalculates every displayed boundary after an optimistic deletion", () => {

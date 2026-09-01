@@ -255,11 +255,11 @@ export const updateStudentRateInputSchema = studentIdInputSchema.extend({
       message: "A custom rate period requires a start date.",
     });
   }
-  if (hasCustomPeriod && startDate && endDate && endDate < startDate) {
+  if (hasCustomPeriod && startDate && endDate && endDate <= startDate) {
     context.addIssue({
       code: "custom",
       path: ["endDate"],
-      message: "The end date cannot be before the start date.",
+      message: "The end date must be after the start date.",
     });
   }
 });

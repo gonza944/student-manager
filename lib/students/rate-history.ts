@@ -42,6 +42,13 @@ export type RateHistoryStartResolution = {
   deletedRateIds: string[];
 };
 
+export type RateHistoryDeletionResolution =
+  | { ok: false; error: "notFound" | "protected" }
+  | {
+      ok: true;
+      extend: { id: string; effectiveAt: Date } | null;
+    };
+
 export function addDateOnlyDays(value: string, days: number) {
   const date = new Date(`${value}T00:00:00.000Z`);
   date.setUTCDate(date.getUTCDate() + days);
@@ -97,7 +104,7 @@ export function resolveRatePeriod(
     !today ||
     startDate < studentSince ||
     startDate > today ||
-    (endDate !== null && (endDate < startDate || endDate >= today))
+    (endDate !== null && (endDate <= startDate || endDate >= today))
   ) {
     return { ok: false, error: "invalidDate" };
   }
@@ -109,9 +116,7 @@ export function resolveRatePeriod(
   );
   const effectiveAt =
     startDate === today ? now : getZonedDateStart(startDate, timeZone);
-  const restoreAt = endDate
-    ? getZonedDateStart(addDateOnlyDays(endDate, 1), timeZone)
-    : null;
+  const restoreAt = endDate ? getZonedDateStart(endDate, timeZone) : null;
   const effectiveMs = effectiveAt.getTime();
   const restoreMs = restoreAt?.getTime() ?? Number.POSITIVE_INFINITY;
   const activeIndex = chronological.findLastIndex(
@@ -167,6 +172,26 @@ export function resolveRateHistoryStart(
     deletedRateIds: chronological
       .slice(0, firstRateIndex)
       .map(({ id }) => id),
+  };
+}
+
+export function resolveRateHistoryDeletion(
+  history: StoredRateHistoryEntry[],
+  rateId: string,
+): RateHistoryDeletionResolution {
+  const targetIndex = history.findIndex(({ id }) => id === rateId);
+
+  if (targetIndex < 0) return { ok: false, error: "notFound" };
+  if (targetIndex === history.length - 1) {
+    return { ok: false, error: "protected" };
+  }
+
+  return {
+    ok: true,
+    extend:
+      targetIndex === 0
+        ? { id: history[1].id, effectiveAt: history[0].effectiveAt }
+        : null,
   };
 }
 
