@@ -80,7 +80,6 @@ export function StudentRateHistory({
     currentRate,
     deleteMutation,
     entries,
-    hasNextPage,
     isError,
     isFetchingNextPage,
     rowVirtualizer,
@@ -144,8 +143,7 @@ export function StudentRateHistory({
                   const entry = entries[virtualRow.index];
                   const index = virtualRow.index;
                   const current = index === 0;
-                  const canDelete =
-                    !current && (hasNextPage || index < entries.length - 1);
+                  const canDelete = !current;
                   const startDate = date.format(new Date(entry.effectiveAt));
 
                   return (
@@ -198,11 +196,7 @@ export function StudentRateHistory({
                       </td>
                       <td className="whitespace-nowrap py-3 pe-5 ps-4 sm:pe-6">
                         {entry.effectiveUntil
-                          ? date.format(
-                              new Date(
-                                new Date(entry.effectiveUntil).getTime() - 1,
-                              ),
-                            )
+                          ? date.format(new Date(entry.effectiveUntil))
                           : t("profile.rateHistory.ongoing")}
                       </td>
                       <td className="whitespace-nowrap py-2 pe-5 ps-4 text-end sm:pe-6">

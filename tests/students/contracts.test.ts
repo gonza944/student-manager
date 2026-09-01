@@ -190,6 +190,17 @@ test("validates the quick rate and source update", () => {
     }).success,
     false,
   );
+  assert.equal(
+    updateStudentRateInputSchema.safeParse({
+      studentId: "student-01",
+      hourlyRateMinor: 2_500,
+      source: "private",
+      hasCustomPeriod: true,
+      startDate: "2026-05-10",
+      endDate: "2026-05-10",
+    }).success,
+    false,
+  );
 });
 
 test("validates rate deletion identifiers", () => {

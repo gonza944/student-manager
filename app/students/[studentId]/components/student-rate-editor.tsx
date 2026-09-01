@@ -250,7 +250,11 @@ export function StudentRateEditor({
                             "profile.rateHistory.endDatePlaceholder",
                           )}
                           openLabel={t("profile.rateHistory.endDateOpen")}
-                          minDate={startDate || studentSince}
+                          minDate={
+                            startDate
+                              ? addDateOnlyDays(startDate, 1)
+                              : studentSince
+                          }
                           maxDate={yesterday}
                           invalid={
                             mutation.error?.message === "invalidRateDate"

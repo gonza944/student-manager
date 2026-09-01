@@ -42,6 +42,7 @@ import {
   createRateSnapshot,
   getZonedDateStart,
   hasRateChanged,
+  resolveRateHistoryDeletion,
   resolveRateHistoryStart,
   resolveRatePeriod,
 } from "./rate-history";
@@ -481,20 +482,32 @@ export async function updateTeacherStudentRate(
         : ({ status: "notFound" } as const);
     }
 
-    const insertRateQuery = db.insert(studentRateHistory).values({
-      id: crypto.randomUUID(),
-      studentId: input.studentId,
-      teacherId,
-      ...snapshot,
-      effectiveAt: period.effectiveAt,
-    });
+    const saveRateQuery =
+      period.activeRate.effectiveAt.getTime() === period.effectiveAt.getTime()
+        ? db
+            .update(studentRateHistory)
+            .set(snapshot)
+            .where(
+              and(
+                eq(studentRateHistory.id, period.activeRate.id),
+                eq(studentRateHistory.studentId, input.studentId),
+                eq(studentRateHistory.teacherId, teacherId),
+              ),
+            )
+        : db.insert(studentRateHistory).values({
+            id: crypto.randomUUID(),
+            studentId: input.studentId,
+            teacherId,
+            ...snapshot,
+            effectiveAt: period.effectiveAt,
+          });
 
     if (period.restoreAt) {
       if (period.hasRestoreBoundary) {
-        await insertRateQuery;
+        await saveRateQuery;
       } else {
         await db.batch([
-          insertRateQuery,
+          saveRateQuery,
           db.insert(studentRateHistory).values({
             id: crypto.randomUUID(),
             studentId: input.studentId,
@@ -521,7 +534,7 @@ export async function updateTeacherStudentRate(
 
     const [updatedRows] = await db.batch([
       updateStudentQuery,
-      insertRateQuery,
+      saveRateQuery,
     ]);
     const updated = updatedRows[0];
     return updated
@@ -594,12 +607,8 @@ export async function deleteTeacherStudentRate(
       ),
     )
     .orderBy(asc(studentRateHistory.effectiveAt), asc(historySequence));
-  const targetIndex = history.findIndex(({ id }) => id === input.rateId);
-
-  if (targetIndex < 0) return { status: "notFound" } as const;
-  if (targetIndex === 0 || targetIndex === history.length - 1) {
-    return { status: "protected" } as const;
-  }
+  const deletion = resolveRateHistoryDeletion(history, input.rateId);
+  if (!deletion.ok) return { status: deletion.error } as const;
 
   const deleteQuery = db
     .delete(studentRateHistory)
@@ -611,6 +620,27 @@ export async function deleteTeacherStudentRate(
       ),
     )
     .returning({ id: studentRateHistory.id });
+
+  if (deletion.extend) {
+    const [deletedRows] = await db.batch([
+      deleteQuery,
+      db
+        .update(studentRateHistory)
+        .set({ effectiveAt: deletion.extend.effectiveAt })
+        .where(
+          and(
+            eq(studentRateHistory.id, deletion.extend.id),
+            eq(studentRateHistory.studentId, input.studentId),
+            eq(studentRateHistory.teacherId, teacherId),
+          ),
+        ),
+    ]);
+    const deleted = deletedRows[0];
+
+    return deleted
+      ? ({ status: "ok", data: deleted } as const)
+      : ({ status: "notFound" } as const);
+  }
 
   const [deleted] = await deleteQuery;
   return deleted
