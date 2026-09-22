@@ -19,6 +19,7 @@ import {
 } from "drizzle-orm";
 
 import type { createDb } from "../../db";
+import { studentClass } from "../../db/class-schema";
 import { user } from "../../db/schema";
 import { student, studentRateHistory } from "../../db/student-schema";
 import {
@@ -785,12 +786,34 @@ export async function deleteTeacherStudent(
   teacherId: string,
   studentId: string,
 ) {
+  const [studentRows, classRows] = await db.batch([
+    db
+      .select({ id: student.id })
+      .from(student)
+      .where(and(eq(student.id, studentId), eq(student.teacherId, teacherId)))
+      .limit(1),
+    db
+      .select({ id: studentClass.id })
+      .from(studentClass)
+      .where(
+        and(
+          eq(studentClass.studentId, studentId),
+          eq(studentClass.teacherId, teacherId),
+        ),
+      )
+      .limit(1),
+  ]);
+  if (!studentRows[0]) return { status: "notFound" } as const;
+  if (classRows[0]) return { status: "protected" } as const;
+
   const [deleted] = await db
     .delete(student)
     .where(and(eq(student.id, studentId), eq(student.teacherId, teacherId)))
     .returning({ id: student.id });
 
-  return deleted ?? null;
+  return deleted
+    ? ({ status: "ok", data: deleted } as const)
+    : ({ status: "notFound" } as const);
 }
 
 export async function updateTeacherCommissions(

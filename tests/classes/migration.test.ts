@@ -50,10 +50,14 @@ test("adds race-safe class intervals without changing existing rows", () => {
   const db = new DatabaseSync(":memory:");
   db.exec(`
     PRAGMA foreign_keys=ON;
-    CREATE TABLE user (id text PRIMARY KEY NOT NULL);
+    CREATE TABLE user (
+      id text PRIMARY KEY NOT NULL,
+      currency text DEFAULT 'USD' NOT NULL
+    );
     CREATE TABLE student (
       id text PRIMARY KEY NOT NULL,
-      teacher_id text NOT NULL REFERENCES user(id) ON DELETE cascade
+      teacher_id text NOT NULL REFERENCES user(id) ON DELETE cascade,
+      hourly_rate_minor integer DEFAULT 1001 NOT NULL
     );
     INSERT INTO user (id) VALUES ('teacher-1'), ('teacher-2');
     INSERT INTO student (id, teacher_id)
@@ -68,6 +72,19 @@ test("adds race-safe class intervals without changing existing rows", () => {
   db.exec(migration);
 
   insertClass(db, { id: "primary", scheduledAt: at("10:00") });
+  db.exec(`
+    UPDATE student SET hourly_rate_minor = 2000 WHERE id = 'student-1';
+    UPDATE user SET currency = 'EUR' WHERE id = 'teacher-1';
+  `);
+  assert.deepEqual(
+    {
+      ...db.prepare(`
+        SELECT hourly_rate_snapshot_minor AS hourlyRateSnapshotMinor, currency
+        FROM student_class WHERE id = 'primary'
+      `).get(),
+    },
+    { hourlyRateSnapshotMinor: 1001, currency: "USD" },
+  );
 
   assert.throws(
     () =>

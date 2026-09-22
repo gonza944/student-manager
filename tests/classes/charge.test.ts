@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { calculateClassChargeMinor } from "../../lib/classes/charge";
+import {
+  calculateClassChargeMinor,
+  resolveEditedClassChargeMinor,
+} from "../../lib/classes/charge";
 
 test("charges started half-hours and rounds exact minor-unit halves upward", () => {
   const hourlyRateMinor = 1_001;
@@ -18,4 +21,9 @@ test("rejects invalid rates and durations", () => {
   assert.throws(() => calculateClassChargeMinor(0, 30), RangeError);
   assert.throws(() => calculateClassChargeMinor(1_000, 0), RangeError);
   assert.throws(() => calculateClassChargeMinor(1_000, 31), RangeError);
+});
+
+test("preserves manual charges only while duration stays unchanged", () => {
+  assert.equal(resolveEditedClassChargeMinor(1_001, 60, 60, 900), 900);
+  assert.equal(resolveEditedClassChargeMinor(1_001, 60, 65, 900), 1_502);
 });

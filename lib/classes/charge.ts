@@ -24,3 +24,14 @@ export function calculateClassChargeMinor(
 
   return Math.floor(numerator / 2) + (numerator % 2);
 }
+
+export function resolveEditedClassChargeMinor(
+  hourlyRateSnapshotMinor: number,
+  previousDurationMinutes: number,
+  nextDurationMinutes: number,
+  editedChargeMinor: number,
+) {
+  return previousDurationMinutes === nextDurationMinutes
+    ? editedChargeMinor
+    : calculateClassChargeMinor(hourlyRateSnapshotMinor, nextDurationMinutes);
+}

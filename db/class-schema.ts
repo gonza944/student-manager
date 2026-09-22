@@ -9,8 +9,7 @@ import {
 
 import { user } from "./schema";
 import { student } from "./student-schema";
-
-export const classStatuses = ["scheduled", "completed", "cancelled"] as const;
+import { classStatuses } from "../lib/classes/contracts";
 
 const timestamp = (name: string) =>
   integer(name, { mode: "timestamp_ms" })

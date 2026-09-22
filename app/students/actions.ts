@@ -43,7 +43,8 @@ type ActionError =
         | "conflict"
         | "invalidRateDate"
         | "rateOverlap"
-        | "protectedRate";
+        | "protectedRate"
+        | "studentHasClasses";
     }
   | { ok: false; error: "validation"; fields: string[] };
 type ActionResult<T> = { ok: true; data: T } | ActionError;
@@ -272,15 +273,29 @@ export async function deleteStudentAction(
   const context = await getTeacherContext();
   if (!context.ok) return context;
 
-  const data = await deleteTeacherStudent(
-    await getDb(),
-    context.teacherId,
-    parsed.data.studentId,
-  );
-  if (!data) return { ok: false, error: "notFound" };
+  let result: Awaited<ReturnType<typeof deleteTeacherStudent>>;
+  try {
+    result = await deleteTeacherStudent(
+      await getDb(),
+      context.teacherId,
+      parsed.data.studentId,
+    );
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes("FOREIGN KEY constraint failed")
+    ) {
+      return { ok: false, error: "studentHasClasses" };
+    }
+    throw error;
+  }
+  if (result.status === "notFound") return { ok: false, error: "notFound" };
+  if (result.status === "protected") {
+    return { ok: false, error: "studentHasClasses" };
+  }
 
   revalidatePath("/students");
   revalidatePath(`/students/${parsed.data.studentId}`);
   revalidatePath("/");
-  return { ok: true, data };
+  return { ok: true, data: result.data };
 }
