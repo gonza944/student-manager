@@ -1,45 +1,17 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { notFound, redirect } from "next/navigation";
-import { cache } from "react";
 
-import { getDb } from "@/db";
-import { requireRole } from "@/lib/auth/server";
-import {
-  studentIdInputSchema,
-  teacherRateSettingsSchema,
-  timeZoneSchema,
-} from "@/lib/students/contracts";
-import { getTeacherStudentProfile } from "@/lib/students/data";
+import { getDevelopmentStudentClasses } from "@/lib/classes/development-fixtures";
 
 import { StudentProfile } from "./components/student-profile";
-
-const loadProfile = cache(async (studentId: string) => {
-  const parsed = studentIdInputSchema.safeParse({ studentId });
-  if (!parsed.success) notFound();
-
-  const auth = await requireRole("teacher");
-  if ("error" in auth) redirect("/login");
-
-  const settings = teacherRateSettingsSchema.parse(auth.session.user);
-  const timeZone = timeZoneSchema.parse(auth.session.user.timeZone);
-  const profile = await getTeacherStudentProfile(
-    await getDb(),
-    auth.session.user.id,
-    { ...settings, timeZone },
-    parsed.data.studentId,
-  );
-  if (!profile) notFound();
-
-  return profile;
-});
+import { loadStudentProfile } from "./load-profile";
 
 export async function generateMetadata({
   params,
 }: PageProps<"/students/[studentId]">): Promise<Metadata> {
   const { studentId } = await params;
   const [profile, t] = await Promise.all([
-    loadProfile(studentId),
+    loadStudentProfile(studentId),
     getTranslations("Students.profile"),
   ]);
 
@@ -53,8 +25,20 @@ export default async function StudentProfilePage({
   params,
 }: PageProps<"/students/[studentId]">) {
   const { studentId } = await params;
-  const profile = await loadProfile(studentId);
+  const profile = await loadStudentProfile(studentId);
+  const previewClasses =
+    process.env.NODE_ENV === "development"
+      ? getDevelopmentStudentClasses(
+          profile.student.id,
+          profile.student.name,
+          profile.currency,
+        )
+      : [];
   return (
-    <StudentProfile key={profile.student.updatedAt} profile={profile} />
+    <StudentProfile
+      key={profile.student.updatedAt}
+      profile={profile}
+      previewClasses={previewClasses}
+    />
   );
 }

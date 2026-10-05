@@ -32,7 +32,7 @@ function isScheduleConflict(error: unknown) {
 
 function revalidateClassPaths(studentId: string, classId: string) {
   revalidatePath(`/students/${studentId}`);
-  revalidatePath(`/students/${studentId}/classes/${classId}`);
+  revalidatePath(`/students/${studentId}/classes/${classId}/edit`);
 }
 
 export async function createStudentClassAction(

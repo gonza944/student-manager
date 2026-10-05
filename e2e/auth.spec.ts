@@ -217,6 +217,30 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(page.getByText("Last updated", { exact: true })).toBeVisible();
   await expect(page.getByText("Learning goals", { exact: true })).toHaveCount(0);
 
+  await page.getByRole("button", { name: /Completed.*60 minutes/ }).click();
+  await page.getByRole("menuitem", { name: "Edit class" }).click();
+  await expect(page).toHaveURL(
+    `${profileUrl}/classes/preview-completed/edit`,
+  );
+  const classDialog = page.getByRole("dialog", { name: "Edit class" });
+  await expect(classDialog).toBeVisible();
+  await expect(page.locator("#student-profile-name")).toBeVisible();
+  await classDialog
+    .getByRole("button", { name: "Choose class start time" })
+    .click();
+  await page.getByRole("button", { name: "11:05 AM", exact: true }).click();
+  await expect(classDialog.getByRole("textbox", { name: "Start time" })).toHaveValue(
+    "11:05 AM",
+  );
+  await classDialog.getByRole("button", { name: "Close class dialog" }).click();
+  await expect(page).toHaveURL(profileUrl);
+  await page.getByRole("button", { name: /Completed.*60 minutes/ }).click();
+  await page.getByRole("menuitem", { name: "Delete permanently" }).click();
+  const deleteClassDialog = page.getByRole("dialog", { name: "Delete class?" });
+  await expect(deleteClassDialog).toBeVisible();
+  await deleteClassDialog.getByRole("button", { name: "Keep class" }).click();
+  await expect(deleteClassDialog).toBeHidden();
+
   await page.reload();
   await expect(
     page.getByRole("heading", { level: 1, name: editedStudentName }),

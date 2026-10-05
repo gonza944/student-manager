@@ -14,7 +14,8 @@ export default async function StudentsLayout({
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={{ Students: messages.Students }}>
+    <NextIntlClientProvider
+      messages={{ Students: messages.Students, Classes: messages.Classes }}>
       <StudentsQueryProvider>
         {children}
         {modal}

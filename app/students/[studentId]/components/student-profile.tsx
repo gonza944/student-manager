@@ -38,6 +38,7 @@ import type {
   StudentProfile as StudentProfileData,
   StudentRateHistoryEntry,
 } from "@/lib/students/contracts";
+import type { StudentClassDto } from "@/lib/classes/contracts";
 import { cn } from "@/lib/utils";
 
 import { deleteStudentAction, setStudentActiveAction } from "../../actions";
@@ -47,11 +48,18 @@ import {
   studentThemeSwatches,
 } from "../../const/student-card-config";
 import { ProfileCardHeader } from "./profile-card-header";
+import { ClassPreviewList } from "./class-preview-list";
 import { ProfileDetail } from "./profile-detail";
 import { ProfileTags } from "./profile-tags";
 import { StudentRateHistory } from "./student-rate-history";
 
-export function StudentProfile({ profile }: { profile: StudentProfileData }) {
+export function StudentProfile({
+  profile,
+  previewClasses = [],
+}: {
+  profile: StudentProfileData;
+  previewClasses?: StudentClassDto[];
+}) {
   const { student, currency, teacherTimeZone } = profile;
   const t = useTranslations("Students");
   const locale = useLocale();
@@ -424,6 +432,15 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
             timeZone={teacherTimeZone}
           />
         </section>
+
+        {previewClasses.length ? (
+          <ClassPreviewList
+            classes={previewClasses}
+            studentId={student.id}
+            studentIsActive={isActive}
+            timeZone={teacherTimeZone}
+          />
+        ) : null}
 
         <DeleteStudentConfirmation
           name={student.name}

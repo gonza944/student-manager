@@ -364,5 +364,55 @@
       "notFound": "Este estudiante ya no existe.",
       "general": "No pudimos completar la acción. Inténtalo de nuevo."
     }
+  },
+  "Classes": {
+    "metaTitle": "Clases — Orbit",
+    "metaDescription": "Programa y gestiona las clases de estudiantes.",
+    "title": "Clases",
+    "navigation": "Navegación de clases",
+    "duration": "{minutes, plural, one {# minuto} other {# minutos}}",
+    "statuses": {
+      "scheduled": "Programada",
+      "completed": "Completada",
+      "cancelled": "Cancelada"
+    },
+    "actions": {
+      "add": "Programar clase",
+      "edit": "Editar clase",
+      "complete": "Marcar como completada",
+      "cancel": "Cancelar clase",
+      "delete": "Eliminar permanentemente",
+      "save": "Guardar clase",
+      "backToProfile": "Volver al estudiante"
+    },
+    "modal": {
+      "close": "Cerrar diálogo de clase"
+    },
+    "add": {
+      "title": "Programar clase",
+      "description": "Elige una fecha y hora disponibles para este estudiante."
+    },
+    "edit": {
+      "title": "Editar clase",
+      "description": "Cambia la fecha, hora, duración o importe de esta clase."
+    },
+    "delete": {
+      "title": "¿Eliminar la clase?",
+      "description": "Esto elimina la clase permanentemente. Si no se realizó, cancélala para conservar su historial.",
+      "cancel": "Conservar clase",
+      "confirm": "Eliminar permanentemente",
+      "close": "Cerrar confirmación para eliminar la clase"
+    },
+    "fields": {
+      "date": "Fecha",
+      "datePlaceholder": "DD/MM/AAAA",
+      "openDate": "Elegir fecha de la clase",
+      "startTime": "Hora de inicio",
+      "openTime": "Elegir hora de inicio de la clase",
+      "dateTime": "Fecha y hora",
+      "duration": "Duración",
+      "charge": "Importe",
+      "timeZone": "Zona horaria"
+    }
   }
 }

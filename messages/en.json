@@ -364,5 +364,55 @@
       "notFound": "This student no longer exists.",
       "general": "We couldn't complete that action. Try again."
     }
+  },
+  "Classes": {
+    "metaTitle": "Classes — Orbit",
+    "metaDescription": "Schedule and manage student classes.",
+    "title": "Classes",
+    "navigation": "Class navigation",
+    "duration": "{minutes, plural, one {# minute} other {# minutes}}",
+    "statuses": {
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "add": "Schedule class",
+      "edit": "Edit class",
+      "complete": "Mark completed",
+      "cancel": "Cancel class",
+      "delete": "Delete permanently",
+      "save": "Save class",
+      "backToProfile": "Back to student"
+    },
+    "modal": {
+      "close": "Close class dialog"
+    },
+    "add": {
+      "title": "Schedule class",
+      "description": "Choose an available date and time for this student."
+    },
+    "edit": {
+      "title": "Edit class",
+      "description": "Change this class date, time, duration, or charge."
+    },
+    "delete": {
+      "title": "Delete class?",
+      "description": "This permanently removes the class. If it did not take place, cancel it instead to preserve its history.",
+      "cancel": "Keep class",
+      "confirm": "Delete permanently",
+      "close": "Close delete-class confirmation"
+    },
+    "fields": {
+      "date": "Date",
+      "datePlaceholder": "MM/DD/YYYY",
+      "openDate": "Choose class date",
+      "startTime": "Start time",
+      "openTime": "Choose class start time",
+      "dateTime": "Date and time",
+      "duration": "Duration",
+      "charge": "Charge",
+      "timeZone": "Time zone"
+    }
   }
 }
