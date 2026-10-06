@@ -41,3 +41,7 @@ coverage/
 # Graphify: keep only the searchable relationship data.
 graphify-out/*
 !graphify-out/graph.json
+
+# Stryker sandboxes, reports, and incremental cache
+.stryker-tmp/
+reports/mutation/

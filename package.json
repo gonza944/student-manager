@@ -17,7 +17,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply student-manager-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply student-manager-db --remote",
-    "db:seed:local": "wrangler d1 execute student-manager-db --local --file=./scripts/seed-local-students.sql"
+    "db:seed:local": "wrangler d1 execute student-manager-db --local --file=./scripts/seed-local-students.sql",
+    "mutation": "stryker run",
+    "mutation:incremental": "stryker run --incremental --force",
+    "mutation:diff": "node scripts/stryker-diff.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -52,6 +55,7 @@
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.20.1",
     "@playwright/test": "^1.61.1",
+    "@stryker-mutator/core": "10.0.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
