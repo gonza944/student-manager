@@ -4,6 +4,12 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+## Development and review standards
+
+Before developing or reviewing code, read [CODING_STANDARDS.md](CODING_STANDARDS.md)
+and use the development skills it requires. Its written rules and these repository
+instructions take precedence over skill guidance.
+
 ## Internationalization is a default requirement
 
 - Treat every new or changed user-facing surface as bilingual (`es` and `en`) unless explicitly scoped otherwise.
