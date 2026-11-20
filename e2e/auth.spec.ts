@@ -223,6 +223,8 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await page.getByRole("link", { name: "Schedule class" }).click();
   const addClassDialog = page.getByRole("dialog", { name: "Schedule class" });
   await expect(addClassDialog).toBeVisible();
+  await expect(addClassDialog.locator('[data-slot="accordion-item"]').first()).toHaveCSS("transition-property", "flex-grow");
+  await expect(addClassDialog.locator('[data-slot="accordion-content"]').first()).toHaveCSS("animation-name", "none");
   const scheduleGrid = addClassDialog.getByRole("region", {name:"Day schedule", exact:true});
   const initialGridHeight = await scheduleGrid.evaluate((element) => element.getBoundingClientRect().height);
   const occupiedToggle = addClassDialog.getByRole("button", {name:"Occupied times", exact:true});
