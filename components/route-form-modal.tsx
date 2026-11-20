@@ -1,0 +1,104 @@
+"use client";
+
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useRouter } from "next/navigation";
+import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { PortalContainerProvider } from "@/components/ui/portal-container";
+import { cn } from "@/lib/utils";
+import { useIsDesktop } from "@/hooks/use-is-desktop";
+
+const FormCloseContext = createContext<((guard: (() => void) | null) => void) | null>(null);
+export const useFormCloseGuard = () => useContext(FormCloseContext);
+
+export function RouteFormModal({
+  children,
+  title,
+  description,
+  closeLabel,
+  className,
+}: {
+  children: ReactNode;
+  title: string;
+  description: string;
+  closeLabel: string;
+  className?: string;
+}) {
+  const router = useRouter();
+  const closeGuard = useRef<(() => void) | null>(null);
+  const registerCloseGuard = useCallback((guard: (() => void) | null) => { closeGuard.current = guard; }, []);
+  const isDesktop = useIsDesktop();
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(
+    null,
+  );
+  const close = (open: boolean) => {
+    if (!open) {
+      if (closeGuard.current) closeGuard.current();
+      else router.back();
+    }
+  };
+
+  if (isDesktop) {
+    return (
+      <Dialog open onOpenChange={close}>
+        <DialogContent
+          ref={setPortalContainer}
+          closeLabel={closeLabel}
+          className={cn("block max-h-[calc(100dvh-2rem)] w-[min(96vw,96rem)] max-w-none overflow-y-auto rounded-3xl bg-paper-strong p-0 text-ink shadow-2xl sm:max-w-none", className)}>
+          <DialogTitle className="sr-only">{title}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {description}
+          </DialogDescription>
+          <PortalContainerProvider container={portalContainer}>
+            <FormCloseContext.Provider value={registerCloseGuard}>{children}</FormCloseContext.Provider>
+          </PortalContainerProvider>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <Drawer open onOpenChange={close}>
+      <DrawerContent ref={setPortalContainer}>
+        <DrawerTitle className="sr-only">{title}</DrawerTitle>
+        <DrawerDescription className="sr-only">
+          {description}
+        </DrawerDescription>
+        <PortalContainerProvider container={portalContainer}>
+          <div className="relative overflow-y-auto overscroll-contain">
+            <DrawerClose asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={closeLabel}
+                className="absolute end-4 top-3 z-10">
+                <HugeiconsIcon
+                  icon={Cancel01Icon}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+              </Button>
+            </DrawerClose>
+            <FormCloseContext.Provider value={registerCloseGuard}>{children}</FormCloseContext.Provider>
+          </div>
+        </PortalContainerProvider>
+      </DrawerContent>
+    </Drawer>
+  );
+}

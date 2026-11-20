@@ -30,6 +30,8 @@ pnpm-debug.log*
 
 # coverage and caches
 coverage/
+test-results/
+playwright-report/
 .turbo/
 *.tsbuildinfo
 

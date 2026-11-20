@@ -38,6 +38,7 @@ import type {
   StudentProfile as StudentProfileData,
   StudentRateHistoryEntry,
 } from "@/lib/students/contracts";
+import type { StudentClassTimeline } from "@/lib/classes/contracts";
 import { cn } from "@/lib/utils";
 
 import { deleteStudentAction, setStudentActiveAction } from "../../actions";
@@ -47,11 +48,18 @@ import {
   studentThemeSwatches,
 } from "../../const/student-card-config";
 import { ProfileCardHeader } from "./profile-card-header";
+import { ClassList } from "./class-list";
 import { ProfileDetail } from "./profile-detail";
 import { ProfileTags } from "./profile-tags";
 import { StudentRateHistory } from "./student-rate-history";
 
-export function StudentProfile({ profile }: { profile: StudentProfileData }) {
+export function StudentProfile({
+  profile,
+  classTimeline,
+}: {
+  profile: StudentProfileData;
+  classTimeline: StudentClassTimeline;
+}) {
   const { student, currency, teacherTimeZone } = profile;
   const t = useTranslations("Students");
   const locale = useLocale();
@@ -415,6 +423,15 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
             </CardContent>
           </Card>
 
+          <div className="lg:col-span-12 min-w-0">
+            <ClassList
+            initialData={classTimeline}
+            studentId={student.id}
+            studentIsActive={isActive}
+            timeZone={teacherTimeZone}
+          />
+          </div>
+
           <StudentRateHistory
             currency={currency}
             initialData={profile.rateHistory}
@@ -424,6 +441,8 @@ export function StudentProfile({ profile }: { profile: StudentProfileData }) {
             timeZone={teacherTimeZone}
           />
         </section>
+
+
 
         <DeleteStudentConfirmation
           name={student.name}

@@ -1,10 +1,13 @@
+import { verifyTimelineNavigation } from "./helpers/class-timeline";
 import { expect, test } from "@playwright/test";
+import { selectClassTime } from "./helpers/class-scheduler";
 
-test.use({ locale: "es-AR" });
+test.use({ locale: "es-AR", hasTouch: true });
 
 test("el directorio y el formulario móvil se muestran en español", async ({
   page,
 }) => {
+  test.setTimeout(120_000);
   const suffix = Date.now();
 
   await page.goto("/signup");
@@ -167,6 +170,67 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   ).toBeVisible();
   await rateDialog.getByRole("button", { name: "Cancelar" }).click();
   await expect(rateDialog).toBeHidden();
+
+  await page.getByRole("link", { name: "Programar clase" }).click();
+  const classDrawer = page.getByRole("dialog", { name: "Programar clase" });
+  await expect(classDrawer).toBeVisible();
+  const scheduleSection = classDrawer.getByRole("button", {name:"Agenda", exact:true});
+  const occupiedSection = classDrawer.getByRole("button", {name:"Horarios ocupados", exact:true});
+  await expect(scheduleSection).toHaveAttribute("aria-expanded", "true");
+  await expect(occupiedSection).toHaveAttribute("aria-expanded", "false");
+  await expect(classDrawer.getByText(/Arrastra o toca/)).toHaveCount(0);
+  await classDrawer.getByLabel("Importe (USD)").fill("42.50");
+  await scheduleSection.click();
+  await expect(scheduleSection).toHaveAttribute("aria-expanded", "false");
+  await occupiedSection.click();
+  await expect(occupiedSection).toHaveAttribute("aria-expanded", "true");
+  await expect(classDrawer.getByText("No hay horarios ocupados en esta fecha.")).toBeVisible();
+  await occupiedSection.click();
+  await scheduleSection.click();
+  await expect(classDrawer.getByLabel("Importe (USD)")).toHaveValue("42.50");
+
+  const touch = await page.context().newCDPSession(page);
+  await selectClassTime(page, classDrawer, "11:00");
+  const endHandle = classDrawer.getByRole("slider", { name: "Ajustar hora de fin de la clase" });
+  await endHandle.scrollIntoViewIfNeeded();
+  await endHandle.click({trial: true});
+  const bounds = await endHandle.boundingBox();
+  expect(bounds).not.toBeNull();
+  const x = bounds!.x + bounds!.width / 2;
+  const y = bounds!.y + bounds!.height / 2;
+  await touch.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+  await touch.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y: y + 10 }] });
+  await touch.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await expect(classDrawer.getByText(/11:00 — 12:05 · 65 minutos/)).toBeVisible();
+  await endHandle.focus();
+  await page.keyboard.press("ArrowUp");
+  const startHandle = classDrawer.getByRole("slider", { name: "Ajustar hora de inicio de la clase" });
+  await startHandle.scrollIntoViewIfNeeded();
+  const startBounds = await startHandle.boundingBox();
+  const trackBounds = await classDrawer.locator('[data-slot="class-day-grid-track"]').boundingBox();
+  expect(startBounds).not.toBeNull();
+  expect(trackBounds).not.toBeNull();
+  await page.touchscreen.tap(trackBounds!.x + trackBounds!.width / 2, startBounds!.y + startBounds!.height / 2 + 10);
+  await expect(classDrawer.getByText(/11:05 — 12:05 · 60 minutos/)).toBeVisible();
+  await expect.poll(async () => {
+    const readout = await classDrawer.getByText(/11:05 — 12:05 · 60 minutos/).boundingBox();
+    const viewport = await classDrawer.locator('[data-slot="scroll-area-viewport"]').boundingBox();
+    return readout && viewport ? readout.y - viewport.y : -1;
+  }).toBeGreaterThanOrEqual(8);
+
+  await selectClassTime(page, classDrawer, "11:00");
+  await classDrawer.getByLabel("Importe (USD)").fill("42.50");
+  const mobileScreenshot = test.info().outputPath("class-mobile-grid.png");
+  await classDrawer.getByRole("region", { name: "Agenda del día" }).screenshot({ path: mobileScreenshot });
+  await test.info().attach("Spanish mobile interval grid", { path: mobileScreenshot, contentType: "image/png" });
+  await touch.detach();
+  await classDrawer.getByRole("button", { name: "Guardar clase" }).click();
+  await expect(classDrawer).toBeHidden();
+  await verifyTimelineNavigation(page, "vertical", "Cronología de clases", "Ir a ahora");
+  await page.getByRole("button", { name: /Programada.*60 minutos.*USD/ }).click();
+  await page.getByRole("menuitem", { name: "Eliminar permanentemente" }).click();
+  await page.getByRole("dialog", { name: "¿Eliminar la clase?" }).getByRole("button", { name: "Eliminar permanentemente" }).click();
+  await expect(page.getByText("Todavía no hay clases.", { exact: true })).toBeVisible();
 
   await page.goto("/");
   await page.getByRole("link", { name: "Configuración" }).click();

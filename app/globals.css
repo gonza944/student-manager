@@ -261,3 +261,13 @@
     opacity: 0;
   }
 }
+
+.timeline-fade-horizontal {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 2rem, black calc(100% - 2rem), transparent);
+  mask-image: linear-gradient(to right, transparent, black 2rem, black calc(100% - 2rem), transparent);
+}
+
+.timeline-fade-vertical {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 2rem, black calc(100% - 2rem), transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 2rem, black calc(100% - 2rem), transparent);
+}
