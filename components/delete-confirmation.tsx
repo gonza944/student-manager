@@ -28,6 +28,7 @@ export function DeleteConfirmation({
   pending,
   onOpenChange,
   onConfirm,
+  confirmVariant = "destructive",
 }: {
   title: string;
   description: string;
@@ -38,6 +39,7 @@ export function DeleteConfirmation({
   pending: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
+  confirmVariant?: "default" | "destructive";
 }) {
   const isDesktop = useIsDesktop();
   const actions = (
@@ -57,7 +59,7 @@ export function DeleteConfirmation({
       )}
       <Button
         type="button"
-        variant="destructive"
+        variant={confirmVariant}
         disabled={pending}
         onClick={onConfirm}>
         {confirmLabel}

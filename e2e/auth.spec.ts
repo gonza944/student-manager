@@ -1,4 +1,6 @@
+import { verifyTimelineNavigation } from "./helpers/class-timeline";
 import { expect, test } from "@playwright/test";
+import { selectClassTime } from "./helpers/class-scheduler";
 
 test("auth pages link to each other", async ({ page }) => {
   const consoleErrors: string[] = [];
@@ -44,6 +46,7 @@ test("currency options are grouped and filter as the teacher types", async ({
 });
 
 test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
+  test.setTimeout(120_000);
   const email = `e2e-${Date.now()}@example.test`;
   const password = "playwright-test";
 
@@ -217,29 +220,116 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await expect(page.getByText("Last updated", { exact: true })).toBeVisible();
   await expect(page.getByText("Learning goals", { exact: true })).toHaveCount(0);
 
-  await page.getByRole("button", { name: /Completed.*60 minutes/ }).click();
+  await page.getByRole("link", { name: "Schedule class" }).click();
+  const addClassDialog = page.getByRole("dialog", { name: "Schedule class" });
+  await expect(addClassDialog).toBeVisible();
+  const scheduleGrid = addClassDialog.getByRole("region", {name:"Day schedule", exact:true});
+  const initialGridHeight = await scheduleGrid.evaluate((element) => element.getBoundingClientRect().height);
+  const occupiedToggle = addClassDialog.getByRole("button", {name:"Occupied times", exact:true});
+  await occupiedToggle.click();
+  await expect.poll(() => scheduleGrid.evaluate((element) => element.getBoundingClientRect().height)).toBeLessThan(initialGridHeight - 20);
+  await occupiedToggle.click();
+  await expect.poll(() => scheduleGrid.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThan(initialGridHeight - 2);
+
+  await expect(addClassDialog.getByRole("combobox", { name: /Start time|End time/ })).toHaveCount(0);
+  await expect(addClassDialog.getByLabel("Duration", { exact: true })).toHaveCount(0);
+  await expect(addClassDialog.getByText(/^Ends at/)).toHaveCount(0);
+  await expect(addClassDialog.getByLabel("Charge (USD)")).toBeEditable();
+  const gridSelection = addClassDialog.getByRole("button", { name: "Select an available class interval" });
+  await gridSelection.focus();
+  await page.keyboard.press("Enter");
+  await expect(addClassDialog.getByRole("slider", { name: "Adjust class start time" })).toBeVisible();
+  await selectClassTime(page, addClassDialog, "12:00 AM");
+  const midnightBounds = await addClassDialog.getByText("12:00 AM", { exact: true }).boundingBox();
+  const gridViewportBounds = await addClassDialog.locator('[data-slot="scroll-area-viewport"]').boundingBox();
+  expect(midnightBounds!.y - gridViewportBounds!.y).toBeGreaterThanOrEqual(16);
+  const dateBounds = await addClassDialog.getByLabel("Date", { exact: true }).locator("..").boundingBox();
+  const chargeBounds = await addClassDialog.getByLabel("Charge (USD)").boundingBox();
+  expect(Math.abs(dateBounds!.y - chargeBounds!.y)).toBeLessThan(1);
+  await selectClassTime(page, addClassDialog, "11:00 AM");
+  const startHandle = addClassDialog.getByRole("slider", { name: "Adjust class start time" });
+  const endHandle = addClassDialog.getByRole("slider", { name: "Adjust class end time" });
+  await endHandle.focus();
+  for (let step = 0; step < 11; step++) await page.keyboard.press("ArrowUp");
+  await expect(addClassDialog.getByText(/11:00 AM — 11:05 AM · 5 minutes/)).toBeVisible();
+  for (let step = 0; step < 11; step++) await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  await expect(addClassDialog.getByText(/11:00 AM — 12:05 PM · 65 minutes/)).toBeVisible();
+  await page.keyboard.press("ArrowUp");
+  await expect(addClassDialog.getByText(/11:00 AM — 12:00 PM · 60 minutes/)).toBeVisible();
+  await startHandle.scrollIntoViewIfNeeded();
+  const handleBounds = await startHandle.boundingBox();
+  const trackBounds = await addClassDialog.locator('[data-slot="class-day-grid-track"]').boundingBox();
+  expect(handleBounds).not.toBeNull();
+  expect(trackBounds).not.toBeNull();
+  const dragX = trackBounds!.x + trackBounds!.width / 2;
+  const dragY = handleBounds!.y + handleBounds!.height / 2;
+  await page.mouse.move(dragX, dragY);
+  await page.mouse.down();
+  await page.mouse.move(dragX, dragY + 60, { steps: 6 });
+  await page.mouse.up();
+  await expect(addClassDialog.getByText(/11:00 AM — 11:30 AM · 30 minutes/)).toBeVisible();
+  await endHandle.focus();
+  for (let step = 0; step < 6; step++) await page.keyboard.press("ArrowDown");
+  await addClassDialog.getByLabel("Charge (USD)").fill("58.25");
+  const desktopScreenshot = test.info().outputPath("class-scheduler.png");
+  await addClassDialog.screenshot({ path: desktopScreenshot });
+  await test.info().attach("Desktop class scheduler", { path: desktopScreenshot, contentType: "image/png" });
+  await addClassDialog.getByRole("button", { name: "Save class" }).click();
+  await expect(page).toHaveURL(profileUrl);
+  const scheduledClass = page.getByRole("button", { name: /Scheduled.*60 minutes.*USD/ });
+  await expect(scheduledClass).toBeVisible();
+  await expect(page.getByRole("button", {name:"Older classes", exact:true})).toHaveCount(0);
+  await expect(page.getByText(/\d+ completed classes/)).toHaveCount(0);
+  await verifyTimelineNavigation(page, "horizontal", "Class timeline", "Go to now");
+  await page.setViewportSize({width:390, height:844});
+  await verifyTimelineNavigation(page, "vertical", "Class timeline", "Go to now");
+  await page.setViewportSize({width:1280, height:720});
+  await verifyTimelineNavigation(page, "horizontal", "Class timeline", "Go to now");
+
+  await page.reload();
+  await expect(scheduledClass).toContainText(/58\.25/);
+  await page.getByRole("link", { name: "Schedule class" }).click();
+  await selectClassTime(page, addClassDialog, "11:00 AM");
+  await expect(addClassDialog.getByRole("button", { name: "Save class" })).toBeDisabled();
+  await selectClassTime(page, addClassDialog, "12:00 PM");
+  await expect(addClassDialog.getByRole("button", { name: "Save class" })).toBeEnabled();
+  await addClassDialog.getByRole("button", { name: "Cancel", exact: true }).click();
+  await page.getByRole("dialog", { name: "Discard unsaved changes?" }).getByRole("button", { name: "Discard changes" }).click();
+  await expect(page).toHaveURL(profileUrl);
+  await scheduledClass.click();
   await page.getByRole("menuitem", { name: "Edit class" }).click();
-  await expect(page).toHaveURL(
-    `${profileUrl}/classes/preview-completed/edit`,
-  );
+  await expect(page).toHaveURL(new RegExp(`${profileUrl}/classes/[^/]+/edit$`));
   const classDialog = page.getByRole("dialog", { name: "Edit class" });
   await expect(classDialog).toBeVisible();
   await expect(page.locator("#student-profile-name")).toBeVisible();
-  await classDialog
-    .getByRole("button", { name: "Choose class start time" })
-    .click();
-  await page.getByRole("button", { name: "11:05 AM", exact: true }).click();
-  await expect(classDialog.getByRole("textbox", { name: "Start time" })).toHaveValue(
-    "11:05 AM",
-  );
+  await classDialog.getByRole("slider", { name: "Adjust class end time" }).focus();
+  for (let step = 0; step < 6; step++) await page.keyboard.press("ArrowDown");
   await classDialog.getByRole("button", { name: "Close class dialog" }).click();
+  const discardDialog = page.getByRole("dialog", { name: "Discard unsaved changes?" });
+  await expect(discardDialog).toBeVisible();
+  await discardDialog.getByRole("button", { name: "Keep editing" }).click();
+  await classDialog.getByRole("button", { name: "Save class" }).click();
   await expect(page).toHaveURL(profileUrl);
-  await page.getByRole("button", { name: /Completed.*60 minutes/ }).click();
+  await page.reload();
+  await page.getByRole("button", { name: /Scheduled.*90 minutes.*USD/ }).click();
+  await page.getByRole("menuitem", { name: "Mark completed" }).click();
+  await expect(page.getByRole("dialog", { name: "Change class status?" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Completed.*90 minutes.*USD/ })).toBeVisible();
+  await page.getByRole("button", { name: /Completed.*90 minutes.*USD/ }).click();
+  await page.getByRole("menuitem", { name: "Cancel class" }).click();
+  await page.getByRole("dialog", { name: "Change class status?" }).getByRole("button", { name: "Cancel class" }).click();
+  await expect(page.getByRole("button", { name: /Cancelled.*90 minutes.*USD/ })).toBeVisible();
+  await page.getByRole("button", { name: /Cancelled.*90 minutes.*USD/ }).click();
   await page.getByRole("menuitem", { name: "Delete permanently" }).click();
   const deleteClassDialog = page.getByRole("dialog", { name: "Delete class?" });
   await expect(deleteClassDialog).toBeVisible();
   await deleteClassDialog.getByRole("button", { name: "Keep class" }).click();
   await expect(deleteClassDialog).toBeHidden();
+  await page.getByRole("button", { name: /Cancelled.*90 minutes.*USD/ }).click();
+  await page.getByRole("menuitem", { name: "Delete permanently" }).click();
+  await deleteClassDialog.getByRole("button", { name: "Delete permanently" }).click();
+  await expect(page.getByText("No classes yet.", { exact: true })).toBeVisible();
 
   await page.reload();
   await expect(
@@ -327,6 +417,8 @@ test("a teacher can sign up, log out, and sign back in", async ({ page }) => {
   await deleteDrawer
     .getByRole("button", { name: "Delete forever" })
     .click();
+  await expect(deleteDrawer).toBeHidden();
+  await expect(page.getByText("No students yet.", { exact: true })).toBeVisible();
   await expect(studentCard).toHaveCount(0);
   await page.reload();
   await expect(

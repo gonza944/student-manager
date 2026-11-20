@@ -76,7 +76,7 @@ export async function createTeacherStudentClass(
       durationMinutes: input.durationMinutes,
       hourlyRateSnapshotMinor: owner.hourlyRateMinor,
       currency: owner.currency,
-      chargeMinor: calculateClassChargeMinor(
+      chargeMinor: input.chargeMinor ?? calculateClassChargeMinor(
         owner.hourlyRateMinor,
         input.durationMinutes,
       ),

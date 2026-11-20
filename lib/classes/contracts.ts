@@ -28,6 +28,7 @@ export const createStudentClassInputSchema = z.object({
   studentId: entityIdSchema,
   scheduledAt: z.iso.datetime(),
   durationMinutes: durationMinutesSchema,
+  chargeMinor: z.int().nonnegative().max(100_000_000).optional(),
 });
 
 export const updateStudentClassInputSchema = studentClassIdInputSchema.extend({

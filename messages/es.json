@@ -62,10 +62,10 @@
     "viewSchedule": "Ver agenda",
     "toggleTheme": "Cambiar tema de color",
     "settings": "Configuración",
-  "logout": "Cerrar sesión",
-  "loggingOut": "Cerrando sesión…",
-  "logoutFailed": "No pudimos cerrar tu sesión. Inténtalo de nuevo.",
-  "weekLocation": "Semana {week} / {location}",
+    "logout": "Cerrar sesión",
+    "loggingOut": "Cerrando sesión…",
+    "logoutFailed": "No pudimos cerrar tu sesión. Inténtalo de nuevo.",
+    "weekLocation": "Semana {week} / {location}",
     "title": "Enseña, sin el ruido administrativo.",
     "overviewLabel": "Resumen de enseñanza",
     "detailsLabel": "Detalles del panel",
@@ -383,7 +383,12 @@
       "cancel": "Cancelar clase",
       "delete": "Eliminar permanentemente",
       "save": "Guardar clase",
-      "backToProfile": "Volver al estudiante"
+      "backToProfile": "Volver al estudiante",
+      "saving": "Guardando…",
+      "discard": "Cancelar",
+      "earlier": "Clases anteriores",
+      "later": "Clases siguientes",
+      "retry": "Reintentar"
     },
     "modal": {
       "close": "Cerrar diálogo de clase"
@@ -408,11 +413,62 @@
       "datePlaceholder": "DD/MM/AAAA",
       "openDate": "Elegir fecha de la clase",
       "startTime": "Hora de inicio",
+      "endTime": "Hora de fin",
+      "openEndTime": "Elegir hora de fin de la clase",
       "openTime": "Elegir hora de inicio de la clase",
       "dateTime": "Fecha y hora",
       "duration": "Duración",
       "charge": "Importe",
-      "timeZone": "Zona horaria"
+      "timeZone": "Zona horaria",
+      "chargeCurrency": "Importe ({currency})"
+    },
+    "empty": "Todavía no hay clases.",
+    "completedCount": "{count, plural, one {# clase completada} other {# clases completadas}}",
+    "loading": "Cargando horarios disponibles…",
+    "noTimes": "No hay horarios disponibles para esta duración.",
+    "endsAt": "Termina a las {time}",
+    "grid": {
+      "title": "Agenda del día",
+      "startLabel": "Inicio",
+      "endLabel": "Fin",
+      "help": "Arrastra o toca una hora libre para seleccionar un intervalo. Ajusta los controles de inicio y fin. Con el teclado, pulsa Enter para seleccionar y usa las flechas para ajustar.",
+      "selectInterval": "Seleccionar un intervalo disponible para la clase",
+      "startHandle": "Ajustar hora de inicio de la clase",
+      "endHandle": "Ajustar hora de fin de la clase"
+    },
+    "occupied": "Horarios ocupados",
+    "success": {
+      "created": "Clase programada.",
+      "updated": "Clase actualizada.",
+      "changed": "Clase actualizada."
+    },
+    "lifecycle": {
+      "title": "¿Cambiar el estado de la clase?",
+      "completeDescription": "¿Marcar esta clase como completada?",
+      "cancelDescription": "¿Cancelar esta clase? Su horario quedará disponible."
+    },
+    "discard": {
+      "title": "¿Descartar los cambios sin guardar?",
+      "description": "Los cambios de la clase no se han guardado.",
+      "keep": "Seguir editando",
+      "confirm": "Descartar cambios"
+    },
+    "errors": {
+      "validation": "Revisa la fecha, duración, hora e importe.",
+      "duration": "Usa una duración entre 5 y 1500 minutos, en incrementos de 5 minutos.",
+      "scheduleConflict": "Este horario está ocupado. Elige otro.",
+      "general": "No pudimos completar la acción. Inténtalo de nuevo.",
+      "availability": "No pudimos cargar la disponibilidad. Inténtalo de nuevo.",
+      "inactiveStudent": "Activa al estudiante antes de programar una clase."
+    },
+    "timeline": {
+      "label": "Cronología de clases",
+      "now": "Ahora",
+      "goToNow": "Ir a ahora"
+    },
+    "sections": {
+      "schedule": "Agenda",
+      "noOccupied": "No hay horarios ocupados en esta fecha."
     }
   }
 }

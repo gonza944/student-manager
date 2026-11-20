@@ -1,4 +1,4 @@
-import { ClassPreviewContent } from "@/app/students/[studentId]/classes/components/class-preview-content";
+import { ClassFormContent } from "@/app/students/[studentId]/classes/components/class-form-content";
 import { ClassModal } from "@/app/students/components/class-modal";
 
 export default async function EditClassModalPage({
@@ -7,7 +7,7 @@ export default async function EditClassModalPage({
   const { studentId, classId } = await params;
   return (
     <ClassModal mode="edit">
-      <ClassPreviewContent mode="edit" studentId={studentId} classId={classId} />
+      <ClassFormContent mode="edit" studentId={studentId} classId={classId} />
     </ClassModal>
   );
 }

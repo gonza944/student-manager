@@ -63,6 +63,42 @@ test("limits lifecycle changes and validates availability dates", () => {
   );
 });
 
+test("creation accepts a manual charge without trusting an hourly-rate override", () => {
+  const input = {
+    studentId: "student-1",
+    scheduledAt: "2026-10-07T14:00:00.000Z",
+    durationMinutes: 60,
+  };
+  assert.equal(
+    createStudentClassInputSchema.parse({ ...input, chargeMinor: 0 })
+      .chargeMinor,
+    0,
+  );
+  assert.equal(
+    createStudentClassInputSchema.parse({
+      ...input,
+      chargeMinor: 5825,
+      hourlyRateSnapshotMinor: 1,
+    }).chargeMinor,
+    5825,
+  );
+  assert.equal(
+    "hourlyRateSnapshotMinor" in
+      createStudentClassInputSchema.parse({
+        ...input,
+        hourlyRateSnapshotMinor: 1,
+      }),
+    false,
+  );
+  for (const chargeMinor of [-1, 1.5, 100_000_001, NaN]) {
+    assert.equal(
+      createStudentClassInputSchema.safeParse({ ...input, chargeMinor })
+        .success,
+      false,
+    );
+  }
+});
+
 test("requires stable timeline cursors", () => {
   assert.equal(
     studentClassPageInputSchema.safeParse({

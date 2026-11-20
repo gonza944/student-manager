@@ -3,7 +3,7 @@
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +23,9 @@ import { PortalContainerProvider } from "@/components/ui/portal-container";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
 
+const FormCloseContext = createContext<((guard: (() => void) | null) => void) | null>(null);
+export const useFormCloseGuard = () => useContext(FormCloseContext);
+
 export function RouteFormModal({
   children,
   title,
@@ -37,12 +40,17 @@ export function RouteFormModal({
   className?: string;
 }) {
   const router = useRouter();
+  const closeGuard = useRef<(() => void) | null>(null);
+  const registerCloseGuard = useCallback((guard: (() => void) | null) => { closeGuard.current = guard; }, []);
   const isDesktop = useIsDesktop();
   const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(
     null,
   );
   const close = (open: boolean) => {
-    if (!open) router.back();
+    if (!open) {
+      if (closeGuard.current) closeGuard.current();
+      else router.back();
+    }
   };
 
   if (isDesktop) {
@@ -57,7 +65,7 @@ export function RouteFormModal({
             {description}
           </DialogDescription>
           <PortalContainerProvider container={portalContainer}>
-            {children}
+            <FormCloseContext.Provider value={registerCloseGuard}>{children}</FormCloseContext.Provider>
           </PortalContainerProvider>
         </DialogContent>
       </Dialog>
@@ -87,7 +95,7 @@ export function RouteFormModal({
                 />
               </Button>
             </DrawerClose>
-            {children}
+            <FormCloseContext.Provider value={registerCloseGuard}>{children}</FormCloseContext.Provider>
           </div>
         </PortalContainerProvider>
       </DrawerContent>

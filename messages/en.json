@@ -62,10 +62,10 @@
     "viewSchedule": "View schedule",
     "toggleTheme": "Toggle color theme",
     "settings": "Settings",
-  "logout": "Log out",
-  "loggingOut": "Logging out…",
-  "logoutFailed": "We couldn't log you out. Please try again.",
-  "weekLocation": "Week {week} / {location}",
+    "logout": "Log out",
+    "loggingOut": "Logging out…",
+    "logoutFailed": "We couldn't log you out. Please try again.",
+    "weekLocation": "Week {week} / {location}",
     "title": "Teaching, without the admin noise.",
     "overviewLabel": "Teaching overview",
     "detailsLabel": "Dashboard details",
@@ -383,7 +383,12 @@
       "cancel": "Cancel class",
       "delete": "Delete permanently",
       "save": "Save class",
-      "backToProfile": "Back to student"
+      "backToProfile": "Back to student",
+      "saving": "Saving…",
+      "discard": "Cancel",
+      "earlier": "Older classes",
+      "later": "Later classes",
+      "retry": "Retry"
     },
     "modal": {
       "close": "Close class dialog"
@@ -408,11 +413,62 @@
       "datePlaceholder": "MM/DD/YYYY",
       "openDate": "Choose class date",
       "startTime": "Start time",
+      "endTime": "End time",
+      "openEndTime": "Choose class end time",
       "openTime": "Choose class start time",
       "dateTime": "Date and time",
       "duration": "Duration",
       "charge": "Charge",
-      "timeZone": "Time zone"
+      "timeZone": "Time zone",
+      "chargeCurrency": "Charge ({currency})"
+    },
+    "empty": "No classes yet.",
+    "completedCount": "{count, plural, one {# completed class} other {# completed classes}}",
+    "loading": "Loading available times…",
+    "noTimes": "No available times for this duration.",
+    "endsAt": "Ends at {time}",
+    "grid": {
+      "title": "Day schedule",
+      "startLabel": "Start",
+      "endLabel": "End",
+      "help": "Drag or tap a free time to select an interval. Adjust the start/end handles. With the keyboard, press Enter to select, then use the arrow keys to adjust.",
+      "selectInterval": "Select an available class interval",
+      "startHandle": "Adjust class start time",
+      "endHandle": "Adjust class end time"
+    },
+    "occupied": "Occupied times",
+    "success": {
+      "created": "Class scheduled.",
+      "updated": "Class updated.",
+      "changed": "Class updated."
+    },
+    "lifecycle": {
+      "title": "Change class status?",
+      "completeDescription": "Mark this class as completed?",
+      "cancelDescription": "Cancel this class? Its time slot will become available."
+    },
+    "discard": {
+      "title": "Discard unsaved changes?",
+      "description": "Your class changes have not been saved.",
+      "keep": "Keep editing",
+      "confirm": "Discard changes"
+    },
+    "errors": {
+      "validation": "Check the date, duration, time, and charge.",
+      "duration": "Use a duration from 5 to 1500 minutes, in 5-minute increments.",
+      "scheduleConflict": "This interval is already occupied. Choose another time.",
+      "general": "We couldn't complete this action. Try again.",
+      "availability": "We couldn't load availability. Try again.",
+      "inactiveStudent": "Activate this student before scheduling a class."
+    },
+    "timeline": {
+      "label": "Class timeline",
+      "now": "Now",
+      "goToNow": "Go to now"
+    },
+    "sections": {
+      "schedule": "Schedule",
+      "noOccupied": "No occupied times on this date."
     }
   }
 }

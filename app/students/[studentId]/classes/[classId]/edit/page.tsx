@@ -1,10 +1,10 @@
-import { ClassPreviewContent } from "../../components/class-preview-content";
+import { ClassFormContent } from "../../components/class-form-content";
 
 export default async function EditClassPage({
   params,
 }: PageProps<"/students/[studentId]/classes/[classId]/edit">) {
   const { studentId, classId } = await params;
   return (
-    <ClassPreviewContent mode="edit" studentId={studentId} classId={classId} />
+    <ClassFormContent mode="edit" studentId={studentId} classId={classId} />
   );
 }

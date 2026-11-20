@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { getDevelopmentStudentClasses } from "@/lib/classes/development-fixtures";
+import { getStudentClassTimelineAction } from "@/app/students/classes/query-actions";
+import { notFound } from "next/navigation";
 
 import { StudentProfile } from "./components/student-profile";
 import { loadStudentProfile } from "./load-profile";
@@ -25,20 +26,19 @@ export default async function StudentProfilePage({
   params,
 }: PageProps<"/students/[studentId]">) {
   const { studentId } = await params;
-  const profile = await loadStudentProfile(studentId);
-  const previewClasses =
-    process.env.NODE_ENV === "development"
-      ? getDevelopmentStudentClasses(
-          profile.student.id,
-          profile.student.name,
-          profile.currency,
-        )
-      : [];
+  const [profile, result] = await Promise.all([
+    loadStudentProfile(studentId),
+    getStudentClassTimelineAction({ studentId }),
+  ]);
+  if (!result.ok) {
+    if (result.error === "notFound") notFound();
+    throw new Error(result.error);
+  }
   return (
     <StudentProfile
       key={profile.student.updatedAt}
       profile={profile}
-      previewClasses={previewClasses}
+      classTimeline={result.data}
     />
   );
 }

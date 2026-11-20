@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { getDb } from "@/db";
+import { isScheduleConflict } from "@/lib/classes/conflicts";
 import {
   createStudentClassInputSchema,
   setStudentClassStatusInputSchema,
@@ -22,13 +23,6 @@ import {
   validationError,
   type ClassActionResult,
 } from "./action-context";
-
-function isScheduleConflict(error: unknown) {
-  return (
-    error instanceof Error &&
-    error.message.includes("student_class interval overlaps an existing class")
-  );
-}
 
 function revalidateClassPaths(studentId: string, classId: string) {
   revalidatePath(`/students/${studentId}`);

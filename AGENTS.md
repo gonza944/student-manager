@@ -33,3 +33,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Additive schema changes must use `ALTER TABLE ... ADD COLUMN` and an explicit backfill. Never drop or rebuild a populated table just to add a column.
 - Never drop, recreate, truncate, or synthesize historical production data unless the user explicitly approves that exact data-changing operation.
 - Every migration that changes existing data must include a regression test proving unrelated rows remain unchanged.
+
+## Phased delivery
+
+- Organize implementation plans into ordered phases with clear outcomes and verification.
+- After each completed and verified implementation phase, commit its changes and push the working branch before starting the next phase.
