@@ -125,6 +125,7 @@ export async function updateTeacherStudentClass(
     input.durationMinutes,
     existing.studentSince,
     existing.timeZone,
+    existing,
   );
   if (!interval.ok) return { status: interval.error } as const;
 

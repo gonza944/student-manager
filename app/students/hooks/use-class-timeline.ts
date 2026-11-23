@@ -12,7 +12,7 @@ type PageParam = { direction: "earlier" | "later"; cursor: ClassCursor } | null;
 export function useClassTimeline(
   studentId: string,
   initialData: StudentClassTimeline,
-  version: number,
+  version: string,
 ) {
   const initialPage = {
     classes: [...initialData.past, ...initialData.future],

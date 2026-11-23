@@ -56,7 +56,7 @@ test("teachers can filter, sort, and change student status", async ({
     if (student.email) {
       await dialog.getByLabel("Email address").fill(student.email);
     }
-    if ("birthDate" in student) {
+    if (student.birthDate) {
       const calendarTrigger = dialog.getByRole("button", {
         name: "Open calendar",
       });

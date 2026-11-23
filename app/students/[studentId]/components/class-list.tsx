@@ -48,7 +48,9 @@ export function ClassList({
   const query = useQuery({
     queryKey,
     initialData,
-    staleTime: Infinity,
+    staleTime: 60_000,
+    refetchInterval: 60_000,
+    refetchOnMount: "always",
     queryFn: async () => {
       const result = await getStudentClassTimelineAction({ studentId });
       if (!result.ok) throw new Error(result.error);
@@ -96,8 +98,8 @@ export function ClassList({
     <section className="min-w-0" aria-labelledby="classes-title">
       <Card className="border-orbit-ink/20 bg-paper-strong text-orbit-ink shadow-none">
         <ClassTimeline
-          key={query.dataUpdatedAt}
-          version={query.dataUpdatedAt}
+          key={query.data.revision}
+          version={query.data.revision}
           studentId={studentId}
           initialData={query.data}
           timeZone={timeZone}

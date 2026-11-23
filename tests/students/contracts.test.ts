@@ -130,7 +130,7 @@ test("validates and normalizes the input used to update a student", () => {
     studentId: validStudent.id,
   });
 
-  assert.equal(student.id, undefined);
+  assert.equal("id" in student, false);
   assert.equal(student.studentId, "student-01");
   assert.equal(student.email, "sofia@example.com");
   assert.equal(student.nationalityCode, "AR");

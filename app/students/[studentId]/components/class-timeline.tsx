@@ -24,7 +24,7 @@ export function ClassTimeline({
 }: {
   studentId: string;
   initialData: StudentClassTimeline;
-  version: number;
+  version: string;
   timeZone: string;
   actions: ReactNode;
   isError: boolean;

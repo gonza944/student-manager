@@ -62,3 +62,23 @@ test("rejects intervals before studentSince and across local midnight", () => {
     { ok: false, error: "invalidInterval" },
   );
 });
+
+test("allows an unchanged historical interval but rejects backdated rescheduling", () => {
+  const scheduledAt = new Date("2026-09-01T15:00:00.000Z");
+  const existing = { scheduledAt, durationMinutes: 60 };
+  const timeZone = "America/Argentina/Cordoba";
+  const resolve = (start: Date, duration: number) =>
+    resolveClassInterval(start, duration, "2026-09-02", timeZone, existing);
+
+  assert.deepEqual(resolve(scheduledAt, 60), { ok: true, localDate: "2026-09-01" });
+  assert.deepEqual(resolve(scheduledAt, 65), { ok: false, error: "invalidDate" });
+  assert.deepEqual(resolve(new Date("2026-09-01T16:00:00Z"), 60), {
+    ok: false, error: "invalidDate",
+  });
+  assert.deepEqual(resolve(new Date("2026-08-31T15:00:00Z"), 60), {
+    ok: false, error: "invalidDate",
+  });
+  assert.deepEqual(resolve(new Date("2026-09-02T15:00:00Z"), 60), {
+    ok: true, localDate: "2026-09-02",
+  });
+});

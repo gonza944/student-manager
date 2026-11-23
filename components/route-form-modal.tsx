@@ -23,7 +23,7 @@ import { PortalContainerProvider } from "@/components/ui/portal-container";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
 
-const FormCloseContext = createContext<((guard: (() => void) | null) => void) | null>(null);
+export const FormCloseContext = createContext<((guard: (() => void) | null) => void) | null>(null);
 export const useFormCloseGuard = () => useContext(FormCloseContext);
 
 export function RouteFormModal({

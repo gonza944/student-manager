@@ -39,9 +39,14 @@ export function resolveClassInterval(
   durationMinutes: number,
   studentSince: string,
   timeZone: string,
+  existing?: { scheduledAt: Date; durationMinutes: number },
 ) {
   const localDate = getDateOnlyToday(timeZone, scheduledAt);
-  if (!localDate || localDate < studentSince) {
+  const unchanged =
+    existing &&
+    scheduledAt.getTime() === existing.scheduledAt.getTime() &&
+    durationMinutes === existing.durationMinutes;
+  if (!localDate || (localDate < studentSince && !unchanged)) {
     return { ok: false, error: "invalidDate" } as const;
   }
   if (

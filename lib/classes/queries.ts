@@ -133,7 +133,7 @@ export async function getTeacherStudentClassTimeline(
     eq(studentClass.teacherId, teacherId),
     eq(studentClass.studentId, input.studentId),
   );
-  const [studentRows, pastRows, futureRows, completedRows] = await db.batch([
+  const [studentRows, pastRows, futureRows, summaryRows] = await db.batch([
     db
       .select({ id: student.id })
       .from(student)
@@ -156,9 +156,13 @@ export async function getTeacherStudentClassTimeline(
       .orderBy(asc(studentClass.scheduledAt), asc(studentClass.id))
       .limit(input.limit + 1),
     db
-      .select({ count: sql<number>`count(*)` })
+      .select({
+        count: sql<number>`sum(case when ${studentClass.status} = 'completed' then 1 else 0 end)`,
+        total: sql<number>`count(*)`,
+        updatedAtTotal: sql<string>`cast(coalesce(sum(${studentClass.updatedAt}), 0) as text)`,
+      })
       .from(studentClass)
-      .where(and(filters, eq(studentClass.status, "completed"))),
+      .where(filters),
   ]);
   if (!studentRows[0]) return null;
 
@@ -174,7 +178,8 @@ export async function getTeacherStudentClassTimeline(
       hasEarlier && pastPage.at(-1) ? toCursor(pastPage.at(-1)!) : null,
     laterCursor:
       hasLater && futurePage.at(-1) ? toCursor(futurePage.at(-1)!) : null,
-    completedCount: Number(completedRows[0]?.count ?? 0),
+    completedCount: Number(summaryRows[0]?.count ?? 0),
+    revision: `${summaryRows[0]?.total ?? 0}:${summaryRows[0]?.updatedAtTotal ?? "0"}:${summaryRows[0]?.count ?? 0}`,
   });
 }
 

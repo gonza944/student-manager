@@ -104,6 +104,7 @@ export const studentClassTimelineSchema = z.object({
   earlierCursor: classCursorSchema.nullable(),
   laterCursor: classCursorSchema.nullable(),
   completedCount: z.int().nonnegative(),
+  revision: z.string(),
 });
 
 export type ClassStatus = (typeof classStatuses)[number];

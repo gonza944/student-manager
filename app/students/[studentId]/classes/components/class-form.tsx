@@ -96,7 +96,11 @@ export function ClassForm({
     durationMinutes <= 1500;
   const validDate =
     classAvailabilityInputSchema.safeParse({ localDate: date }).success &&
-    date >= studentSince;
+    (date >= studentSince ||
+      (studentClass &&
+        date === initialDate &&
+        scheduledAt === studentClass?.scheduledAt &&
+        durationMinutes === studentClass.durationMinutes));
   const inactive = !studentClass && !studentIsActive;
   const availability = useQuery({
     queryKey: ["class-availability", date, studentClass?.id ?? null],
@@ -266,12 +270,20 @@ export function ClassForm({
                     placeholder={t("fields.datePlaceholder")}
                     openLabel={t("fields.openDate")}
                     minDate={studentSince}
+                    allowedDate={studentClass ? initialDate : undefined}
                     limitToToday={false}
                     required
                     invalid={!validDate}
                     onValueChange={(value) => {
                       setDate(value);
-                      setScheduledAt("");
+                      setScheduledAt(
+                        value === initialDate && studentClass
+                          ? studentClass.scheduledAt
+                          : "",
+                      );
+                      if (value === initialDate && studentClass) {
+                        changeDuration(String(studentClass.durationMinutes));
+                      }
                     }}
                   />
                 </div>
@@ -324,7 +336,8 @@ export function ClassForm({
                     save.isPending ||
                     inactive ||
                     availability.isFetching ||
-                    !validDuration
+                    !validDuration ||
+                    date < studentSince
                   }
                   onSelect={(start, nextDuration) => {
                     setScheduledAt(start);
