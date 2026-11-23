@@ -1,0 +1,68 @@
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
+import { Clock03Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Badge } from "@/components/ui/badge";
+import type { StudentClassDto } from "@/lib/classes/contracts";
+import type { TimelineOrientation } from "@/components/timeline/layout";
+
+export function ClassSummary({
+  studentClass,
+  timeZone,
+  orientation,
+  above,
+}: {
+  studentClass: StudentClassDto;
+  timeZone: string;
+  orientation: TimelineOrientation;
+  above: boolean;
+}) {
+  const locale = useLocale();
+  const t = useTranslations("Classes");
+  const charge = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: studentClass.currency,
+    currencyDisplay: "code",
+  });
+  const fractionDigits = charge.resolvedOptions().maximumFractionDigits ?? 2;
+  const dateTime = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone,
+  });
+  return (
+    <>
+      <Badge
+        variant={
+          studentClass.status === "completed"
+            ? "success"
+            : studentClass.status === "cancelled"
+              ? "destructive"
+              : "outline"
+        }
+        className={
+          studentClass.status === "cancelled"
+            ? "border border-destructive/20 bg-destructive/10 text-destructive"
+            : studentClass.status === "scheduled"
+              ? "border-orbit-ink/30 bg-transparent text-orbit-ink"
+              : undefined
+        }
+      >
+        {t(`statuses.${studentClass.status}`)}
+      </Badge>
+      <span
+        className={`rounded-full border border-orbit-ink/20 bg-paper-strong px-3 py-1.5 text-sm font-bold ${orientation === "horizontal" ? `absolute left-1/2 -translate-x-1/2 whitespace-nowrap ${above ? "-bottom-12" : "-top-12"}` : "mt-3 max-w-full"}`}
+      >
+        {dateTime.format(new Date(studentClass.scheduledAt))}
+      </span>
+      <span className="mt-2 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+        <HugeiconsIcon icon={Clock03Icon} aria-hidden="true" />
+        {t("duration", { minutes: studentClass.durationMinutes })}
+      </span>
+      <span className="mt-2 font-bold">
+        {charge.format(studentClass.chargeMinor / 10 ** fractionDigits)}
+      </span>
+    </>
+  );
+}

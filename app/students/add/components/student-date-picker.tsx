@@ -38,7 +38,9 @@ export function StudentDatePicker({
   describedBy,
   autoComplete,
   minDate,
+  allowedDate,
   maxDate,
+  limitToToday = true,
   required = false,
   onValueChange,
 }: {
@@ -53,7 +55,9 @@ export function StudentDatePicker({
   describedBy?: string;
   autoComplete?: string;
   minDate?: string;
+  allowedDate?: string;
   maxDate?: string;
+  limitToToday?: boolean;
   required?: boolean;
   onValueChange: (value: string) => void;
 }) {
@@ -61,11 +65,17 @@ export function StudentDatePicker({
   const selectedDate = parseIsoDateOnly(value);
   const today = parseIsoDateOnly(getDateOnlyToday(timeZone) ?? "");
   const minimumDate = parseIsoDateOnly(minDate ?? "");
-  const maximumDate = parseIsoDateOnly(maxDate ?? "") ?? today;
+  const exceptionDate = parseIsoDateOnly(allowedDate ?? "");
+  const earliestDate =
+    exceptionDate && minimumDate && exceptionDate < minimumDate
+      ? exceptionDate
+      : minimumDate;
+  const maximumDate =
+    parseIsoDateOnly(maxDate ?? "") ?? (limitToToday ? today : undefined);
   const startMonth =
-    minimumDate && maximumDate && minimumDate > maximumDate
+    earliestDate && maximumDate && earliestDate > maximumDate
       ? maximumDate
-      : minimumDate ??
+      : earliestDate ??
         (today ? new Date(today.getFullYear() - 120, 0, 1) : undefined);
   const formatDate = (date: Date) => formatDateInput(date, locale);
   const [open, setOpen] = useState(false);
@@ -154,7 +164,9 @@ export function StudentDatePicker({
           month={month}
           onMonthChange={setMonth}
           disabled={(date) =>
-            (minimumDate ? date < minimumDate : false) ||
+            (minimumDate
+              ? date < minimumDate && toIsoDateOnly(date) !== allowedDate
+              : false) ||
             (maximumDate ? date > maximumDate : false)
           }
           onSelect={(date) => {

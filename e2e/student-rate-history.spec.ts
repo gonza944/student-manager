@@ -117,7 +117,7 @@ test("records rate changes once and keeps histories teacher-scoped", async ({
   ).toHaveCount(0);
   await expect(
     rows.nth(3).getByRole("button", { name: /Delete rate starting/ }),
-  ).toHaveCount(0);
+  ).toHaveCount(1);
 
   await rows
     .nth(2)
@@ -144,6 +144,26 @@ test("records rate changes once and keeps histories teacher-scoped", async ({
   await expect(rows.nth(1)).toHaveClass(/bg-orbit-ink/);
   await expect(rows.nth(1)).toContainText("Preply");
   await expect(rows.nth(1)).toContainText("$30.00");
+
+  await rows
+    .nth(2)
+    .getByRole("button", { name: /Delete rate starting/ })
+    .click();
+  const oldestRateDeleted = page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      new URL(response.url()).pathname === studentProfileUrl &&
+      response.ok(),
+  );
+  await deleteDialog.getByRole("button", { name: "Delete rate" }).click();
+  await oldestRateDeleted;
+  await expect(rows).toHaveCount(2);
+  await page.reload();
+  await expect(rows).toHaveCount(2);
+  await expect(rows.nth(1)).toContainText("$30.00");
+  await expect(
+    rows.nth(1).getByRole("button", { name: /Delete rate starting/ }),
+  ).toHaveCount(0);
 
   await page.getByRole("link", { name: "Back to students" }).click();
   const studentCard = page.getByRole("article").filter({
