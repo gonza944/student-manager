@@ -100,8 +100,8 @@ export function ClassTimeline({
           )
         }
       />
-      <div className="flex flex-wrap gap-2 px-6">
-        {query.isError ? (
+      {query.isError ? (
+        <div className="px-6">
           <Button
             variant="outline"
             disabled={query.isFetching}
@@ -113,17 +113,8 @@ export function ClassTimeline({
           >
             {t("actions.retry")}
           </Button>
-        ) : null}
-        {query.hasNextPage ? (
-          <Button
-            variant="outline"
-            disabled={query.isFetching}
-            onClick={() => void query.fetchNextPage()}
-          >
-            {t("actions.later")}
-          </Button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </>
   );
 }
