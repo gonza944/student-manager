@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { getStudentClassTimelineAction } from "@/app/students/classes/query-actions";
+import { getClassTimelineAction } from "@/app/students/classes/query-actions";
 import { notFound } from "next/navigation";
 
 import { StudentProfile } from "./components/student-profile";
@@ -28,7 +28,7 @@ export default async function StudentProfilePage({
   const { studentId } = await params;
   const [profile, result] = await Promise.all([
     loadStudentProfile(studentId),
-    getStudentClassTimelineAction({ studentId }),
+    getClassTimelineAction({ studentId }),
   ]);
   if (!result.ok) {
     if (result.error === "notFound") notFound();

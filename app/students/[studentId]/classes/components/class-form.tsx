@@ -1,17 +1,19 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { StudentDatePicker } from "@/app/students/add/components/student-date-picker";
+import { getClassFormReturnHref } from "@/app/students/classes/navigation";
 import {
   createStudentClassAction,
   updateStudentClassAction,
 } from "@/app/students/classes/mutation-actions";
 import { getClassAvailabilityAction } from "@/app/students/classes/query-actions";
+import { classTimelineQueryKey } from "@/app/students/queries/class-timeline-query-key";
 import { toMinorUnits } from "@/app/students/utils/to-minor-units";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmation } from "@/components/delete-confirmation";
@@ -35,6 +37,7 @@ import { ClassDayGrid } from "./class-day-grid";
 
 export function ClassForm({
   studentId,
+  timelineStudentId,
   studentClass,
   timeZone,
   studentSince,
@@ -44,6 +47,7 @@ export function ClassForm({
   initialDate,
 }: {
   studentId: string;
+  timelineStudentId?: string;
   studentClass?: StudentClassDto;
   timeZone: string;
   studentSince: string;
@@ -55,6 +59,8 @@ export function ClassForm({
   const t = useTranslations("Classes");
   const locale = useLocale();
   const router = useRouter();
+  const fromDashboard = useSearchParams().get("from") === "dashboard";
+  const returnHref = getClassFormReturnHref(studentId, fromDashboard);
   const queryClient = useQueryClient();
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
@@ -191,12 +197,12 @@ export function ClassForm({
       setSaved(true);
       await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: ["student-classes", studentId],
+          queryKey: classTimelineQueryKey(timelineStudentId),
         }),
         queryClient.invalidateQueries({ queryKey: ["class-availability"] }),
       ]);
       toast.success(t(studentClass ? "success.updated" : "success.created"));
-      router.push(`/students/${studentId}`);
+      router.push(returnHref);
       router.refresh();
     },
   });
@@ -404,7 +410,7 @@ export function ClassForm({
             variant="outline"
             onClick={() => {
               if (dirty) setDiscardOpen(true);
-              else router.push(`/students/${studentId}`);
+              else router.push(returnHref);
             }}
           >
             {t("actions.discard")}
@@ -423,7 +429,7 @@ export function ClassForm({
         onConfirm={() => {
           setSaved(true);
           setDiscardOpen(false);
-          router.push(`/students/${studentId}`);
+          router.push(returnHref);
         }}
       />
     </form>

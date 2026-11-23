@@ -7,7 +7,12 @@ export default async function EditClassModalPage({
   const { studentId, classId } = await params;
   return (
     <ClassModal mode="edit">
-      <ClassFormContent mode="edit" studentId={studentId} classId={classId} />
+      <ClassFormContent
+        mode="edit"
+        studentId={studentId}
+        timelineStudentId={studentId}
+        classId={classId}
+      />
     </ClassModal>
   );
 }

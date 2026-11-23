@@ -10,13 +10,14 @@ import {
   Message01Icon,
   Orbit02Icon,
   Settings02Icon,
-  TeacherIcon,
   UserMultipleIcon,
 } from "@hugeicons/core-free-icons";
 import { getFormatter, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { dashboardClassTimelineId } from "@/app/students/classes/navigation";
+import { ClassList } from "@/app/students/components/class-list";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { DashboardLogoutButton } from "@/components/dashboard-logout-button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -32,24 +33,13 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { requireRole } from "@/lib/auth/server";
 import { getDb } from "@/db";
-import { getTeacherStudentCounts } from "@/lib/students/data";
-
-const classes = [
-  { time: "18:30", student: "Emma Reed", level: "B2", lesson: "speaking", status: "ready" },
-  { time: "20:00", student: "Noor Haddad", level: "C1", lesson: "writing", status: "ready" },
-  { time: "22:15", student: "Tomás Vega", level: "A2", lesson: "review", status: "draft" },
-] as const;
+import { studentClassTimelineInputSchema } from "@/lib/classes/contracts";
+import { getTeacherClassTimeline } from "@/lib/classes/queries";
+import { timeZoneSchema } from "@/lib/students/contracts";
+import { listTeacherActiveStudentOptions } from "@/lib/students/data";
 
 const progress = [
   { initials: "ER", student: "Emma Reed", value: 92, tone: "bg-red-500 text-orbit-paper-strong" },
@@ -101,11 +91,22 @@ export default async function Home() {
   const session = await requireRole("teacher");
   if ("error" in session) redirect("/login");
 
-  const [t, format, studentCounts] = await Promise.all([
+  const teacher = session.session.user;
+  const [t, format, [timeline, activeStudents]] = await Promise.all([
     getTranslations("Dashboard"),
     getFormatter(),
-    getDb().then((db) => getTeacherStudentCounts(db, session.session.user.id)),
+    getDb().then((db) =>
+      Promise.all([
+        getTeacherClassTimeline(
+          db,
+          teacher.id,
+          studentClassTimelineInputSchema.parse({}),
+        ),
+        listTeacherActiveStudentOptions(db, teacher.id),
+      ]),
+    ),
   ]);
+  if (!timeline) throw new Error("Unable to load the teacher's class timeline.");
   const currency = (value: number) =>
     format.number(value, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
   const month = (value: number, style: "long" | "short") =>
@@ -120,7 +121,7 @@ export default async function Home() {
     },
     {
       label: t("metrics.activeStudents"),
-      value: format.number(studentCounts.activeStudents),
+      value: format.number(activeStudents.length),
       detail: t("metrics.activeDetail", { count: 3 }),
       icon: UserMultipleIcon,
       className: "bg-green-400 text-orbit-ink",
@@ -194,7 +195,7 @@ export default async function Home() {
               </Link>
             </Button>
             <Button asChild className="rounded-full">
-              <a href="#today">
+              <a href={`#${dashboardClassTimelineId}`}>
                 <HugeiconsIcon
                   data-icon="inline-start"
                   icon={Calendar03Icon}
@@ -231,48 +232,15 @@ export default async function Home() {
         </section>
 
         <section className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12" aria-label={t("detailsLabel")}>
-          <Card
-            id="today"
-            className="overflow-hidden border-orbit-ink/20 bg-yellow-400 text-orbit-ink shadow-none lg:col-span-7"
-          >
-            <CardHeader>
-              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-orbit-ink/65">
-                {t("upNext")}
-              </CardDescription>
-              <CardTitle className="text-3xl font-black tracking-[-0.06em] sm:text-4xl">{t("todaysClasses")}</CardTitle>
-              <CardAction className="grid size-11 place-items-center rounded-full border border-orbit-ink/30">
-                <HugeiconsIcon icon={TeacherIcon} size={22} color="currentColor" strokeWidth={1.5} aria-hidden="true" />
-              </CardAction>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-orbit-ink/25 hover:bg-transparent">
-                    <TableHead className="text-orbit-ink/65">{t("table.time")}</TableHead>
-                    <TableHead>{t("table.student")}</TableHead>
-                    <TableHead>{t("table.lesson")}</TableHead>
-                    <TableHead className="text-right">{t("table.status")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {classes.map((item) => (
-                    <TableRow key={item.time} className="border-orbit-ink/25 hover:bg-yellow-300/60">
-                      <TableCell className="font-bold">{item.time}</TableCell>
-                      <TableCell className="font-bold">{item.student}</TableCell>
-                      <TableCell>{item.level} · {t(`lessons.${item.lesson}`)}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant={item.status === "ready" ? "success" : "outline"}>
-                          {t(`statuses.${item.status}`)}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <div className="min-w-0 lg:col-span-12">
+            <ClassList
+              activeStudents={activeStudents}
+              initialData={timeline}
+              timeZone={timeZoneSchema.parse(teacher.timeZone)}
+            />
+          </div>
 
-          <Card className="border-orbit-ink/20 bg-blue-gray-400 text-orbit-ink shadow-none lg:col-span-5">
+          <Card className="border-orbit-ink/20 bg-blue-gray-400 text-orbit-ink shadow-none lg:col-span-6">
             <CardHeader>
               <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-orbit-ink/65">
                 {t("studentPulse")}
@@ -302,7 +270,7 @@ export default async function Home() {
             </CardContent>
           </Card>
 
-          <Card className="border-orbit-paper-strong/20 bg-orbit-ink text-orbit-paper-strong shadow-none lg:col-span-5">
+          <Card className="border-orbit-paper-strong/20 bg-orbit-ink text-orbit-paper-strong shadow-none lg:col-span-6">
             <CardHeader>
               <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-blue-gray-400">
                 {t("monthlyRevenue")}
@@ -395,7 +363,7 @@ export default async function Home() {
             </CardContent>
           </Card>
 
-          <Card className="min-h-80 border-red-500 bg-red-500 text-orbit-paper-strong shadow-none lg:col-span-7">
+          <Card className="min-h-80 border-red-500 bg-red-500 text-orbit-paper-strong shadow-none lg:col-span-5">
             <CardHeader>
               <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-orbit-paper-strong/75">
                 {t("weeklyNote")}

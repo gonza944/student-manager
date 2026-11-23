@@ -52,14 +52,14 @@ export const classCursorSchema = z.object({
 });
 
 export const studentClassPageInputSchema = z.object({
-  studentId: entityIdSchema,
+  studentId: entityIdSchema.optional(),
   direction: z.enum(classPageDirections),
   limit: z.int().min(1).max(50).default(20),
   cursor: classCursorSchema,
 });
 
 export const studentClassTimelineInputSchema = z.object({
-  studentId: entityIdSchema,
+  studentId: entityIdSchema.optional(),
   limit: z.int().min(1).max(50).default(20),
 });
 

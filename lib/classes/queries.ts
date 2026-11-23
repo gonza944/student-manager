@@ -7,11 +7,9 @@ import {
   eq,
   getTableColumns,
   gte,
-  gt,
   inArray,
   lt,
   ne,
-  or,
   sql,
 } from "drizzle-orm";
 
@@ -51,22 +49,27 @@ function toCursor(row: typeof studentClass.$inferSelect): ClassCursor {
 }
 
 function cursorCondition(input: StudentClassPageInput) {
-  const scheduledAt = new Date(input.cursor.scheduledAt);
+  const row = sql`(${studentClass.scheduledAt}, ${studentClass.id})`;
+  const cursor = sql`(${Date.parse(input.cursor.scheduledAt)}, ${input.cursor.id})`;
   return input.direction === "earlier"
-    ? or(
-        lt(studentClass.scheduledAt, scheduledAt),
-        and(
-          eq(studentClass.scheduledAt, scheduledAt),
-          lt(studentClass.id, input.cursor.id),
-        ),
-      )
-    : or(
-        gt(studentClass.scheduledAt, scheduledAt),
-        and(
-          eq(studentClass.scheduledAt, scheduledAt),
-          gt(studentClass.id, input.cursor.id),
-        ),
-      );
+    ? sql`${row} < ${cursor}`
+    : sql`${row} > ${cursor}`;
+}
+
+function ownedStudentLookup(db: Database, teacherId: string, studentId: string) {
+  return db
+    .select({ id: student.id })
+    .from(student)
+    .where(and(eq(student.id, studentId), eq(student.teacherId, teacherId)))
+    .limit(1);
+}
+
+function classScope(teacherId: string, studentId?: string) {
+  return and(
+    eq(studentClass.teacherId, teacherId),
+    eq(student.teacherId, teacherId),
+    studentId === undefined ? undefined : eq(studentClass.studentId, studentId),
+  );
 }
 
 export async function getTeacherStudentClassDetail(
@@ -123,24 +126,14 @@ export async function getTeacherClassAvailability(
   });
 }
 
-export async function getTeacherStudentClassTimeline(
+export async function getTeacherClassTimeline(
   db: Database,
   teacherId: string,
   input: StudentClassTimelineInput,
   now = new Date(),
 ) {
-  const filters = and(
-    eq(studentClass.teacherId, teacherId),
-    eq(studentClass.studentId, input.studentId),
-  );
-  const [studentRows, pastRows, futureRows, summaryRows] = await db.batch([
-    db
-      .select({ id: student.id })
-      .from(student)
-      .where(
-        and(eq(student.id, input.studentId), eq(student.teacherId, teacherId)),
-      )
-      .limit(1),
+  const filters = classScope(teacherId, input.studentId);
+  const [pastRows, futureRows, summaryRows, studentRows] = await db.batch([
     db
       .select(classSelection)
       .from(studentClass)
@@ -160,16 +153,23 @@ export async function getTeacherStudentClassTimeline(
         count: sql<number>`sum(case when ${studentClass.status} = 'completed' then 1 else 0 end)`,
         total: sql<number>`count(*)`,
         updatedAtTotal: sql<string>`cast(coalesce(sum(${studentClass.updatedAt}), 0) as text)`,
+        studentUpdatedAtTotal: sql<string>`cast(coalesce(sum(${student.updatedAt}), 0) as text)`,
       })
       .from(studentClass)
+      .innerJoin(student, eq(student.id, studentClass.studentId))
       .where(filters),
+    ...(input.studentId === undefined
+      ? []
+      : [ownedStudentLookup(db, teacherId, input.studentId)]),
   ]);
-  if (!studentRows[0]) return null;
+  if (input.studentId !== undefined && !studentRows?.[0]) return null;
 
   const hasEarlier = pastRows.length > input.limit;
   const hasLater = futureRows.length > input.limit;
   const pastPage = pastRows.slice(0, input.limit);
   const futurePage = futureRows.slice(0, input.limit);
+  const summary = summaryRows[0];
+  const classRevision = `${summary?.total ?? 0}:${summary?.updatedAtTotal ?? "0"}:${summary?.count ?? 0}`;
 
   return studentClassTimelineSchema.parse({
     past: pastPage.toReversed().map(toClassDto),
@@ -178,22 +178,27 @@ export async function getTeacherStudentClassTimeline(
       hasEarlier && pastPage.at(-1) ? toCursor(pastPage.at(-1)!) : null,
     laterCursor:
       hasLater && futurePage.at(-1) ? toCursor(futurePage.at(-1)!) : null,
-    completedCount: Number(summaryRows[0]?.count ?? 0),
-    revision: `${summaryRows[0]?.total ?? 0}:${summaryRows[0]?.updatedAtTotal ?? "0"}:${summaryRows[0]?.count ?? 0}`,
+    completedCount: Number(summary?.count ?? 0),
+    revision:
+      input.studentId === undefined
+        ? `${classRevision}:${summary?.studentUpdatedAtTotal ?? "0"}`
+        : classRevision,
   });
 }
 
-export async function listTeacherStudentClassesPage(
+export async function listTeacherClassesPage(
   db: Database,
   teacherId: string,
   input: StudentClassPageInput,
 ) {
-  const [ownedStudent] = await db
-    .select({ id: student.id })
-    .from(student)
-    .where(and(eq(student.id, input.studentId), eq(student.teacherId, teacherId)))
-    .limit(1);
-  if (!ownedStudent) return null;
+  if (input.studentId !== undefined) {
+    const [ownedStudent] = await ownedStudentLookup(
+      db,
+      teacherId,
+      input.studentId,
+    );
+    if (!ownedStudent) return null;
+  }
 
   const rows = await db
     .select(classSelection)
@@ -201,8 +206,7 @@ export async function listTeacherStudentClassesPage(
     .innerJoin(student, eq(student.id, studentClass.studentId))
     .where(
       and(
-        eq(studentClass.teacherId, teacherId),
-        eq(studentClass.studentId, input.studentId),
+        classScope(teacherId, input.studentId),
         cursorCondition(input),
       ),
     )

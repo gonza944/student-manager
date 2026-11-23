@@ -13,9 +13,9 @@ import {
 } from "@/lib/classes/contracts";
 import {
   getTeacherClassAvailability,
+  getTeacherClassTimeline,
   getTeacherStudentClassDetail,
-  getTeacherStudentClassTimeline,
-  listTeacherStudentClassesPage,
+  listTeacherClassesPage,
 } from "@/lib/classes/queries";
 
 import {
@@ -58,7 +58,7 @@ export async function getClassAvailabilityAction(
   return { ok: true, data };
 }
 
-export async function getStudentClassTimelineAction(
+export async function getClassTimelineAction(
   input: unknown,
 ): Promise<ClassActionResult<StudentClassTimeline>> {
   const parsed = studentClassTimelineInputSchema.safeParse(input);
@@ -66,7 +66,7 @@ export async function getStudentClassTimelineAction(
   const context = await getTeacherContext();
   if (!context.ok) return context;
 
-  const data = await getTeacherStudentClassTimeline(
+  const data = await getTeacherClassTimeline(
     await getDb(),
     context.teacherId,
     parsed.data,
@@ -74,7 +74,7 @@ export async function getStudentClassTimelineAction(
   return data ? { ok: true, data } : { ok: false, error: "notFound" };
 }
 
-export async function listStudentClassesAction(
+export async function listClassesPageAction(
   input: unknown,
 ): Promise<ClassActionResult<StudentClassPage>> {
   const parsed = studentClassPageInputSchema.safeParse(input);
@@ -82,7 +82,7 @@ export async function listStudentClassesAction(
   const context = await getTeacherContext();
   if (!context.ok) return context;
 
-  const data = await listTeacherStudentClassesPage(
+  const data = await listTeacherClassesPage(
     await getDb(),
     context.teacherId,
     parsed.data,

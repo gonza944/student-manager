@@ -22,7 +22,7 @@ export function ClassTimeline({
   isError,
   renderClass,
 }: {
-  studentId: string;
+  studentId: string | undefined;
   initialData: StudentClassTimeline;
   version: string;
   timeZone: string;
@@ -93,14 +93,15 @@ export function ClassTimeline({
             item,
             <ClassSummary
               studentClass={item}
+              showStudentName={studentId === undefined}
               timeZone={timeZone}
               {...context}
             />,
           )
         }
       />
-      <div className="flex flex-wrap gap-2 px-6">
-        {query.isError ? (
+      {query.isError ? (
+        <div className="px-6">
           <Button
             variant="outline"
             disabled={query.isFetching}
@@ -112,17 +113,8 @@ export function ClassTimeline({
           >
             {t("actions.retry")}
           </Button>
-        ) : null}
-        {query.hasNextPage ? (
-          <Button
-            variant="outline"
-            disabled={query.isFetching}
-            onClick={() => void query.fetchNextPage()}
-          >
-            {t("actions.later")}
-          </Button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </>
   );
 }

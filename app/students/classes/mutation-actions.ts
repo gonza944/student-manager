@@ -25,6 +25,7 @@ import {
 } from "./action-context";
 
 function revalidateClassPaths(studentId: string, classId: string) {
+  revalidatePath("/");
   revalidatePath(`/students/${studentId}`);
   revalidatePath(`/students/${studentId}/classes/${classId}/edit`);
 }

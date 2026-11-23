@@ -9,10 +9,12 @@ import { ClassForm } from "./class-form";
 
 export async function ClassFormContent({
   studentId,
+  timelineStudentId,
   classId,
   mode,
 }: {
   studentId: string;
+  timelineStudentId?: string;
   classId?: string;
   mode: "add" | "edit";
 }) {
@@ -41,6 +43,7 @@ export async function ClassFormContent({
       </div>
       <ClassForm
         studentId={studentId}
+        timelineStudentId={timelineStudentId}
         studentClass={studentClass}
         timeZone={profile.teacherTimeZone}
         studentSince={profile.student.studentSince}
