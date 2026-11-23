@@ -85,7 +85,7 @@ export function StudentSettingsFields({
                 onChange={() => updateField("avatarKey", avatarKey)}
                 className="peer sr-only"
               />
-              <span className="relative block aspect-square w-full overflow-hidden rounded-xl border-2 border-transparent bg-muted peer-checked:border-orbit-ink peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring">
+              <span className="relative block aspect-square w-full overflow-hidden rounded-xl border-2 border-transparent bg-muted peer-checked:border-foreground peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring">
                 <Image
                   src={`/avatars/open-peeps/${avatarKey}.svg`}
                   alt={t("form.avatarOption", { number: index + 1 })}
@@ -123,7 +123,7 @@ export function StudentSettingsFields({
               className="size-11 p-1.5">
               <span
                 className={cn(
-                  "block size-full rounded-full ring-1 ring-orbit-ink/20",
+                  "block size-full rounded-full ring-1 ring-border",
                   studentThemeSwatches[themeColor],
                 )}>
                 <span className="sr-only">{t(`colors.${themeColor}`)}</span>

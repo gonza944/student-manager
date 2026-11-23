@@ -52,14 +52,14 @@ export function ClassSummary({
           studentClass.status === "cancelled"
             ? "border border-destructive/20 bg-destructive/10 text-destructive"
             : studentClass.status === "scheduled"
-              ? "border-orbit-ink/30 bg-transparent text-orbit-ink"
+              ? "border-foreground/30 bg-transparent"
               : undefined
         }
       >
         {t(`statuses.${studentClass.status}`)}
       </Badge>
       <span
-        className={`rounded-full border border-orbit-ink/20 bg-paper-strong px-3 py-1.5 text-sm font-bold ${orientation === "horizontal" ? `absolute left-1/2 -translate-x-1/2 whitespace-nowrap ${above ? "-bottom-12" : "-top-12"}` : "mt-3 max-w-full"}`}
+        className={`rounded-full border border-border bg-card px-3 py-1.5 text-sm font-bold ${orientation === "horizontal" ? `absolute left-1/2 -translate-x-1/2 whitespace-nowrap ${above ? "-bottom-12" : "-top-12"}` : "mt-3 max-w-full"}`}
       >
         {dateTime.format(new Date(studentClass.scheduledAt))}
       </span>

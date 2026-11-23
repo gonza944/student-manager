@@ -178,7 +178,7 @@ export function ClassDayGrid({
       </div>
       <ScrollArea
         viewportRef={viewport}
-        className="min-h-40 flex-1 rounded-xl border border-orbit-ink/20"
+        className="min-h-40 flex-1 rounded-xl border"
         data-vaul-no-drag
       >
         <div className="px-6 pb-6 pt-16">
@@ -190,7 +190,7 @@ export function ClassDayGrid({
           >
             <div
               data-slot="class-day-grid-track"
-              className="absolute inset-y-0 start-20 end-3 touch-pan-y"
+              className="absolute inset-y-0 start-20 end-3 touch-pan-y focus-visible:outline-2 focus-visible:outline-ring"
               role="button"
               tabIndex={disabled ? -1 : 0}
               aria-label={t("grid.selectInterval")}
@@ -240,7 +240,7 @@ export function ClassDayGrid({
                     <span className="w-20 pe-3 text-end text-xs leading-none text-muted-foreground [text-box:trim-both_cap_alphabetic]">
                       {formatTime(instant)}
                     </span>
-                    <span className="flex-1 border-t border-orbit-ink/10" />
+                    <span className="flex-1 border-t border-foreground/10 dark:border-foreground/20" />
                   </div>
                 );
               },
@@ -260,7 +260,7 @@ export function ClassDayGrid({
                 <div
                   key={interval.id}
                   title={label}
-                  className="pointer-events-none absolute start-20 end-3 overflow-hidden rounded-xl border border-orbit-ink/20 bg-muted p-3 text-xs"
+                  className="pointer-events-none absolute start-20 end-3 overflow-hidden rounded-xl border bg-secondary p-3 text-xs text-secondary-foreground"
                   style={{
                     top: top(busyStart),
                     height: top(busyEnd) - top(busyStart),
@@ -276,7 +276,7 @@ export function ClassDayGrid({
             })}
             {selected ? (
               <div
-                className={`pointer-events-none absolute start-20 end-3 rounded-lg border-2 ${valid ? "border-orbit-ink bg-orbit-ink/10" : "border-destructive bg-destructive/10"}`}
+                className={`pointer-events-none absolute start-20 end-3 rounded-lg border-2 ${valid ? "border-primary bg-primary/10" : "border-destructive bg-destructive/10"}`}
                 style={{ top: top(start), height: top(end) - top(start) }}
               >
                 <p className="absolute -top-14 end-0 rounded-md bg-paper-strong px-2 py-1 text-end text-xs font-bold">

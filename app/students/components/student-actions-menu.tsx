@@ -45,7 +45,7 @@ export function StudentActionsMenu({
           size="icon"
           disabled={pending}
           aria-label={t("studentActions", { name })}
-          className="group size-8 rounded-full border border-orbit-ink/50 bg-transparent text-orbit-ink shadow-none backdrop-blur-sm hover:bg-orbit-paper-strong/25 hover:text-orbit-ink">
+          className="group size-8 rounded-full border border-orbit-ink/50 bg-transparent text-orbit-ink shadow-none backdrop-blur-sm hover:bg-orbit-paper-strong/25 hover:text-orbit-ink dark:bg-orbit-paper-strong/75 dark:hover:bg-orbit-paper-strong">
           <HugeiconsIcon
             icon={Add01Icon}
             strokeWidth={2}

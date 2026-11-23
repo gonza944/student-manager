@@ -9,7 +9,7 @@ export function ProfileDetail({
 }) {
   return (
     <div className="min-w-0 border-t border-current/20 py-4">
-      <dt className="text-caption font-bold uppercase tracking-[0.12em] opacity-65">
+      <dt className="text-caption font-bold uppercase tracking-[0.12em] text-current/90">
         {label}
       </dt>
       <dd className="mt-2 min-w-0 wrap-break-word font-semibold">{children}</dd>

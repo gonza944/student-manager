@@ -92,7 +92,7 @@ export function StudentRateHistory({
   });
   const firstVirtualRow = virtualRows[0];
   return (
-    <Card className="gap-0 overflow-hidden border-orbit-ink/20 bg-paper-strong py-0 shadow-none lg:col-span-12">
+    <Card className="gap-0 overflow-hidden py-0 shadow-none lg:col-span-12">
         <CardHeader className="flex flex-row items-center gap-3 px-5 py-3 sm:px-6">
           <CardTitle className="text-2xl font-black tracking-[-0.04em]">
             <h2>{t("profile.rateHistory.title")}</h2>
@@ -118,7 +118,7 @@ export function StudentRateHistory({
                 {t("profile.rateHistory.caption")}
               </caption>
               <thead className="sticky top-0 z-10 bg-paper-strong">
-                <tr className="border-y border-orbit-ink/15 text-muted-foreground shadow-[0_1px_0_rgb(22_22_22/0.15)]">
+                <tr className="border-y text-muted-foreground">
                   {rateHistoryColumns.map((column) => (
                     <th
                       key={column}
@@ -151,8 +151,8 @@ export function StudentRateHistory({
                       key={virtualRow.key}
                       className={
                         current
-                          ? "h-14 border-b border-orbit-ink/15 bg-orbit-ink text-orbit-paper-strong"
-                          : "h-14 border-b border-orbit-ink/15 bg-paper-strong text-orbit-ink"
+                          ? "h-14 border-b border-orbit-paper-strong/15 bg-orbit-ink text-orbit-paper-strong"
+                          : "h-14 border-b bg-paper-strong text-card-foreground"
                       }>
                       <th
                         scope="row"
@@ -244,14 +244,14 @@ export function StudentRateHistory({
           </div>
           {isFetchingNextPage ? (
             <p
-              className="border-t border-orbit-ink/15 px-5 py-3 text-center text-sm font-bold text-muted-foreground sm:px-6"
+              className="border-t px-5 py-3 text-center text-sm font-bold text-muted-foreground sm:px-6"
               role="status">
               {t("profile.rateHistory.loadingMore")}
             </p>
           ) : null}
           {isError ? (
             <p
-              className="border-t border-orbit-ink/15 px-5 py-3 text-sm font-bold text-destructive sm:px-6"
+              className="border-t px-5 py-3 text-sm font-bold text-destructive sm:px-6"
               role="alert">
               {t("profile.rateHistory.loadError")}
             </p>

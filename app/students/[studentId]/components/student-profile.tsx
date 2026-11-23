@@ -235,7 +235,7 @@ export function StudentProfile({
                 content: (
                 <Badge
                   variant={isActive ? "success" : "outline"}
-                  className="border-orbit-ink/20 px-3 py-1 text-caption font-black uppercase tracking-widest">
+                  className="border-orbit-ink/20 px-3 py-1 text-[length:var(--text-caption)] font-black uppercase tracking-widest text-orbit-ink">
                   {status}
                 </Badge>
                 ),
@@ -332,7 +332,7 @@ export function StudentProfile({
             </CardContent>
           </Card>
 
-          <Card className="border-orbit-ink/20 bg-paper-strong shadow-none lg:col-span-7">
+          <Card className="shadow-none lg:col-span-7">
             <ProfileCardHeader
               title={t("profile.groups.contact")}
               icon={Message01Icon}

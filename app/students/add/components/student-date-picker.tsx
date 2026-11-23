@@ -95,7 +95,7 @@ export function StudentDatePicker({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <InputGroup className="h-11 rounded-xl border-orbit-ink/20 bg-orbit-paper-strong/70 transition-[border-color,box-shadow,transform] focus-within:-translate-y-px focus-within:border-orbit-ink/60 focus-within:ring-4 focus-within:ring-orbit-ink/10">
+      <InputGroup className="h-11 rounded-xl bg-paper-strong/70 transition-[border-color,box-shadow,transform] focus-within:-translate-y-px focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/50">
         <InputGroupInput
           id={id}
           name={name}
@@ -132,9 +132,9 @@ export function StudentDatePicker({
             <InputGroupButton
               variant="ghost"
               size="icon-sm"
-              className="group size-11 rounded-full p-1 hover:bg-transparent hover:text-orbit-ink"
+              className="group size-11 rounded-full p-1 hover:bg-transparent"
               aria-label={openLabel}>
-              <span className="flex size-9 items-center justify-center rounded-full border border-orbit-ink bg-transparent text-orbit-ink transition-colors group-hover:bg-orbit-ink/5">
+              <span className="flex size-9 items-center justify-center rounded-full border border-current bg-transparent text-foreground transition-colors group-hover:bg-foreground/5">
                 <HugeiconsIcon
                   icon={Calendar03Icon}
                   strokeWidth={2}

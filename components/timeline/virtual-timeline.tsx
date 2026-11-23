@@ -172,7 +172,7 @@ export function VirtualTimeline<T>({
           >
             <li
               aria-hidden="true"
-              className={`pointer-events-none absolute border-orbit-ink/20 ${layout.railClass}`}
+              className={`pointer-events-none absolute border-border ${layout.railClass}`}
             />
             {rows.map((row) => {
               const item = items[row.index];
