@@ -35,27 +35,36 @@ test("teachers can manage classes for different students on the dashboard", asyn
   }
 
   await page.goto("/");
-  for (const [name, day] of [[zoe, "02"], [ana, "01"]]) {
+  const viewport = page.viewportSize()!;
+  for (const [name, day, width] of [[zoe, "02", 1033], [ana, "01", 390]] as const) {
+    await page.setViewportSize({ width, height: 486 });
     await schedule.click();
     await page.getByRole("menuitem", { name, exact: true }).click();
-    const form = page.getByRole("main");
-    await expect(form.getByRole("heading", { name: "Schedule class" })).toBeVisible();
+    const form = page.getByRole("dialog", { name: "Schedule class", exact: true });
+    await expect(form.getByRole("heading", { name: "Schedule class", level: 1 })).toBeVisible();
     await expect(form.getByText(name, { exact: true })).toBeVisible();
+    await expect(page.getByRole("list", { name: "Class timeline", includeHidden: true })).toBeAttached();
+    const date = form.getByLabel("Date", { exact: true });
+    await expect(date).toBeInViewport();
+    await expect(form.getByLabel("Charge (USD)")).toBeInViewport();
+    const save = form.getByRole("button", { name: "Save class" });
+    await expect(save).toBeInViewport({ ratio: 1 });
     const availabilityLoaded = page.waitForResponse((response) =>
       response.request().method() === "POST" &&
       response.request().postData()?.includes(`2026-09-${day}`) === true,
     );
-    await form.getByLabel("Date", { exact: true }).fill(`09/${day}/2026`);
+    await date.fill(`09/${day}/2026`);
     await availabilityLoaded;
     const interval = form.getByRole("button", { name: "Select an available class interval" });
     await expect(interval).toBeEnabled();
     await interval.press("Enter");
     await expect(form.getByRole("slider", { name: "Adjust class start time" })).toBeVisible();
-    const save = form.getByRole("button", { name: "Save class" });
     await expect(save).toBeEnabled();
     await save.click();
+    await expect(form).toBeHidden();
     await expect(page).toHaveURL("/#class-timeline");
   }
+  await page.setViewportSize(viewport);
 
   const timeline = page.getByRole("list", { name: "Class timeline", exact: true });
   const classFor = (name: string) => timeline.getByRole("button").filter({ hasText: name });
