@@ -1,7 +1,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { listStudentClassesAction } from "@/app/students/classes/query-actions";
+import { listClassesPageAction } from "@/app/students/classes/query-actions";
 import type {
   ClassCursor,
   StudentClassTimeline,
@@ -10,7 +10,7 @@ import type {
 type PageParam = { direction: "earlier" | "later"; cursor: ClassCursor } | null;
 
 export function useClassTimeline(
-  studentId: string,
+  studentId: string | undefined,
   initialData: StudentClassTimeline,
   version: string,
 ) {
@@ -27,7 +27,7 @@ export function useClassTimeline(
     gcTime: 0,
     queryFn: async ({ pageParam }) => {
       if (!pageParam) return initialPage;
-      const result = await listStudentClassesAction({
+      const result = await listClassesPageAction({
         studentId,
         ...pageParam,
       });

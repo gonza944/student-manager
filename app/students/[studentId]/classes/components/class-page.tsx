@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useRef, type ReactNode } from "react";
 
 import { FormCloseContext } from "@/components/route-form-modal";
+import { getClassFormReturnHref } from "@/app/students/classes/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -16,6 +18,7 @@ export function ClassPage({
   studentId: string;
 }) {
   const t = useTranslations("Classes");
+  const fromDashboard = useSearchParams().get("from") === "dashboard";
   const closeGuard = useRef<(() => void) | null>(null);
   const registerCloseGuard = useCallback((guard: (() => void) | null) => {
     closeGuard.current = guard;
@@ -26,7 +29,7 @@ export function ClassPage({
       <nav aria-label={t("navigation")} className="mx-auto mb-4 max-w-4xl">
         <Button asChild variant="ghost" className="min-h-12 rounded-full">
           <Link
-            href={`/students/${studentId}`}
+            href={getClassFormReturnHref(studentId, fromDashboard)}
             onNavigate={(event) => {
               if (closeGuard.current) {
                 event.preventDefault();
@@ -34,7 +37,7 @@ export function ClassPage({
               }
             }}
           >
-            {t("actions.backToProfile")}
+            {t(fromDashboard ? "actions.backToDashboard" : "actions.backToProfile")}
           </Link>
         </Button>
       </nav>

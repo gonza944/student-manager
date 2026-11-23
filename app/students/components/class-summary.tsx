@@ -9,11 +9,13 @@ import type { TimelineOrientation } from "@/components/timeline/layout";
 
 export function ClassSummary({
   studentClass,
+  showStudentName,
   timeZone,
   orientation,
   above,
 }: {
   studentClass: StudentClassDto;
+  showStudentName: boolean;
   timeZone: string;
   orientation: TimelineOrientation;
   above: boolean;
@@ -33,6 +35,11 @@ export function ClassSummary({
   });
   return (
     <>
+      {showStudentName ? (
+        <span className="mb-2 w-full truncate font-bold" title={studentClass.studentName}>
+          {studentClass.studentName}
+        </span>
+      ) : null}
       <Badge
         variant={
           studentClass.status === "completed"

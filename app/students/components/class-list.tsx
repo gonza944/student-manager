@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Add01Icon,
   CancelCircleIcon,
   CheckmarkCircle02Icon,
   Delete02Icon,
@@ -18,10 +17,14 @@ import {
   deleteStudentClassAction,
   setStudentClassStatusAction,
 } from "@/app/students/classes/mutation-actions";
-import { getStudentClassTimelineAction } from "@/app/students/classes/query-actions";
+import {
+  dashboardClassFormSearch,
+  dashboardClassTimelineId,
+} from "@/app/students/classes/navigation";
+import { getClassTimelineAction } from "@/app/students/classes/query-actions";
 
+import { ClassScheduleAction, type ClassScheduleScope } from "./class-schedule-action";
 import { ClassTimeline } from "./class-timeline";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -33,15 +36,15 @@ import type { StudentClassTimeline } from "@/lib/classes/contracts";
 
 export function ClassList({
   initialData,
-  studentId,
-  studentIsActive,
   timeZone,
+  ...scope
 }: {
   initialData: StudentClassTimeline;
-  studentId: string;
-  studentIsActive: boolean;
   timeZone: string;
-}) {
+} & ClassScheduleScope) {
+  const { studentId } = scope;
+  const allStudents = studentId === undefined;
+  const formSearch = allStudents ? dashboardClassFormSearch : "";
   const t = useTranslations("Classes");
   const queryClient = useQueryClient();
   const queryKey = ["student-classes", studentId];
@@ -52,27 +55,24 @@ export function ClassList({
     refetchInterval: 60_000,
     refetchOnMount: "always",
     queryFn: async () => {
-      const result = await getStudentClassTimelineAction({ studentId });
+      const result = await getClassTimelineAction({ studentId });
       if (!result.ok) throw new Error(result.error);
       return result.data;
     },
   });
   const [confirmation, setConfirmation] = useState<{
+    studentId: string;
     classId: string;
     action: "delete" | "completed" | "cancelled";
   } | null>(null);
   const mutation = useMutation({
-    mutationFn: async (input: NonNullable<typeof confirmation>) => {
+    mutationFn: async ({ action, ...target }: NonNullable<typeof confirmation>) => {
       const result =
-        input.action === "delete"
-          ? await deleteStudentClassAction({
-              studentId,
-              classId: input.classId,
-            })
+        action === "delete"
+          ? await deleteStudentClassAction(target)
           : await setStudentClassStatusAction({
-              studentId,
-              classId: input.classId,
-              status: input.action,
+              ...target,
+              status: action,
             });
       if (!result.ok) throw new Error(result.error);
     },
@@ -95,7 +95,11 @@ export function ClassList({
   });
 
   return (
-    <section className="min-w-0" aria-labelledby="classes-title">
+    <section
+      id={allStudents ? dashboardClassTimelineId : undefined}
+      className="min-w-0"
+      aria-labelledby="classes-title"
+    >
       <Card className="border-orbit-ink/20 bg-paper-strong text-orbit-ink shadow-none">
         <ClassTimeline
           key={query.data.revision}
@@ -104,39 +108,7 @@ export function ClassList({
           initialData={query.data}
           timeZone={timeZone}
           isError={query.isError}
-          actions={
-            <>
-              {studentIsActive ? (
-                <Button
-                  asChild
-                  variant="outline"
-                  className="min-h-12 rounded-full bg-transparent text-orbit-ink"
-                >
-                  <Link href={`/students/${studentId}/classes/add`}>
-                    <HugeiconsIcon
-                      icon={Add01Icon}
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    />
-                    {t("actions.add")}
-                  </Link>
-                </Button>
-              ) : (
-                <Button
-                  disabled
-                  variant="outline"
-                  className="min-h-12 rounded-full bg-transparent text-orbit-ink"
-                >
-                  <HugeiconsIcon
-                    icon={Add01Icon}
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
-                  {t("actions.add")}
-                </Button>
-              )}
-            </>
-          }
+          actions={<ClassScheduleAction {...scope} />}
           renderClass={(studentClass, summary) => (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -151,7 +123,7 @@ export function ClassList({
               <DropdownMenuContent align="start" className="w-48 p-2">
                 <DropdownMenuItem asChild className="py-2">
                   <Link
-                    href={`/students/${studentId}/classes/${studentClass.id}/edit`}
+                    href={`/students/${studentClass.studentId}/classes/${studentClass.id}/edit${formSearch}`}
                   >
                     <HugeiconsIcon
                       icon={PencilEdit01Icon}
@@ -166,6 +138,7 @@ export function ClassList({
                     className="py-2"
                     onSelect={() =>
                       mutation.mutate({
+                        studentId: studentClass.studentId,
                         classId: studentClass.id,
                         action: "completed",
                       })
@@ -184,6 +157,7 @@ export function ClassList({
                     className="py-2"
                     onSelect={() =>
                       setConfirmation({
+                        studentId: studentClass.studentId,
                         classId: studentClass.id,
                         action: "cancelled",
                       })
@@ -202,6 +176,7 @@ export function ClassList({
                   className="py-2"
                   onSelect={() =>
                     setConfirmation({
+                      studentId: studentClass.studentId,
                       classId: studentClass.id,
                       action: "delete",
                     })

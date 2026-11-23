@@ -24,6 +24,9 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   await page.getByRole("button", { name: "Crear cuenta" }).click();
 
   await expect(page).toHaveURL("/");
+  await page.getByRole("link", { name: "Ver agenda" }).click();
+  await expect(page.getByRole("list", { name: "Cronología de clases" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Programar clase", exact: true })).toBeDisabled();
   await page.getByRole("link", { name: "Estudiantes" }).click();
   await expect(
     page.getByRole("heading", {

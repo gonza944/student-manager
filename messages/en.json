@@ -79,23 +79,6 @@
       "unreadMessages": "Unread messages",
       "messagesDetail": "{count, plural, =0 {None need a reply} one {# needs a reply} other {# need a reply}}"
     },
-    "upNext": "Up next",
-    "todaysClasses": "Today's classes",
-    "table": {
-      "time": "Time",
-      "student": "Student",
-      "lesson": "Lesson",
-      "status": "Status"
-    },
-    "lessons": {
-      "speaking": "Speaking",
-      "writing": "Writing",
-      "review": "Review"
-    },
-    "statuses": {
-      "ready": "Ready",
-      "draft": "Draft"
-    },
     "studentPulse": "Student pulse",
     "everyoneMoving": "Everyone is moving.",
     "courseProgress": "{student}: {value, number, percent} course progress",
@@ -378,11 +361,13 @@
     },
     "actions": {
       "add": "Schedule class",
+      "chooseStudent": "Choose a student",
       "edit": "Edit class",
       "complete": "Mark completed",
       "cancel": "Cancel class",
       "delete": "Delete permanently",
       "save": "Save class",
+      "backToDashboard": "Back to dashboard",
       "backToProfile": "Back to student",
       "saving": "Saving…",
       "discard": "Cancel",

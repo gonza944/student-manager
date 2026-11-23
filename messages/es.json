@@ -79,23 +79,6 @@
       "unreadMessages": "Mensajes sin leer",
       "messagesDetail": "{count, plural, =0 {Ninguno requiere respuesta} one {# requiere respuesta} other {# requieren respuesta}}"
     },
-    "upNext": "A continuación",
-    "todaysClasses": "Clases de hoy",
-    "table": {
-      "time": "Hora",
-      "student": "Estudiante",
-      "lesson": "Lección",
-      "status": "Estado"
-    },
-    "lessons": {
-      "speaking": "Conversación",
-      "writing": "Escritura",
-      "review": "Repaso"
-    },
-    "statuses": {
-      "ready": "Lista",
-      "draft": "Borrador"
-    },
     "studentPulse": "Progreso estudiantil",
     "everyoneMoving": "Todos avanzan.",
     "courseProgress": "{student}: {value, number, percent} de progreso del curso",
@@ -378,11 +361,13 @@
     },
     "actions": {
       "add": "Programar clase",
+      "chooseStudent": "Elegir estudiante",
       "edit": "Editar clase",
       "complete": "Marcar como completada",
       "cancel": "Cancelar clase",
       "delete": "Eliminar permanentemente",
       "save": "Guardar clase",
+      "backToDashboard": "Volver al panel",
       "backToProfile": "Volver al estudiante",
       "saving": "Guardando…",
       "discard": "Cancelar",

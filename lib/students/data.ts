@@ -211,6 +211,14 @@ export async function getTeacherStudentCounts(
   });
 }
 
+export function listTeacherActiveStudentOptions(db: Database, teacherId: string) {
+  return db
+    .select({ id: student.id, name: student.name })
+    .from(student)
+    .where(and(eq(student.teacherId, teacherId), eq(student.isActive, true)))
+    .orderBy(asc(student.normalizedName), asc(student.id));
+}
+
 export async function listTeacherStudentsPage(
   db: Database,
   teacherId: string,

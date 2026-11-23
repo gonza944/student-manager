@@ -42,13 +42,13 @@ import type { StudentClassTimeline } from "@/lib/classes/contracts";
 import { cn } from "@/lib/utils";
 
 import { deleteStudentAction, setStudentActiveAction } from "../../actions";
+import { ClassList } from "../../components/class-list";
 import { DeleteStudentConfirmation } from "../../components/delete-student-confirmation";
 import {
   studentThemeStyles,
   studentThemeSwatches,
 } from "../../const/student-card-config";
 import { ProfileCardHeader } from "./profile-card-header";
-import { ClassList } from "./class-list";
 import { ProfileDetail } from "./profile-detail";
 import { ProfileTags } from "./profile-tags";
 import { StudentRateHistory } from "./student-rate-history";
@@ -425,11 +425,11 @@ export function StudentProfile({
 
           <div className="lg:col-span-12 min-w-0">
             <ClassList
-            initialData={classTimeline}
-            studentId={student.id}
-            studentIsActive={isActive}
-            timeZone={teacherTimeZone}
-          />
+              initialData={classTimeline}
+              studentId={student.id}
+              studentIsActive={isActive}
+              timeZone={teacherTimeZone}
+            />
           </div>
 
           <StudentRateHistory
