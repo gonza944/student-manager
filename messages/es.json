@@ -363,6 +363,7 @@
       "add": "Programar clase",
       "chooseStudent": "Elegir estudiante",
       "edit": "Editar clase",
+      "viewStudentProfile": "Ver perfil del estudiante",
       "complete": "Marcar como completada",
       "cancel": "Cancelar clase",
       "delete": "Eliminar permanentemente",

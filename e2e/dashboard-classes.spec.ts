@@ -62,6 +62,19 @@ test("teachers can manage classes for different students on the dashboard", asyn
   await expect(timeline.getByRole("button")).toHaveText([/Ana Timeline/, /Zoe Timeline/]);
   await verifyTimelineNavigation(page, "horizontal", "Class timeline", "Go to now");
 
+  const viewStudent = page.getByRole("menuitem", { name: "View student profile" });
+  await classFor(ana).click();
+  await expect(viewStudent).toBeVisible();
+  await viewStudent.press("Enter");
+  await expect(page).toHaveURL(/\/students\/[^/]+$/);
+  await expect(page.getByRole("heading", { name: ana, exact: true })).toBeVisible();
+  await timeline.getByRole("button", { name: /Scheduled.*60 minutes/ }).click();
+  await expect(page.getByRole("menuitem", { name: "Edit class" })).toBeVisible();
+  await expect(viewStudent).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.goBack();
+  await expect(page).toHaveURL("/#class-timeline");
+
   await classFor(ana).click();
   await page.getByRole("menuitem", { name: "Edit class" }).click();
   const edit = page.getByRole("dialog", { name: "Edit class" });
@@ -102,6 +115,15 @@ test("teachers can manage classes for different students on the dashboard", asyn
   await edit.getByRole("button", { name: "Close class dialog" }).click();
   await expect(edit).toBeHidden();
   await expect(page).toHaveURL("/#class-timeline");
+
+  await classFor(zoe).click();
+  await expect(viewStudent).toBeVisible();
+  await viewStudent.click();
+  await expect(page).toHaveURL(/\/students\/[^/]+$/);
+  await expect(page.getByRole("heading", { name: zoe, exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL("/#class-timeline");
+
   await classFor(ana).click();
   await page.getByRole("menuitem", { name: "Delete permanently" }).click();
   await page.getByRole("dialog", { name: "Delete class?" }).getByRole("button", { name: "Delete permanently" }).click();

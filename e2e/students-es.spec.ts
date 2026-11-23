@@ -229,6 +229,11 @@ test("el directorio y el formulario móvil se muestran en español", async ({
   await touch.detach();
   await classDrawer.getByRole("button", { name: "Guardar clase" }).click();
   await expect(classDrawer).toBeHidden();
+  await page.goto("/");
+  await page.getByRole("link", { name: "Ver agenda" }).click();
+  await page.getByRole("button", { name: /Programada.*60 minutos.*USD/ }).click();
+  await page.getByRole("menuitem", { name: "Ver perfil del estudiante" }).click();
+  await expect(page.getByRole("heading", { name: studentName, exact: true, level: 1 })).toBeVisible();
   await verifyTimelineNavigation(page, "vertical", "Cronología de clases", "Ir a ahora");
   await page.getByRole("button", { name: /Programada.*60 minutos.*USD/ }).click();
   await page.getByRole("menuitem", { name: "Eliminar permanentemente" }).click();

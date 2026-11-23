@@ -363,6 +363,7 @@
       "add": "Schedule class",
       "chooseStudent": "Choose a student",
       "edit": "Edit class",
+      "viewStudentProfile": "View student profile",
       "complete": "Mark completed",
       "cancel": "Cancel class",
       "delete": "Delete permanently",

@@ -5,9 +5,8 @@ import {
   CheckmarkCircle02Icon,
   Delete02Icon,
   PencilEdit01Icon,
+  UserIcon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,13 +24,8 @@ import { getClassTimelineAction } from "@/app/students/classes/query-actions";
 
 import { ClassScheduleAction, type ClassScheduleScope } from "./class-schedule-action";
 import { ClassTimeline } from "./class-timeline";
+import { ClassTimelineMenu, type ClassTimelineMenuItem } from "./class-timeline-menu";
 import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { StudentClassTimeline } from "@/lib/classes/contracts";
 
 export function ClassList({
@@ -109,89 +103,58 @@ export function ClassList({
           timeZone={timeZone}
           isError={query.isError}
           actions={<ClassScheduleAction {...scope} />}
-          renderClass={(studentClass, summary) => (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  disabled={mutation.isPending}
-                  className="relative flex w-full flex-col items-center rounded-xl p-3 text-center transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {summary}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 p-2">
-                <DropdownMenuItem asChild className="py-2">
-                  <Link
-                    href={`/students/${studentClass.studentId}/classes/${studentClass.id}/edit${formSearch}`}
-                  >
-                    <HugeiconsIcon
-                      icon={PencilEdit01Icon}
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    />
-                    {t("actions.edit")}
-                  </Link>
-                </DropdownMenuItem>
-                {studentClass.status !== "completed" ? (
-                  <DropdownMenuItem
-                    className="py-2"
-                    onSelect={() =>
-                      mutation.mutate({
-                        studentId: studentClass.studentId,
-                        classId: studentClass.id,
-                        action: "completed",
-                      })
-                    }
-                  >
-                    <HugeiconsIcon
-                      icon={CheckmarkCircle02Icon}
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    />
-                    {t("actions.complete")}
-                  </DropdownMenuItem>
-                ) : null}
-                {studentClass.status !== "cancelled" ? (
-                  <DropdownMenuItem
-                    className="py-2"
-                    onSelect={() =>
-                      setConfirmation({
-                        studentId: studentClass.studentId,
-                        classId: studentClass.id,
-                        action: "cancelled",
-                      })
-                    }
-                  >
-                    <HugeiconsIcon
-                      icon={CancelCircleIcon}
-                      strokeWidth={2}
-                      aria-hidden="true"
-                    />
-                    {t("actions.cancel")}
-                  </DropdownMenuItem>
-                ) : null}
-                <DropdownMenuItem
-                  variant="destructive"
-                  className="py-2"
-                  onSelect={() =>
-                    setConfirmation({
-                      studentId: studentClass.studentId,
-                      classId: studentClass.id,
-                      action: "delete",
-                    })
-                  }
-                >
-                  <HugeiconsIcon
-                    icon={Delete02Icon}
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
-                  {t("actions.delete")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          renderClass={(studentClass, summary) => {
+            const target = { studentId: studentClass.studentId, classId: studentClass.id };
+            const studentHref = `/students/${target.studentId}`;
+            const items: ClassTimelineMenuItem[] = [
+              {
+                id: "edit",
+                label: t("actions.edit"),
+                icon: PencilEdit01Icon,
+                href: `${studentHref}/classes/${target.classId}/edit${formSearch}`,
+              },
+            ];
+
+            if (allStudents) {
+              items.push({
+                id: "viewStudentProfile",
+                label: t("actions.viewStudentProfile"),
+                icon: UserIcon,
+                href: studentHref,
+              });
+            }
+            if (studentClass.status !== "completed") {
+              items.push({
+                id: "complete",
+                label: t("actions.complete"),
+                icon: CheckmarkCircle02Icon,
+                onSelect: () => mutation.mutate({ ...target, action: "completed" }),
+              });
+            }
+            if (studentClass.status !== "cancelled") {
+              items.push({
+                id: "cancel",
+                label: t("actions.cancel"),
+                icon: CancelCircleIcon,
+                onSelect: () => setConfirmation({ ...target, action: "cancelled" }),
+              });
+            }
+            items.push({
+              id: "delete",
+              label: t("actions.delete"),
+              icon: Delete02Icon,
+              variant: "destructive",
+              onSelect: () => setConfirmation({ ...target, action: "delete" }),
+            });
+
+            return (
+              <ClassTimelineMenu
+                summary={summary}
+                disabled={mutation.isPending}
+                items={items}
+              />
+            );
+          }}
         />
       </Card>
       <DeleteConfirmation
