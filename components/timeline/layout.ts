@@ -19,8 +19,8 @@ export function getTimelineLayout(orientation: TimelineOrientation) {
       ? "inset-x-0 top-[220px] border-t"
       : "inset-y-0 start-5 border-s",
     nowLineClass: horizontal
-      ? "inset-y-6 left-1/2 w-px bg-linear-to-b from-transparent via-yellow-700 to-transparent"
-      : "inset-x-0 top-1/2 h-px bg-linear-to-r from-transparent via-yellow-700 to-transparent",
+      ? "inset-y-6 left-1/2 w-px bg-linear-to-b from-transparent via-yellow-700 to-transparent dark:via-accent"
+      : "inset-x-0 top-1/2 h-px bg-linear-to-r from-transparent via-yellow-700 to-transparent dark:via-accent",
   };
 }
 

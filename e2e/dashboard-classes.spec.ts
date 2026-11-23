@@ -62,6 +62,18 @@ test("teachers can manage classes for different students on the dashboard", asyn
   await expect(timeline.getByRole("button")).toHaveText([/Ana Timeline/, /Zoe Timeline/]);
   await verifyTimelineNavigation(page, "horizontal", "Class timeline", "Go to now");
 
+  const themeToggle = page.getByRole("button", { name: "Toggle color theme" });
+  await themeToggle.click();
+  await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+  const darkForeground = await page.locator("body").evaluate((body) => getComputedStyle(body).color);
+  await expect(page.getByRole("heading", { name: "Classes", exact: true })).toHaveCSS("color", darkForeground);
+  await expect(schedule).toHaveCSS("color", darkForeground);
+  await expect(timeline.getByText("Scheduled", { exact: true }).first()).toHaveCSS("color", darkForeground);
+  expect(await page.evaluate(() => localStorage.getItem("theme"))).toBe("dark");
+  await page.reload();
+  await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+  await themeToggle.click();
+
   const viewStudent = page.getByRole("menuitem", { name: "View student profile" });
   await classFor(ana).click();
   await expect(viewStudent).toBeVisible();
