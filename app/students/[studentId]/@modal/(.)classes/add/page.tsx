@@ -7,7 +7,7 @@ export default async function AddClassModalPage({
   const { studentId } = await params;
   return (
     <ClassModal mode="add">
-      <ClassFormContent mode="add" studentId={studentId} />
+      <ClassFormContent mode="add" studentId={studentId} timelineStudentId={studentId} />
     </ClassModal>
   );
 }

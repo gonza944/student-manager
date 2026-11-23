@@ -13,6 +13,7 @@ import {
   updateStudentClassAction,
 } from "@/app/students/classes/mutation-actions";
 import { getClassAvailabilityAction } from "@/app/students/classes/query-actions";
+import { classTimelineQueryKey } from "@/app/students/queries/class-timeline-query-key";
 import { toMinorUnits } from "@/app/students/utils/to-minor-units";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmation } from "@/components/delete-confirmation";
@@ -36,6 +37,7 @@ import { ClassDayGrid } from "./class-day-grid";
 
 export function ClassForm({
   studentId,
+  timelineStudentId,
   studentClass,
   timeZone,
   studentSince,
@@ -45,6 +47,7 @@ export function ClassForm({
   initialDate,
 }: {
   studentId: string;
+  timelineStudentId?: string;
   studentClass?: StudentClassDto;
   timeZone: string;
   studentSince: string;
@@ -194,7 +197,7 @@ export function ClassForm({
       setSaved(true);
       await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: ["student-classes", fromDashboard ? undefined : studentId],
+          queryKey: classTimelineQueryKey(timelineStudentId),
         }),
         queryClient.invalidateQueries({ queryKey: ["class-availability"] }),
       ]);

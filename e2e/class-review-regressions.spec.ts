@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("class review regressions: full-page discard, external refresh and historical charge edits", async ({ page, context }) => {
+test("class review regressions: full-page discard, change-driven refresh and historical charge edits", async ({ page, context }) => {
   test.setTimeout(120_000);
   await page.clock.install();
   const name = `Class review ${Date.now()}`;
@@ -20,6 +20,7 @@ test("class review regressions: full-page discard, external refresh and historic
   await page.getByRole("article").filter({ has: page.getByRole("heading", { name, exact: true }) }).getByRole("link").click();
   await expect(page).toHaveURL(/\/students\/[^/]+$/);
   const profile = new URL(page.url()).pathname;
+  const studentId = profile.slice("/students/".length);
 
   await page.goto(`${profile}/classes/add`);
   await page.getByLabel("Charge (USD)").fill("51");
@@ -49,18 +50,27 @@ test("class review regressions: full-page discard, external refresh and historic
   const scheduled = page.getByRole("button", { name: /Scheduled.*60 minutes.*USD/ });
   await expect(scheduled).toBeVisible();
 
+  const timelineRequests: string[] = [];
+  page.on("request", (request) => {
+    if (
+      request.method() === "POST" &&
+      new URL(request.url()).pathname === profile &&
+      request.postData() === JSON.stringify([{ studentId }])
+    ) {
+      timelineRequests.push(request.url());
+    }
+  });
+  await page.reload();
   await scheduled.click();
   const editLink = page.getByRole("menuitem", { name: "Edit class" });
   const editPath = await editLink.getAttribute("href");
   expect(editPath).toBeTruthy();
-  // An unchanged background refresh must keep the active menu and scroll position.
   const viewport = page.locator('[data-orientation="horizontal"] [data-slot="scroll-area-viewport"]');
   const offset = await viewport.evaluate((element) => element.scrollLeft);
-  const refreshed = page.waitForResponse((response) => response.request().method() === "POST" && new URL(response.url()).pathname === profile);
   await page.clock.runFor(60_001);
-  await refreshed;
   await expect(editLink).toBeVisible();
   expect(await viewport.evaluate((element) => element.scrollLeft)).toBe(offset);
+  expect(timelineRequests).toHaveLength(0);
   await page.keyboard.press("Escape");
 
   const other = await context.newPage();
@@ -70,9 +80,11 @@ test("class review regressions: full-page discard, external refresh and historic
   await expect(other.getByRole("button", { name: /Completed.*60 minutes.*USD/ })).toBeVisible();
   await page.bringToFront();
   await page.clock.runFor(60_001);
+  await expect(scheduled).toBeVisible();
+  await page.reload();
   await expect(page.getByRole("button", { name: /Completed.*60 minutes.*USD/ })).toBeVisible();
 
-  await other.goto(`/students/edit/${profile.split("/").at(-1)}`);
+  await other.goto(`/students/edit/${studentId}`);
   await other.getByLabel("Student since", { exact: true }).fill("09/02/2026");
   await other.getByRole("button", { name: "Save changes" }).click();
   await expect(other).toHaveURL(profile);
@@ -89,7 +101,6 @@ test("class review regressions: full-page discard, external refresh and historic
   await page.getByLabel("Date", { exact: true }).fill("09/01/2026");
   await page.getByRole("button", { name: "Save class" }).click();
   await expect(page).toHaveURL(profile);
-  await page.reload();
   await expect(page.getByRole("button", { name: /Completed.*60 minutes.*USD 65\.00/ })).toBeVisible();
 
   await page.getByRole("button", { name: /Completed.*60 minutes.*USD/ }).click();

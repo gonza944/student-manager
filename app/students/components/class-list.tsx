@@ -21,6 +21,7 @@ import {
   dashboardClassTimelineId,
 } from "@/app/students/classes/navigation";
 import { getClassTimelineAction } from "@/app/students/classes/query-actions";
+import { classTimelineQueryKey } from "@/app/students/queries/class-timeline-query-key";
 
 import { ClassScheduleAction, type ClassScheduleScope } from "./class-schedule-action";
 import { ClassTimeline } from "./class-timeline";
@@ -41,13 +42,11 @@ export function ClassList({
   const formSearch = allStudents ? dashboardClassFormSearch : "";
   const t = useTranslations("Classes");
   const queryClient = useQueryClient();
-  const queryKey = ["student-classes", studentId];
+  const queryKey = classTimelineQueryKey(studentId);
   const query = useQuery({
     queryKey,
     initialData,
-    staleTime: 60_000,
-    refetchInterval: 60_000,
-    refetchOnMount: "always",
+    staleTime: Infinity,
     queryFn: async () => {
       const result = await getClassTimelineAction({ studentId });
       if (!result.ok) throw new Error(result.error);
