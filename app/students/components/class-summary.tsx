@@ -61,7 +61,7 @@ export function ClassSummary({
       >
         {dateTime.format(new Date(studentClass.scheduledAt))}
       </span>
-      <span className="mt-2 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+      <span className="mt-2 flex items-center justify-center gap-2 text-sm text-muted-foreground dark:group-hover/class-entry:text-secondary-foreground">
         <HugeiconsIcon icon={Clock03Icon} aria-hidden="true" />
         {t("duration", { minutes: studentClass.durationMinutes })}
       </span>
