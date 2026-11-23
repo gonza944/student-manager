@@ -45,9 +45,8 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-dvh px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
       <div className="mx-auto max-w-[90rem] space-y-6">
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">{t("title")}</h1>
-          <nav className="flex flex-wrap items-center gap-2" aria-label={t("navigation")}>
+        <header className="space-y-6">
+          <nav className="flex flex-wrap items-center gap-2 lg:justify-end" aria-label={t("navigation")}>
             <Button asChild variant="outline" className="rounded-full">
               <Link href="/students">
                 <HugeiconsIcon data-icon="inline-start" icon={UserMultipleIcon} aria-hidden="true" />
@@ -75,6 +74,9 @@ export default async function DashboardPage() {
               }}
             />
           </nav>
+          <h1 className="max-w-5xl text-balance text-[clamp(2rem,5vw,4.5rem)] font-black leading-none tracking-tight">
+            {t("title")}
+          </h1>
         </header>
 
         <DashboardCards metrics={metrics} currency={currency} timeZone={timeZone} />
