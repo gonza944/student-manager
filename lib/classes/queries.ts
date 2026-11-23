@@ -7,11 +7,9 @@ import {
   eq,
   getTableColumns,
   gte,
-  gt,
   inArray,
   lt,
   ne,
-  or,
   sql,
 } from "drizzle-orm";
 
@@ -51,22 +49,11 @@ function toCursor(row: typeof studentClass.$inferSelect): ClassCursor {
 }
 
 function cursorCondition(input: StudentClassPageInput) {
-  const scheduledAt = new Date(input.cursor.scheduledAt);
+  const row = sql`(${studentClass.scheduledAt}, ${studentClass.id})`;
+  const cursor = sql`(${Date.parse(input.cursor.scheduledAt)}, ${input.cursor.id})`;
   return input.direction === "earlier"
-    ? or(
-        lt(studentClass.scheduledAt, scheduledAt),
-        and(
-          eq(studentClass.scheduledAt, scheduledAt),
-          lt(studentClass.id, input.cursor.id),
-        ),
-      )
-    : or(
-        gt(studentClass.scheduledAt, scheduledAt),
-        and(
-          eq(studentClass.scheduledAt, scheduledAt),
-          gt(studentClass.id, input.cursor.id),
-        ),
-      );
+    ? sql`${row} < ${cursor}`
+    : sql`${row} > ${cursor}`;
 }
 
 function ownedStudentLookup(db: Database, teacherId: string, studentId: string) {
