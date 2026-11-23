@@ -44,6 +44,26 @@
       "norm_label": "editdashboardclassmodalpage()"
     },
     {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/(dashboard)/@classModal/(.)students/[studentId]/classes/add/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_dashboard_classmodal_students_studentid_classes_add_page_tsx_add_page",
+      "community": null,
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "AddDashboardClassModalPage()",
+      "file_type": "code",
+      "source_file": "app/(dashboard)/@classModal/(.)students/[studentId]/classes/add/page.tsx",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "add_page_adddashboardclassmodalpage",
+      "community": null,
+      "norm_label": "adddashboardclassmodalpage()"
+    },
+    {
       "label": "default.tsx",
       "file_type": "code",
       "source_file": "app/(dashboard)/@classModal/default.tsx",
@@ -18637,6 +18657,60 @@
       "weight": 1.0,
       "source": "app_dashboard_classmodal_students_studentid_classes_classid_edit_page_tsx_edit_page",
       "target": "edit_page_editdashboardclassmodalpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(dashboard)/@classModal/(.)students/[studentId]/classes/add/page.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "app_dashboard_classmodal_students_studentid_classes_add_page_tsx_add_page",
+      "target": "add_page_adddashboardclassmodalpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(dashboard)/@classModal/(.)students/[studentId]/classes/add/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "app_dashboard_classmodal_students_studentid_classes_add_page_tsx_add_page",
+      "target": "components_class_form_content",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(dashboard)/@classModal/(.)students/[studentId]/classes/add/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "app_dashboard_classmodal_students_studentid_classes_add_page_tsx_add_page",
+      "target": "components_class_form_content_classformcontent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(dashboard)/@classModal/(.)students/[studentId]/classes/add/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "app_dashboard_classmodal_students_studentid_classes_add_page_tsx_add_page",
+      "target": "components_class_modal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(dashboard)/@classModal/(.)students/[studentId]/classes/add/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "app_dashboard_classmodal_students_studentid_classes_add_page_tsx_add_page",
+      "target": "components_class_modal_classmodal",
       "confidence_score": 1.0
     },
     {
