@@ -194,7 +194,7 @@ export function ClassForm({
       setSaved(true);
       await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: ["student-classes", studentId],
+          queryKey: ["student-classes", fromDashboard ? undefined : studentId],
         }),
         queryClient.invalidateQueries({ queryKey: ["class-availability"] }),
       ]);

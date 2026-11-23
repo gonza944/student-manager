@@ -12,14 +12,12 @@ import {
   Settings02Icon,
   UserMultipleIcon,
 } from "@hugeicons/core-free-icons";
-import { NextIntlClientProvider } from "next-intl";
-import { getFormatter, getMessages, getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { dashboardClassTimelineId } from "@/app/students/classes/navigation";
 import { ClassList } from "@/app/students/components/class-list";
-import { StudentsQueryProvider } from "@/app/students/queries/students-query-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { DashboardLogoutButton } from "@/components/dashboard-logout-button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -94,10 +92,9 @@ export default async function Home() {
   if ("error" in session) redirect("/login");
 
   const teacher = session.session.user;
-  const [t, format, messages, [timeline, activeStudents]] = await Promise.all([
+  const [t, format, [timeline, activeStudents]] = await Promise.all([
     getTranslations("Dashboard"),
     getFormatter(),
-    getMessages(),
     getDb().then((db) =>
       Promise.all([
         getTeacherClassTimeline(
@@ -236,15 +233,11 @@ export default async function Home() {
 
         <section className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12" aria-label={t("detailsLabel")}>
           <div className="min-w-0 lg:col-span-12">
-            <NextIntlClientProvider messages={{ Classes: messages.Classes }}>
-              <StudentsQueryProvider>
-                <ClassList
-                  activeStudents={activeStudents}
-                  initialData={timeline}
-                  timeZone={timeZoneSchema.parse(teacher.timeZone)}
-                />
-              </StudentsQueryProvider>
-            </NextIntlClientProvider>
+            <ClassList
+              activeStudents={activeStudents}
+              initialData={timeline}
+              timeZone={timeZoneSchema.parse(teacher.timeZone)}
+            />
           </div>
 
           <Card className="border-orbit-ink/20 bg-blue-gray-400 text-orbit-ink shadow-none lg:col-span-6">

@@ -64,11 +64,18 @@ test("teachers can manage classes for different students on the dashboard", asyn
 
   await classFor(ana).click();
   await page.getByRole("menuitem", { name: "Edit class" }).click();
-  await expect(page.getByRole("heading", { name: "Edit class" })).toBeVisible();
-  await expect(page.getByRole("main").getByText(ana, { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to dashboard" })).toHaveAttribute("href", "/#class-timeline");
-  await page.getByLabel("Charge (USD)").fill("55");
-  await page.getByRole("button", { name: "Save class" }).click();
+  const edit = page.getByRole("dialog", { name: "Edit class" });
+  await expect(edit).toBeVisible();
+  await expect(page.getByRole("list", { name: "Class timeline", includeHidden: true })).toBeAttached();
+  await expect(edit.getByText(ana, { exact: true })).toBeVisible();
+  await expect(edit.getByLabel("Date", { exact: true })).toBeInViewport();
+  await expect(edit.getByLabel("Charge (USD)")).toBeInViewport();
+  await expect(edit.getByRole("region", { name: "Day schedule" })).toBeInViewport();
+  await edit.getByRole("button", { name: "Occupied times" }).click();
+  await expect(edit.getByText("No occupied times on this date.")).toBeInViewport();
+  await edit.getByLabel("Charge (USD)").fill("55");
+  await edit.getByRole("button", { name: "Save class" }).click();
+  await expect(edit).toBeHidden();
   await expect(page).toHaveURL("/#class-timeline");
   await expect(classFor(ana)).toContainText("USD 55.00");
 
@@ -81,8 +88,20 @@ test("teachers can manage classes for different students on the dashboard", asyn
   await page.getByRole("dialog").getByRole("button", { name: "Cancel class" }).click();
   await expect(classFor(ana)).toContainText("Cancelled");
 
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize({ width: 390, height: 680 });
   await verifyTimelineNavigation(page, "vertical", "Class timeline", "Go to now");
+  await classFor(zoe).click();
+  await page.getByRole("menuitem", { name: "Edit class" }).click();
+  await expect(edit).toBeVisible();
+  await expect(edit.getByText(zoe, { exact: true })).toBeVisible();
+  await expect(edit.getByLabel("Date", { exact: true })).toBeInViewport();
+  await expect(edit.getByLabel("Charge (USD)")).toBeInViewport();
+  await expect(edit.getByRole("region", { name: "Day schedule" })).toBeInViewport();
+  await edit.getByRole("button", { name: "Occupied times" }).click();
+  await expect(edit.getByText("No occupied times on this date.")).toBeInViewport();
+  await edit.getByRole("button", { name: "Close class dialog" }).click();
+  await expect(edit).toBeHidden();
+  await expect(page).toHaveURL("/#class-timeline");
   await classFor(ana).click();
   await page.getByRole("menuitem", { name: "Delete permanently" }).click();
   await page.getByRole("dialog", { name: "Delete class?" }).getByRole("button", { name: "Delete permanently" }).click();
