@@ -58,7 +58,7 @@ export async function DashboardCards({
   const previousMonth = format.dateTime(metrics.previousMonthStart, { month: "long", timeZone });
   const revenue = metrics.revenue.length > 0
     ? metrics.revenue
-    : [{ currency, currentMinor: 0, previousMinor: 0 }];
+    : [{ currency, currentGrossMinor: 0, currentNetMinor: 0, previousGrossMinor: 0 }];
 
   return (
     <section className="grid gap-4 md:grid-cols-3" aria-label={t("overviewLabel")}>
@@ -67,29 +67,38 @@ export async function DashboardCards({
         icon={CircleDollarSignIcon}
         className="bg-orbit-ink text-orbit-paper-strong"
       >
-        {revenue.map(({ currency, currentMinor, previousMinor }) => {
+        {revenue.map(({ currency, currentGrossMinor, currentNetMinor, previousGrossMinor }) => {
           const money = new Intl.NumberFormat(locale, {
             style: "currency",
             currency,
             currencyDisplay: revenue.length > 1 ? "code" : "symbol",
           });
-          const fractionDigits = money.resolvedOptions().maximumFractionDigits ?? 2;
+          const divisor = 10 ** (money.resolvedOptions().maximumFractionDigits ?? 2);
 
           return (
-            <div key={currency} className="space-y-2">
-              <p className={valueClassName}>{money.format(currentMinor / 10 ** fractionDigits)}</p>
-              {previousMinor > 0 ? (
-                <p className="text-sm font-semibold text-yellow-400">
-                  {t("metrics.revenueDetail", {
-                    percent: format.number((currentMinor - previousMinor) / previousMinor, {
-                      style: "percent",
-                      signDisplay: "exceptZero",
-                    }),
-                    month: previousMonth,
-                  })}
-                </p>
-              ) : null}
-            </div>
+            <dl key={currency} className="space-y-3 border-current/25 not-first:border-t not-first:pt-3">
+              <div>
+                <dt className="text-sm font-semibold">{t("metrics.netRevenue")}</dt>
+                <dd className={valueClassName}>{money.format(currentNetMinor / divisor)}</dd>
+              </div>
+              <div>
+                <dt className="text-sm font-semibold">{t("metrics.grossRevenue")}</dt>
+                <dd className="break-words text-xl font-bold tabular-nums">
+                  {money.format(currentGrossMinor / divisor)}
+                </dd>
+                {previousGrossMinor > 0 ? (
+                  <dd className="text-sm font-semibold text-yellow-400">
+                    {t("metrics.revenueDetail", {
+                      percent: format.number((currentGrossMinor - previousGrossMinor) / previousGrossMinor, {
+                        style: "percent",
+                        signDisplay: "exceptZero",
+                      }),
+                      month: previousMonth,
+                    })}
+                  </dd>
+                ) : null}
+              </div>
+            </dl>
           );
         })}
       </DashboardCard>

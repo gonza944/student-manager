@@ -68,6 +68,8 @@
     "overviewLabel": "Resumen de enseñanza",
     "metrics": {
       "monthlyRevenue": "Ingresos mensuales",
+      "netRevenue": "Neto después de comisiones",
+      "grossRevenue": "Bruto antes de comisiones",
       "revenueDetail": "{percent} respecto a {month}",
       "activeStudents": "Estudiantes activos",
       "activeDetail": "{count, plural, =0 {Ningún estudiante nuevo} one {# estudiante nuevo} other {# estudiantes nuevos}} este mes",
