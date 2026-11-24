@@ -18274,6 +18274,86 @@
       "norm_label": "availability()"
     },
     {
+      "label": "metrics.test.ts",
+      "file_type": "code",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "dashboard_metrics_test",
+      "community": null,
+      "norm_label": "metrics.test.ts"
+    },
+    {
+      "label": "SqlValue",
+      "file_type": "code",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "dashboard_metrics_test_sqlvalue",
+      "community": null,
+      "norm_label": "sqlvalue"
+    },
+    {
+      "label": "SqlRow",
+      "file_type": "code",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "dashboard_metrics_test_sqlrow",
+      "community": null,
+      "norm_label": "sqlrow"
+    },
+    {
+      "label": "SqliteDatabase",
+      "file_type": "code",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "dashboard_metrics_test_sqlitedatabase",
+      "community": null,
+      "norm_label": "sqlitedatabase"
+    },
+    {
+      "label": "require",
+      "file_type": "code",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "dashboard_metrics_test_require",
+      "community": null,
+      "norm_label": "require"
+    },
+    {
+      "label": "{ DatabaseSync }",
+      "file_type": "code",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "dashboard_metrics_test_databasesync",
+      "community": null,
+      "norm_label": "{ databasesync }"
+    },
+    {
+      "label": "{ registerHooks }",
+      "file_type": "code",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "dashboard_metrics_test_registerhooks",
+      "community": null,
+      "norm_label": "{ registerhooks }"
+    },
+    {
+      "label": "loadDashboardQueries()",
+      "file_type": "code",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "dashboard_metrics_test_loaddashboardqueries",
+      "community": null,
+      "norm_label": "loaddashboardqueries()"
+    },
+    {
       "label": "contracts.test.ts",
       "file_type": "code",
       "source_file": "tests/students/contracts.test.ts",
@@ -18892,7 +18972,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "app/(dashboard)/components/dashboard-cards.tsx",
-      "source_location": "L54",
+      "source_location": "L56",
       "weight": 1.0,
       "source": "components_dashboard_cards_dashboardcards",
       "target": "i18n_config_getlocale"
@@ -44923,6 +45003,17 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "dashboard_metrics_test_loaddashboardqueries",
+      "target": "db_index",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "db/index.ts",
@@ -47771,6 +47862,17 @@
       "weight": 1.0,
       "source": "dashboard_metrics",
       "target": "students_rate_history_getzoneddatestart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "dashboard_metrics_test_loaddashboardqueries",
+      "target": "dashboard_metrics",
       "confidence_score": 1.0
     },
     {
@@ -50689,6 +50791,76 @@
       "weight": 1.0,
       "source": "classes_time_options_test",
       "target": "classes_time_options_test_availability",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "dashboard_metrics_test",
+      "target": "dashboard_metrics_test_databasesync",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "dashboard_metrics_test",
+      "target": "dashboard_metrics_test_loaddashboardqueries",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "dashboard_metrics_test",
+      "target": "dashboard_metrics_test_registerhooks",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "dashboard_metrics_test",
+      "target": "dashboard_metrics_test_require",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "dashboard_metrics_test",
+      "target": "dashboard_metrics_test_sqlitedatabase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "dashboard_metrics_test",
+      "target": "dashboard_metrics_test_sqlrow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/dashboard/metrics.test.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "dashboard_metrics_test",
+      "target": "dashboard_metrics_test_sqlvalue",
       "confidence_score": 1.0
     },
     {
