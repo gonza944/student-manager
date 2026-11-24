@@ -1,10 +1,10 @@
 import "server-only";
 
-import { and, asc, count, eq, gte, lt, ne, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, lt, lte, ne, sql } from "drizzle-orm";
 
 import type { createDb } from "../../db";
 import { studentClass } from "../../db/class-schema";
-import { student } from "../../db/student-schema";
+import { student, studentRateHistory } from "../../db/student-schema";
 import { getClassDayRange } from "../classes/scheduling";
 import { getDateOnlyToday } from "../students/contracts";
 import { getZonedDateStart } from "../students/rate-history";
@@ -34,6 +34,18 @@ export async function getTeacherDashboardMetrics(
   const nextMonthStart = getZonedDateStart(nextMonthStartDate, timeZone);
   const { dayStart, dayEnd } = getClassDayRange(today, timeZone);
   const classTeacher = eq(studentClass.teacherId, teacherId);
+  const inCurrentMonth = gte(studentClass.scheduledAt, monthStart);
+  const classFeeBps = db
+    .select({ feeBps: studentRateHistory.feeBps })
+    .from(studentRateHistory)
+    .where(and(
+      eq(studentRateHistory.teacherId, studentClass.teacherId),
+      eq(studentRateHistory.studentId, studentClass.studentId),
+      lte(studentRateHistory.effectiveAt, studentClass.scheduledAt),
+    ))
+    .orderBy(desc(studentRateHistory.effectiveAt), desc(sql`${studentRateHistory}.rowid`))
+    .limit(1);
+  const classFeeMinor = sql`cast((${studentClass.chargeMinor} * coalesce((${classFeeBps}), 0) + 5000) / 10000 as integer)`;
 
   const [[{ newStudentsThisMonth }], [classCounts], revenue] = await db.batch([
     db
@@ -55,17 +67,20 @@ export async function getTeacherDashboardMetrics(
       .from(studentClass)
       .where(and(
         classTeacher,
-        gte(studentClass.scheduledAt, monthStart),
+        inCurrentMonth,
         lt(studentClass.scheduledAt, nextMonthStart),
         ne(studentClass.status, "cancelled"),
       )),
     db
       .select({
         currency: studentClass.currency,
-        currentMinor: sql`sum(case when ${studentClass.scheduledAt} >= ${monthStart.getTime()}
-          then ${studentClass.chargeMinor} else 0 end)`.mapWith(Number).as("current_minor"),
-        previousMinor: sql`sum(case when ${studentClass.scheduledAt} < ${monthStart.getTime()}
-          then ${studentClass.chargeMinor} else 0 end)`.mapWith(Number).as("previous_minor"),
+        currentGrossMinor: sql`sum(case when ${inCurrentMonth}
+          then ${studentClass.chargeMinor} else 0 end)`.mapWith(Number).as("current_gross_minor"),
+        currentNetMinor: sql`sum(case when ${inCurrentMonth}
+          then ${studentClass.chargeMinor} - ${classFeeMinor} else 0 end)`
+          .mapWith(Number).as("current_net_minor"),
+        previousGrossMinor: sql`sum(case when ${lt(studentClass.scheduledAt, monthStart)}
+          then ${studentClass.chargeMinor} else 0 end)`.mapWith(Number).as("previous_gross_minor"),
       })
       .from(studentClass)
       .where(and(

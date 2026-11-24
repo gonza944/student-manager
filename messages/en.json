@@ -68,6 +68,8 @@
     "overviewLabel": "Teaching overview",
     "metrics": {
       "monthlyRevenue": "Monthly revenue",
+      "netRevenue": "Net after fees",
+      "grossRevenue": "Gross before fees",
       "revenueDetail": "{percent} from {month}",
       "activeStudents": "Active students",
       "activeDetail": "{count, plural, =0 {No new students} one {# new student} other {# new students}} this month",
