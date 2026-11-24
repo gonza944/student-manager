@@ -38,8 +38,8 @@ export function StudentCard({
   return (
     <article
       className={cn(
-        "transition-[filter,opacity] duration-300",
-        student.isActive ? "" : "opacity-55 grayscale",
+        "transition-[filter] duration-300",
+        student.isActive ? "" : "grayscale",
       )}>
       <Card
         className={cn(
@@ -50,13 +50,16 @@ export function StudentCard({
           <Link
             href={href}
             prefetch={false}
-            className="absolute inset-0 z-10 rounded-[inherit] outline-none focus-visible:ring-3 focus-visible:ring-orbit-ink/70 focus-visible:ring-inset">
+            className="absolute inset-0 z-10 rounded-[inherit] outline-none focus-visible:ring-3 focus-visible:ring-orbit-ink/70 focus-visible:ring-inset dark:focus-visible:ring-ring">
             <span className="sr-only">
               {t("openProfile", { name: student.name })}
             </span>
           </Link>
         ) : null}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[72%] overflow-hidden">
+        <div className={cn(
+          "pointer-events-none absolute inset-x-0 top-0 h-[72%] overflow-hidden",
+          !student.isActive && "opacity-55",
+        )}>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_22%,rgb(255_255_255/0.3),transparent_68%)]" />
           <Image
             src={`/avatars/open-peeps/${student.avatarKey}.svg`}
@@ -99,7 +102,7 @@ export function StudentCard({
         <CardContent className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-baseline justify-between gap-3 p-5 sm:p-6">
           <h2 className="text-balance text-2xl font-black">{student.name}</h2>
           <div className="shrink-0 text-end">
-            <p className="text-label font-bold uppercase tracking-widest opacity-65">
+            <p className="text-label font-bold uppercase tracking-widest">
               {t("grossRate")}
             </p>
             <p className="text-lg font-semibold">

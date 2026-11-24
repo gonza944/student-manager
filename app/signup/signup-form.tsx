@@ -208,9 +208,10 @@ export function SignupForm({
           autoHighlight
           required
           disabled={pending}>
-          <ComboboxInputGroup>
+          <ComboboxInputGroup className="border-orbit-ink/20 bg-orbit-paper-strong text-orbit-ink dark:bg-orbit-paper-strong">
             <ComboboxInput
               id="currency"
+              className="placeholder:text-orbit-ink-soft"
               placeholder={copy.currencyPlaceholder}
               aria-invalid={Boolean(fieldErrors.currency)}
               aria-describedby={
@@ -219,6 +220,7 @@ export function SignupForm({
               disabled={pending}
             />
             <ComboboxTrigger
+              className="text-orbit-ink hover:bg-orbit-ink/5"
               aria-label={copy.currencyOpen}
               disabled={pending}
             />
@@ -322,7 +324,7 @@ export function SignupForm({
       {error && (
         <p
           role="alert"
-          className="px-4 py-3 text-sm font-semibold text-destructive">
+          className="rounded-xl bg-destructive px-4 py-3 text-sm font-semibold text-destructive-foreground">
           {error}
         </p>
       )}

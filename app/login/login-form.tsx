@@ -216,7 +216,7 @@ export function LoginForm({ copy }: { copy: Copy }) {
       {error && (
         <p
           role="alert"
-          className="px-4 py-3 text-sm font-semibold text-destructive">
+          className="rounded-xl bg-destructive px-4 py-3 text-sm font-semibold text-destructive-foreground">
           {error}
         </p>
       )}

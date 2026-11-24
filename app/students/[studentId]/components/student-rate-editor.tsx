@@ -171,7 +171,7 @@ export function StudentRateEditor({
                 name="hasCustomPeriod"
                 type="checkbox"
                 checked={hasCustomPeriod}
-                className="mt-0.5 size-5 shrink-0 accent-orbit-ink"
+                className="mt-0.5 size-5 shrink-0 accent-primary"
                 aria-describedby="student-rate-custom-period-hint"
                 onChange={(event) => {
                   const checked = event.target.checked;

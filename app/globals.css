@@ -80,7 +80,7 @@
   --muted-foreground: var(--color-blue-gray-400); /* #98A3AB */
   --accent: var(--color-yellow-400); /* #DFAE38 */
   --accent-foreground: var(--orbit-ink);
-  --destructive: var(--color-red-400); /* #CD544A */
+  --destructive: var(--color-red-200);
   --destructive-foreground: var(--orbit-ink);
   --success: var(--color-green-400); /* #6BAA6E */
   --success-foreground: var(--orbit-ink);
@@ -233,7 +233,7 @@
 
   ::selection {
     background: var(--color-yellow-200);
-    color: var(--ink);
+    color: var(--accent-foreground);
   }
 }
 

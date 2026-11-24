@@ -21,7 +21,7 @@ function ComboboxInputGroup({
     <ComboboxPrimitive.InputGroup
       data-slot="combobox-input-group"
       className={cn(
-        "flex h-12 w-full items-center rounded-xl border border-orbit-ink/20 bg-orbit-paper-strong/70 transition-[border-color,box-shadow,transform] focus-within:-translate-y-px focus-within:border-orbit-ink/60 focus-within:ring-4 focus-within:ring-orbit-ink/10 has-aria-invalid:border-destructive has-aria-invalid:ring-destructive/20",
+        "flex h-12 w-full items-center rounded-xl border border-input bg-paper-strong/70 transition-[border-color,box-shadow,transform] focus-within:-translate-y-px focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/50 has-aria-invalid:border-destructive has-aria-invalid:ring-destructive/20 dark:bg-input/30",
         className,
       )}
       {...props}
@@ -37,7 +37,7 @@ function ComboboxInput({
     <ComboboxPrimitive.Input
       data-slot="combobox-input"
       className={cn(
-        "min-w-0 flex-1 bg-transparent px-4 text-base font-semibold outline-none placeholder:text-orbit-ink/45 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        "min-w-0 flex-1 bg-transparent px-4 text-base font-semibold outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
         className,
       )}
       {...props}
@@ -54,7 +54,7 @@ function ComboboxTrigger({
     <ComboboxPrimitive.Trigger
       data-slot="combobox-trigger"
       className={cn(
-        "group me-1 flex size-9 shrink-0 items-center justify-center rounded-full border border-orbit-ink bg-transparent text-orbit-ink transition-colors hover:bg-orbit-ink/5 focus-visible:ring-3 focus-visible:ring-orbit-ink/30 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+        "group me-1 flex size-9 shrink-0 items-center justify-center rounded-full border border-current bg-transparent text-foreground transition-colors hover:bg-foreground/5 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
       {...props}>
@@ -148,7 +148,7 @@ function ComboboxLabel({
     <ComboboxPrimitive.GroupLabel
       data-slot="combobox-label"
       className={cn(
-        "px-2 py-1.5 text-xs font-bold text-orbit-paper-strong/75 dark:text-muted-foreground",
+        "px-2 py-1.5 text-xs font-bold text-muted-foreground",
         className,
       )}
       {...props}

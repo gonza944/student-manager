@@ -21,6 +21,8 @@ test("records rate changes once and keeps histories teacher-scoped", async ({
     .fill("playwright-test");
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL("/");
+  await page.getByRole("button", { name: "Toggle color theme" }).click();
+  await expect(page.locator("html")).toHaveClass(/\bdark\b/);
 
   await page.getByRole("link", { name: "Students" }).click();
   await page.getByRole("link", { name: "Add student" }).click();
@@ -104,6 +106,18 @@ test("records rate changes once and keeps histories teacher-scoped", async ({
   await expect(rows.nth(2)).toHaveClass(/bg-paper-strong/);
   await expect(rows.nth(2)).toContainText("Direct");
   await expect(rows.nth(2)).toContainText("$0.97");
+
+  const cardForeground = await historyCard.evaluate(
+    (card) => getComputedStyle(card).color,
+  );
+  const historicalRow = rows.nth(2);
+  await expect(historicalRow.getByText("$20.00", { exact: true })).toHaveCSS(
+    "color",
+    cardForeground,
+  );
+  await expect(
+    historicalRow.getByRole("button", { name: /Delete rate starting/ }),
+  ).toHaveCSS("color", cardForeground);
 
   await historyCard.getByRole("button", { name: "Edit rate" }).click();
   rateDialog = page.getByRole("dialog", { name: "Edit rate" });

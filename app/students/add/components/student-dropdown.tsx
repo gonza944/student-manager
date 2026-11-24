@@ -41,9 +41,9 @@ export function StudentDropdown<Value extends string>({
           aria-label={`${label}: ${selected?.label ?? value}`}
           aria-invalid={invalid}
           aria-describedby={invalid ? `${id}-error` : undefined}
-          className="group h-12 w-full justify-between rounded-xl border border-orbit-ink/20 bg-orbit-paper-strong/70 ps-4 pe-1 text-base font-semibold shadow-none transition-[border-color,box-shadow,transform] hover:bg-orbit-paper-strong/70 hover:text-orbit-ink focus-visible:-translate-y-px focus-visible:border-orbit-ink/60 focus-visible:ring-4 focus-visible:ring-orbit-ink/10 md:text-sm">
+          className="group h-12 w-full justify-between rounded-xl border border-input bg-paper-strong/70 ps-4 pe-1 text-base font-semibold text-foreground shadow-none transition-[border-color,box-shadow,transform] hover:bg-paper-strong hover:text-foreground focus-visible:-translate-y-px focus-visible:border-ring focus-visible:ring-4 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30 dark:hover:bg-input/40">
           {selected?.label ?? value}
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-orbit-ink bg-transparent text-orbit-ink transition-colors group-hover:bg-orbit-ink/5">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-current bg-transparent transition-colors group-hover:bg-foreground/5">
             <HugeiconsIcon
               icon={ArrowDown01Icon}
               size={18}
