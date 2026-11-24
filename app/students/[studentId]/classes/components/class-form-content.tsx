@@ -34,7 +34,7 @@ export async function ClassFormContent({
     studentClass ? new Date(studentClass.scheduledAt) : new Date(),
   )!;
   return (
-    <article className="flex h-[calc(92dvh-2rem)] flex-col p-6 sm:h-[calc(100dvh-2rem)] sm:p-8">
+    <article className="flex h-[calc(92dvh-2rem)] min-h-[26rem] flex-col p-6 sm:h-[calc(100dvh-2rem)] sm:p-8">
       <div className="shrink-0 pe-10">
         <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
           {t(`${mode}.title`)}

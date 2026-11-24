@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -29,6 +30,19 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <meta name="color-scheme" content="light dark" />
       </head>
       <body className="min-h-full font-sans">
+        <Script id="restore-color-theme" strategy="beforeInteractive">
+          {`(() => {
+            const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+            function syncTheme() {
+              let savedTheme;
+              try { savedTheme = localStorage.getItem("theme"); } catch {}
+              const dark = savedTheme === "dark" || (savedTheme !== "light" && systemTheme.matches);
+              document.documentElement.classList.toggle("dark", dark);
+            }
+            syncTheme();
+            systemTheme.addEventListener("change", syncTheme);
+          })();`}
+        </Script>
         {children}
         <Toaster />
       </body>

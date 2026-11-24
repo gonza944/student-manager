@@ -93,7 +93,7 @@ export function ClassList({
       className="min-w-0"
       aria-labelledby="classes-title"
     >
-      <Card className="border-orbit-ink/20 bg-paper-strong text-orbit-ink shadow-none">
+      <Card className="shadow-none">
         <ClassTimeline
           key={query.data.revision}
           version={query.data.revision}
