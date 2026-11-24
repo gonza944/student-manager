@@ -1,179 +1,71 @@
-import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
-  Alert02Icon,
-  AnalyticsUpIcon,
-  ArrowUpRight01Icon,
-  BookOpen02Icon,
   Calendar03Icon,
-  CircleDollarSignIcon,
-  Clock03Icon,
-  Message01Icon,
-  Orbit02Icon,
   Settings02Icon,
   UserMultipleIcon,
 } from "@hugeicons/core-free-icons";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { dashboardClassTimelineId } from "@/app/students/classes/navigation";
 import { ClassList } from "@/app/students/components/class-list";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { DashboardLogoutButton } from "@/components/dashboard-logout-button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import { requireRole } from "@/lib/auth/server";
 import { getDb } from "@/db";
+import { requireRole } from "@/lib/auth/server";
 import { studentClassTimelineInputSchema } from "@/lib/classes/contracts";
 import { getTeacherClassTimeline } from "@/lib/classes/queries";
-import { timeZoneSchema } from "@/lib/students/contracts";
+import { getTeacherDashboardMetrics } from "@/lib/dashboard/metrics";
+import { teacherRateSettingsSchema, timeZoneSchema } from "@/lib/students/contracts";
 import { listTeacherActiveStudentOptions } from "@/lib/students/data";
+import { DashboardCards } from "./components/dashboard-cards";
 
-const progress = [
-  { initials: "ER", student: "Emma Reed", value: 92, tone: "bg-red-500 text-orbit-paper-strong" },
-  { initials: "NH", student: "Noor Haddad", value: 78, tone: "bg-yellow-400 text-orbit-ink" },
-  { initials: "LM", student: "Leo Martin", value: 64, tone: "bg-purple-400 text-orbit-ink" },
-] as const;
+export default async function DashboardPage() {
+  const auth = await requireRole("teacher");
+  if ("error" in auth) redirect("/login");
 
-const revenue = [
-  { month: 1, amount: 2420, height: "h-[42%]" },
-  { month: 2, amount: 2760, height: "h-[55%]" },
-  { month: 3, amount: 2580, height: "h-[48%]" },
-  { month: 4, amount: 3220, height: "h-[72%]" },
-  { month: 5, amount: 3080, height: "h-[68%]" },
-  { month: 6, amount: 3840, height: "h-[92%]" },
-] as const;
-
-function MetricCard({
-  label,
-  value,
-  detail,
-  icon,
-  className,
-}: {
-  label: string;
-  value: string;
-  detail: string;
-  icon: IconSvgElement;
-  className: string;
-}) {
-  return (
-    <Card className={cn("min-h-48 justify-between overflow-hidden py-5 shadow-none", className)}>
-      <CardHeader className="px-5">
-        <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-current">
-          {label}
-        </CardDescription>
-        <CardAction className="grid size-10 place-items-center rounded-full border border-current/20">
-          <HugeiconsIcon icon={icon} size={21} color="currentColor" strokeWidth={1.5} aria-hidden="true" />
-        </CardAction>
-      </CardHeader>
-      <CardContent className="px-5">
-        <p className="text-4xl font-black tracking-[-0.08em]">{value}</p>
-        <p className="mt-2 text-xs font-semibold opacity-70">{detail}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-export default async function Home() {
-  const session = await requireRole("teacher");
-  if ("error" in session) redirect("/login");
-
-  const teacher = session.session.user;
-  const [t, format, [timeline, activeStudents]] = await Promise.all([
+  const teacher = auth.session.user;
+  const timeZone = timeZoneSchema.parse(teacher.timeZone);
+  const { currency } = teacherRateSettingsSchema.parse(teacher);
+  const now = new Date();
+  const [t, [metrics, timeline, activeStudents]] = await Promise.all([
     getTranslations("Dashboard"),
-    getFormatter(),
     getDb().then((db) =>
       Promise.all([
-        getTeacherClassTimeline(
-          db,
-          teacher.id,
-          studentClassTimelineInputSchema.parse({}),
-        ),
+        getTeacherDashboardMetrics(db, teacher.id, timeZone, now),
+        getTeacherClassTimeline(db, teacher.id, studentClassTimelineInputSchema.parse({}), now),
         listTeacherActiveStudentOptions(db, teacher.id),
       ]),
     ),
   ]);
   if (!timeline) throw new Error("Unable to load the teacher's class timeline.");
-  const currency = (value: number) =>
-    format.number(value, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
-  const month = (value: number, style: "long" | "short") =>
-    format.dateTime(new Date(Date.UTC(2026, value, 15)), { month: style, timeZone: "UTC" });
-  const metrics = [
-    {
-      label: t("metrics.monthlyRevenue"),
-      value: currency(3840),
-      detail: t("metrics.revenueDetail", { percent: 0.12, month: month(5, "long") }),
-      icon: CircleDollarSignIcon,
-      className: "bg-paper-strong",
-    },
-    {
-      label: t("metrics.activeStudents"),
-      value: format.number(activeStudents.length),
-      detail: t("metrics.activeDetail", { count: 3 }),
-      icon: UserMultipleIcon,
-      className: "bg-green-400 text-orbit-ink",
-    },
-    {
-      label: t("metrics.hoursTaught"),
-      value: format.number(34.5),
-      detail: t("metrics.hoursDetail", { count: 6 }),
-      icon: Clock03Icon,
-      className: "bg-blue-gray-400 text-orbit-ink",
-    },
-    {
-      label: t("metrics.unreadMessages"),
-      value: format.number(4, { minimumIntegerDigits: 2 }),
-      detail: t("metrics.messagesDetail", { count: 2 }),
-      icon: Message01Icon,
-      className: "bg-purple-400 text-orbit-ink",
-    },
-  ];
 
   return (
     <main className="min-h-dvh px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
-      <div className="mx-auto max-w-360">
-        <header className="flex flex-wrap items-center justify-between gap-4" aria-label={t("headerLabel")}>
-          <div className="flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-full border-[0.5rem] border-ink" aria-hidden="true" />
-            <div className="flex items-center gap-2">
-              <span className="grid size-9 place-items-center rounded-full border border-ink/15 bg-paper-strong">
-                <HugeiconsIcon icon={Orbit02Icon} size={18} color="currentColor" strokeWidth={1.5} aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-sm font-black tracking-tighter">Orbit</p>
-                <p className="text-label font-bold uppercase tracking-[0.12em] text-ink/55">{t("studio")}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <ThemeToggle label={t("toggleTheme")} />
+      <div className="mx-auto max-w-[90rem] space-y-6">
+        <header className="space-y-6">
+          <nav className="flex flex-wrap items-center gap-2 lg:justify-end" aria-label={t("navigation")}>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link href="/students">
+                <HugeiconsIcon data-icon="inline-start" icon={UserMultipleIcon} aria-hidden="true" />
+                {t("students")}
+              </Link>
+            </Button>
             <Button asChild variant="outline" className="rounded-full">
               <Link href="/settings">
-                <HugeiconsIcon
-                  data-icon="inline-start"
-                  icon={Settings02Icon}
-                  size={18}
-                  color="currentColor"
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
+                <HugeiconsIcon data-icon="inline-start" icon={Settings02Icon} aria-hidden="true" />
                 {t("settings")}
               </Link>
             </Button>
+            <Button asChild className="rounded-full">
+              <a href={`#${dashboardClassTimelineId}`}>
+                <HugeiconsIcon data-icon="inline-start" icon={Calendar03Icon} aria-hidden="true" />
+                {t("viewSchedule")}
+              </a>
+            </Button>
+            <ThemeToggle label={t("toggleTheme")} />
             <DashboardLogoutButton
               copy={{
                 label: t("logout"),
@@ -181,219 +73,19 @@ export default async function Home() {
                 failed: t("logoutFailed"),
               }}
             />
-            <Button asChild variant="outline" className="rounded-full">
-              <Link href="/students">
-                <HugeiconsIcon
-                  data-icon="inline-start"
-                  icon={UserMultipleIcon}
-                  size={18}
-                  color="currentColor"
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
-                {t("students")}
-              </Link>
-            </Button>
-            <Button asChild className="rounded-full">
-              <a href={`#${dashboardClassTimelineId}`}>
-                <HugeiconsIcon
-                  data-icon="inline-start"
-                  icon={Calendar03Icon}
-                  size={18}
-                  color="currentColor"
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
-                {t("viewSchedule")}
-              </a>
-            </Button>
-            <Avatar size="lg" className="ring-1 ring-ink/15">
-              <AvatarFallback className="bg-red-500 font-black text-orbit-paper-strong">GA</AvatarFallback>
-            </Avatar>
-          </div>
-        </header>
-
-        <section className="pb-10 pt-16 sm:pt-24 lg:pb-14 lg:pt-32" aria-labelledby="dashboard-title">
-          <p className="mb-4 text-caption font-bold uppercase tracking-[0.16em] text-ink/60">
-            {t("weekLocation", { week: 28, location: "Córdoba" })}
-          </p>
-          <h1
-            id="dashboard-title"
-            className="max-w-6xl text-balance text-[clamp(2.75rem,7vw,7rem)] font-black leading-[0.84] tracking-[-0.085em]"
-          >
+          </nav>
+          <h1 className="max-w-5xl text-balance text-[clamp(2rem,5vw,4.5rem)] font-black leading-none tracking-tight">
             {t("title")}
           </h1>
-        </section>
+        </header>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label={t("overviewLabel")}>
-          {metrics.map((metric) => (
-            <MetricCard key={metric.label} {...metric} />
-          ))}
-        </section>
-
-        <section className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12" aria-label={t("detailsLabel")}>
-          <div className="min-w-0 lg:col-span-12">
-            <ClassList
-              activeStudents={activeStudents}
-              initialData={timeline}
-              timeZone={timeZoneSchema.parse(teacher.timeZone)}
-            />
-          </div>
-
-          <Card className="border-orbit-ink/20 bg-blue-gray-400 text-orbit-ink shadow-none lg:col-span-6">
-            <CardHeader>
-              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-orbit-ink/65">
-                {t("studentPulse")}
-              </CardDescription>
-              <CardTitle className="text-3xl font-black tracking-[-0.06em] sm:text-4xl">{t("everyoneMoving")}</CardTitle>
-              <CardAction className="grid size-11 place-items-center rounded-full border border-orbit-ink/25">
-                <HugeiconsIcon icon={AnalyticsUpIcon} size={22} color="currentColor" strokeWidth={1.5} aria-hidden="true" />
-              </CardAction>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              {progress.map((student) => (
-                <div key={student.student}>
-                  <div className="mb-2 flex items-center gap-3">
-                    <Avatar>
-                      <AvatarFallback className={cn("font-black", student.tone)}>{student.initials}</AvatarFallback>
-                    </Avatar>
-                    <p className="text-sm font-bold">{student.student}</p>
-                    <span className="ms-auto text-sm font-black">{format.number(student.value / 100, { style: "percent" })}</span>
-                  </div>
-                  <Progress
-                    value={student.value}
-                    aria-label={t("courseProgress", { student: student.student, value: student.value / 100 })}
-                    className="bg-orbit-paper-strong/45 [&_[data-slot=progress-indicator]]:bg-orbit-ink"
-                  />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card className="border-orbit-paper-strong/20 bg-orbit-ink text-orbit-paper-strong shadow-none lg:col-span-6">
-            <CardHeader>
-              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-blue-gray-400">
-                {t("monthlyRevenue")}
-              </CardDescription>
-              <CardTitle className="text-5xl font-black tracking-[-0.09em]">{currency(3840)}</CardTitle>
-              <CardAction>
-                <Badge className="bg-green-400 text-green-800">+{format.number(0.12, { style: "percent" })}</Badge>
-              </CardAction>
-            </CardHeader>
-            <CardContent>
-              <div className="flex h-36 items-end gap-2" aria-hidden="true">
-                {revenue.map((item, index) => (
-                  <span
-                    key={item.month}
-                    className={cn(
-                      "min-w-2 flex-1 rounded-t-md bg-blue-gray-600",
-                      item.height,
-                      index === revenue.length - 1 ? "bg-yellow-400" : "",
-                    )}
-                  />
-                ))}
-              </div>
-              <table className="sr-only">
-                <caption>{t("revenueCaption")}</caption>
-                <tbody>
-                  {revenue.map((item) => (
-                    <tr key={item.month}>
-                      <th scope="row">{month(item.month, "long")}</th>
-                      <td>{currency(item.amount)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="mt-3 flex justify-between text-label font-bold uppercase tracking-[0.08em] text-blue-gray-400" aria-hidden="true">
-                {revenue.map((item) => (
-                  <span key={item.month}>{month(item.month, "short")}</span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-ink/20 bg-paper-strong shadow-none lg:col-span-3">
-            <CardHeader>
-              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em]">{t("needsAttention")}</CardDescription>
-              <CardAction className="text-red-500">
-                <HugeiconsIcon icon={Alert02Icon} size={22} color="currentColor" strokeWidth={1.5} aria-hidden="true" />
-              </CardAction>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="font-black">Maya Chen</p>
-                <p className="mt-1 text-xs text-muted-foreground">{t("noCredits")}</p>
-              </div>
-              <Separator />
-              <div>
-                <p className="font-black">Leo Martin</p>
-                <p className="mt-1 text-xs text-muted-foreground">{t("homeworkOverdue", { count: 3 })}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-ink/20 bg-paper-strong shadow-none lg:col-span-4">
-            <CardHeader>
-              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em]">{t("inbox")}</CardDescription>
-              <CardTitle className="text-2xl font-black tracking-[-0.05em]">{t("inboxTitle")}</CardTitle>
-              <CardAction className="grid size-10 place-items-center rounded-full bg-purple-400 text-orbit-ink">
-                <span className="font-black">{format.number(4, { minimumIntegerDigits: 2 })}</span>
-              </CardAction>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-3">
-                <Avatar>
-                  <AvatarFallback className="bg-red-500 font-black text-orbit-paper-strong">ER</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <p className="text-sm font-black">Emma Reed</p>
-                  <p lang="en" className="mt-1 text-sm text-muted-foreground">The speaking prompts were perfect—thank you!</p>
-                </div>
-              </div>
-              <Separator />
-              <div className="flex gap-3">
-                <Avatar>
-                  <AvatarFallback className="bg-blue-gray-600 font-black text-orbit-paper-strong">NH</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <p className="text-sm font-black">Noor Haddad</p>
-                  <p lang="en" className="mt-1 text-sm text-muted-foreground">Shared a new writing draft.</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="min-h-80 border-red-500 bg-red-500 text-orbit-paper-strong shadow-none lg:col-span-5">
-            <CardHeader>
-              <CardDescription className="text-caption font-bold uppercase tracking-[0.14em] text-orbit-paper-strong/75">
-                {t("weeklyNote")}
-              </CardDescription>
-              <CardAction>
-                <HugeiconsIcon icon={BookOpen02Icon} size={24} color="currentColor" strokeWidth={1.5} aria-hidden="true" />
-              </CardAction>
-            </CardHeader>
-            <CardContent className="flex flex-1 flex-col justify-between gap-10">
-              <blockquote className="max-w-3xl text-pretty text-3xl font-black leading-[0.95] tracking-[-0.06em] sm:text-5xl">
-                {t("weeklyQuote")}
-              </blockquote>
-              <div className="flex items-center justify-between border-t border-orbit-paper-strong/35 pt-4 text-caption font-bold uppercase tracking-[0.12em]">
-                <span>{t("week", { week: 28 })}</span>
-                <span>{t("classesLeft", { count: 6 })}</span>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-
-        <footer className="mt-4 flex items-center justify-between rounded-[var(--radius)] border border-ink/20 bg-paper-strong px-5 py-4 text-xs font-bold">
-          <span className="flex items-center gap-2">
-            <HugeiconsIcon icon={Orbit02Icon} size={17} color="currentColor" strokeWidth={1.5} aria-hidden="true" />
-            {t("synced")}
-          </span>
-          <a className="flex items-center gap-2 hover:underline" href="#dashboard-title">
-            {t("backToOverview")}
-            <HugeiconsIcon icon={ArrowUpRight01Icon} size={17} color="currentColor" strokeWidth={1.5} aria-hidden="true" />
-          </a>
-        </footer>
+        <DashboardCards
+          metrics={metrics}
+          activeStudentCount={activeStudents.length}
+          currency={currency}
+          timeZone={timeZone}
+        />
+        <ClassList activeStudents={activeStudents} initialData={timeline} timeZone={timeZone} />
       </div>
     </main>
   );

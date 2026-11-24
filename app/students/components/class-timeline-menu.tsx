@@ -34,7 +34,7 @@ export function ClassTimelineMenu({
         <button
           type="button"
           disabled={disabled}
-          className="relative flex w-full flex-col items-center rounded-xl p-3 text-center transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="group/class-entry relative flex w-full flex-col items-center rounded-xl p-3 text-center transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-secondary dark:hover:text-secondary-foreground"
         >
           {summary}
         </button>

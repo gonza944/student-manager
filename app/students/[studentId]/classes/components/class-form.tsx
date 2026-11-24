@@ -259,162 +259,164 @@ export function ClassForm({
     >
       <fieldset
         disabled={save.isPending || inactive}
-        className="flex min-h-0 flex-1 flex-col gap-4"
+        className="relative min-h-0 min-w-0 flex-1"
       >
-        <ClassFormSections
-          schedule={
-            <>
-              <div className="grid shrink-0 grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="class-date">{t("fields.date")}</Label>
-                  <StudentDatePicker
-                    id="class-date"
-                    name="date"
-                    value={date}
-                    locale={locale}
-                    timeZone={timeZone}
-                    placeholder={t("fields.datePlaceholder")}
-                    openLabel={t("fields.openDate")}
-                    minDate={studentSince}
-                    allowedDate={studentClass ? initialDate : undefined}
-                    limitToToday={false}
-                    required
-                    invalid={!validDate}
-                    onValueChange={(value) => {
-                      setDate(value);
-                      setScheduledAt(
-                        value === initialDate && studentClass
-                          ? studentClass.scheduledAt
-                          : "",
-                      );
-                      if (value === initialDate && studentClass) {
-                        changeDuration(String(studentClass.durationMinutes));
+        <div className="absolute inset-0 flex min-h-0 flex-col gap-4">
+          <ClassFormSections
+            schedule={
+              <>
+                <div className="grid shrink-0 grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="class-date">{t("fields.date")}</Label>
+                    <StudentDatePicker
+                      id="class-date"
+                      name="date"
+                      value={date}
+                      locale={locale}
+                      timeZone={timeZone}
+                      placeholder={t("fields.datePlaceholder")}
+                      openLabel={t("fields.openDate")}
+                      minDate={studentSince}
+                      allowedDate={studentClass ? initialDate : undefined}
+                      limitToToday={false}
+                      required
+                      invalid={!validDate}
+                      onValueChange={(value) => {
+                        setDate(value);
+                        setScheduledAt(
+                          value === initialDate && studentClass
+                            ? studentClass.scheduledAt
+                            : "",
+                        );
+                        if (value === initialDate && studentClass) {
+                          changeDuration(String(studentClass.durationMinutes));
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="class-charge">
+                      {t("fields.chargeCurrency", {
+                        currency: studentClass?.currency ?? currency,
+                      })}
+                    </Label>
+                    <Input
+                      id="class-charge"
+                      name="charge"
+                      type="number"
+                      min={0}
+                      step={1 / factor}
+                      required
+                      aria-invalid={!validCharge}
+                      value={
+                        durationChanged
+                          ? validDuration
+                            ? String(calculatedCharge / factor)
+                            : ""
+                          : charge
                       }
+                      readOnly={Boolean(durationChanged)}
+                      onChange={(event) => setCharge(event.target.value)}
+                      className="h-11 rounded-xl"
+                    />
+                  </div>
+                </div>
+                {availability.isFetching ? (
+                  <p className="text-sm text-muted-foreground">{t("loading")}</p>
+                ) : null}
+                {validDuration &&
+                availability.data &&
+                !availability.isFetching &&
+                options.every((option) => option.disabled) ? (
+                  <p className="text-sm text-muted-foreground">{t("noTimes")}</p>
+                ) : null}
+                {availability.data && validDate ? (
+                  <ClassDayGrid
+                    key={date}
+                    allowOverlap={studentClass?.status === "cancelled"}
+                    day={availability.data}
+                    scheduledAt={scheduledAt}
+                    durationMinutes={durationMinutes}
+                    timeZone={timeZone}
+                    preferredTime={preferredTime}
+                    disabled={
+                      save.isPending ||
+                      inactive ||
+                      availability.isFetching ||
+                      !validDuration ||
+                      date < studentSince
+                    }
+                    onSelect={(start, nextDuration) => {
+                      setScheduledAt(start);
+                      changeDuration(String(nextDuration));
                     }}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="class-charge">
-                    {t("fields.chargeCurrency", {
-                      currency: studentClass?.currency ?? currency,
-                    })}
-                  </Label>
-                  <Input
-                    id="class-charge"
-                    name="charge"
-                    type="number"
-                    min={0}
-                    step={1 / factor}
-                    required
-                    aria-invalid={!validCharge}
-                    value={
-                      durationChanged
-                        ? validDuration
-                          ? String(calculatedCharge / factor)
-                          : ""
-                        : charge
-                    }
-                    readOnly={Boolean(durationChanged)}
-                    onChange={(event) => setCharge(event.target.value)}
-                    className="h-11 rounded-xl"
-                  />
-                </div>
-              </div>
-              {availability.isFetching ? (
-                <p className="text-sm text-muted-foreground">{t("loading")}</p>
-              ) : null}
-              {validDuration &&
-              availability.data &&
-              !availability.isFetching &&
-              options.every((option) => option.disabled) ? (
-                <p className="text-sm text-muted-foreground">{t("noTimes")}</p>
-              ) : null}
-              {availability.data && validDate ? (
-                <ClassDayGrid
-                  key={date}
-                  allowOverlap={studentClass?.status === "cancelled"}
-                  day={availability.data}
-                  scheduledAt={scheduledAt}
-                  durationMinutes={durationMinutes}
-                  timeZone={timeZone}
-                  preferredTime={preferredTime}
-                  disabled={
-                    save.isPending ||
-                    inactive ||
-                    availability.isFetching ||
-                    !validDuration ||
-                    date < studentSince
-                  }
-                  onSelect={(start, nextDuration) => {
-                    setScheduledAt(start);
-                    changeDuration(String(nextDuration));
-                  }}
-                />
-              ) : null}
-            </>
-          }
-          occupied={
-            availability.data?.intervals.length ? (
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                {availability.data.intervals.map((interval) => (
-                  <li key={interval.id}>
-                    {new Intl.DateTimeFormat(locale, {
-                      timeStyle: "short",
-                      timeZone,
-                    }).format(new Date(interval.scheduledAt))}{" "}
-                    —{" "}
-                    {new Intl.DateTimeFormat(locale, {
-                      timeStyle: "short",
-                      timeZone,
-                    }).format(
-                      Date.parse(interval.scheduledAt) +
-                        interval.durationMinutes * 60_000,
-                    )}{" "}
-                    · {interval.studentName} ·{" "}
-                    {t(`statuses.${interval.status}`)}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {t("sections.noOccupied")}
-              </p>
-            )
-          }
-        />
-        {inactive ? <p role="alert">{t("errors.inactiveStudent")}</p> : null}
-        {error ? (
-          <p
-            id="class-form-error"
-            role="alert"
-            className="text-sm text-destructive"
-          >
-            {t(`errors.${error}`)}
-          </p>
-        ) : null}
-        <div className="mt-auto flex shrink-0 gap-2 pt-2">
-          <Button
-            type="submit"
-            disabled={
-              !intervalValid ||
-              !validDate ||
-              !validDuration ||
-              !validCharge ||
-              availability.isFetching
+                ) : null}
+              </>
             }
-          >
-            {t(save.isPending ? "actions.saving" : "actions.save")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              if (dirty) setDiscardOpen(true);
-              else router.push(returnHref);
-            }}
-          >
-            {t("actions.discard")}
-          </Button>
+            occupied={
+              availability.data?.intervals.length ? (
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  {availability.data.intervals.map((interval) => (
+                    <li key={interval.id}>
+                      {new Intl.DateTimeFormat(locale, {
+                        timeStyle: "short",
+                        timeZone,
+                      }).format(new Date(interval.scheduledAt))}{" "}
+                      —{" "}
+                      {new Intl.DateTimeFormat(locale, {
+                        timeStyle: "short",
+                        timeZone,
+                      }).format(
+                        Date.parse(interval.scheduledAt) +
+                          interval.durationMinutes * 60_000,
+                      )}{" "}
+                      · {interval.studentName} ·{" "}
+                      {t(`statuses.${interval.status}`)}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {t("sections.noOccupied")}
+                </p>
+              )
+            }
+          />
+          {inactive ? <p role="alert">{t("errors.inactiveStudent")}</p> : null}
+          {error ? (
+            <p
+              id="class-form-error"
+              role="alert"
+              className="text-sm text-destructive"
+            >
+              {t(`errors.${error}`)}
+            </p>
+          ) : null}
+          <div className="mt-auto flex shrink-0 gap-2 pt-2">
+            <Button
+              type="submit"
+              disabled={
+                !intervalValid ||
+                !validDate ||
+                !validDuration ||
+                !validCharge ||
+                availability.isFetching
+              }
+            >
+              {t(save.isPending ? "actions.saving" : "actions.save")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (dirty) setDiscardOpen(true);
+                else router.push(returnHref);
+              }}
+            >
+              {t("actions.discard")}
+            </Button>
+          </div>
         </div>
       </fieldset>
       <DeleteConfirmation

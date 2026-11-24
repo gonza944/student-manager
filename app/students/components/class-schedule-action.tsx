@@ -19,7 +19,7 @@ export type ClassScheduleScope =
 
 export function ClassScheduleAction(scope: ClassScheduleScope) {
   const t = useTranslations("Classes");
-  const buttonClassName = "min-h-12 rounded-full bg-transparent";
+  const buttonClassName = "min-h-12 rounded-full bg-transparent text-foreground";
   const label = (
     <>
       <HugeiconsIcon icon={Add01Icon} strokeWidth={2} aria-hidden="true" />

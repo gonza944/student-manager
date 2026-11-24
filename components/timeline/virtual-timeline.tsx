@@ -218,7 +218,7 @@ export function VirtualTimeline<T>({
                         className={`pointer-events-none absolute ${layout.nowLineClass}`}
                       />
                       <div className="relative flex h-full items-center justify-center">
-                        <span className="rounded-full border border-orbit-ink/20 bg-yellow-200 px-4 py-2 text-sm font-bold text-orbit-ink">
+                        <span className="rounded-full border border-border bg-yellow-200 px-4 py-2 text-sm font-bold text-accent-foreground dark:bg-accent">
                           {nowLabel}
                         </span>
                       </div>
