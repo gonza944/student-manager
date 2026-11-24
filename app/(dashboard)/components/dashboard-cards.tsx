@@ -41,10 +41,12 @@ const valueClassName = "break-words text-4xl font-black tracking-tight tabular-n
 
 export async function DashboardCards({
   metrics,
+  activeStudentCount,
   currency,
   timeZone,
 }: {
   metrics: Awaited<ReturnType<typeof getTeacherDashboardMetrics>>;
+  activeStudentCount: number;
   currency: string;
   timeZone: string;
 }) {
@@ -96,7 +98,7 @@ export async function DashboardCards({
         icon={UserMultipleIcon}
         className="bg-green-400 text-orbit-ink"
       >
-        <p className={valueClassName}>{format.number(metrics.activeStudents)}</p>
+        <p className={valueClassName}>{format.number(activeStudentCount)}</p>
         <p className="text-sm font-semibold">
           {t("metrics.activeDetail", { count: metrics.newStudentsThisMonth })}
         </p>

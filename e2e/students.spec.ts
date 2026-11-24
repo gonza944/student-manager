@@ -219,4 +219,9 @@ test("teachers can filter, sort, and change student status", async ({
   await expect(
     activeStudentsMetric.getByText("2", { exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Schedule class", exact: true }).click();
+  await expect(page.getByRole("menu").getByRole("menuitem")).toHaveText([
+    students[2].name,
+    students[1].name,
+  ]);
 });

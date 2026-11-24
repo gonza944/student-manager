@@ -79,7 +79,12 @@ export default async function DashboardPage() {
           </h1>
         </header>
 
-        <DashboardCards metrics={metrics} currency={currency} timeZone={timeZone} />
+        <DashboardCards
+          metrics={metrics}
+          activeStudentCount={activeStudents.length}
+          currency={currency}
+          timeZone={timeZone}
+        />
         <ClassList activeStudents={activeStudents} initialData={timeline} timeZone={timeZone} />
       </div>
     </main>

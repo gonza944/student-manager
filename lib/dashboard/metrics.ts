@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, gte, lt, ne, sql } from "drizzle-orm";
+import { and, asc, count, eq, gte, lt, ne, sql } from "drizzle-orm";
 
 import type { createDb } from "../../db";
 import { studentClass } from "../../db/class-schema";
@@ -35,19 +35,15 @@ export async function getTeacherDashboardMetrics(
   const { dayStart, dayEnd } = getClassDayRange(today, timeZone);
   const classTeacher = eq(studentClass.teacherId, teacherId);
 
-  const [[studentCounts], [classCounts], revenue] = await db.batch([
+  const [[{ newStudentsThisMonth }], [classCounts], revenue] = await db.batch([
     db
-      .select({
-        activeStudents: sql`count(case when ${student.isActive} = 1 then 1 end)`
-          .mapWith(Number)
-          .as("active_students"),
-        newStudentsThisMonth: sql`count(case when ${student.studentSince} >= ${monthStartDate}
-          and ${student.studentSince} < ${nextMonthStartDate} then 1 end)`
-          .mapWith(Number)
-          .as("new_students_this_month"),
-      })
+      .select({ newStudentsThisMonth: count() })
       .from(student)
-      .where(eq(student.teacherId, teacherId)),
+      .where(and(
+        eq(student.teacherId, teacherId),
+        gte(student.studentSince, monthStartDate),
+        lt(student.studentSince, nextMonthStartDate),
+      )),
     db
       .select({
         classesThisMonth: sql`count(*)`.mapWith(Number).as("classes_this_month"),
@@ -82,5 +78,5 @@ export async function getTeacherDashboardMetrics(
       .orderBy(asc(studentClass.currency)),
   ]);
 
-  return { ...studentCounts, ...classCounts, previousMonthStart, revenue };
+  return { newStudentsThisMonth, ...classCounts, previousMonthStart, revenue };
 }
