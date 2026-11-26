@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, count, desc, eq, gte, lt, lte, ne, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, lt, lte, ne, sql, type SQL, type SQLWrapper } from "drizzle-orm";
 
 import type { createDb } from "../../db";
 import { studentClass } from "../../db/class-schema";
@@ -13,6 +13,10 @@ function offsetMonthStart(isoMonthStart: string, months: number) {
   const date = new Date(`${isoMonthStart}T00:00:00Z`);
   date.setUTCMonth(date.getUTCMonth() + months);
   return date.toISOString().slice(0, 10);
+}
+
+function sumWhen(condition: SQL, amount: SQLWrapper) {
+  return sql`sum(case when ${condition} then ${amount} else 0 end)`.mapWith(Number);
 }
 
 export async function getTeacherDashboardMetrics(
@@ -35,8 +39,8 @@ export async function getTeacherDashboardMetrics(
   const { dayStart, dayEnd } = getClassDayRange(today, timeZone);
   const classTeacher = eq(studentClass.teacherId, teacherId);
   const inCurrentMonth = gte(studentClass.scheduledAt, monthStart);
-  const classFeeBps = db
-    .select({ feeBps: studentRateHistory.feeBps })
+  const classRateId = db
+    .select({ id: studentRateHistory.id })
     .from(studentRateHistory)
     .where(and(
       eq(studentRateHistory.teacherId, studentClass.teacherId),
@@ -45,7 +49,11 @@ export async function getTeacherDashboardMetrics(
     ))
     .orderBy(desc(studentRateHistory.effectiveAt), desc(sql`${studentRateHistory}.rowid`))
     .limit(1);
-  const classFeeMinor = sql`cast((${studentClass.chargeMinor} * coalesce((${classFeeBps}), 0) + 5000) / 10000 as integer)`;
+  const classFeeMinor = sql`cast((${studentClass.chargeMinor} * coalesce(${studentRateHistory.feeBps}, 0) + 5000) / 10000 as integer)`;
+  const classNetMinor = sql`${studentClass.chargeMinor} - ${classFeeMinor}`;
+  const classSource = sql`coalesce(${studentRateHistory.source}, ${student.source})`;
+  const preplyThisMonth = sql`${inCurrentMonth} and ${classSource} = 'preply'`;
+  const directThisMonth = sql`${inCurrentMonth} and ${classSource} = 'private'`;
 
   const [[{ newStudentsThisMonth }], [classCounts], revenue] = await db.batch([
     db
@@ -74,15 +82,28 @@ export async function getTeacherDashboardMetrics(
     db
       .select({
         currency: studentClass.currency,
-        currentGrossMinor: sql`sum(case when ${inCurrentMonth}
-          then ${studentClass.chargeMinor} else 0 end)`.mapWith(Number).as("current_gross_minor"),
-        currentNetMinor: sql`sum(case when ${inCurrentMonth}
-          then ${studentClass.chargeMinor} - ${classFeeMinor} else 0 end)`
-          .mapWith(Number).as("current_net_minor"),
-        previousGrossMinor: sql`sum(case when ${lt(studentClass.scheduledAt, monthStart)}
-          then ${studentClass.chargeMinor} else 0 end)`.mapWith(Number).as("previous_gross_minor"),
+        currentGrossMinor: sumWhen(inCurrentMonth, studentClass.chargeMinor).as("current_gross_minor"),
+        currentNetMinor: sumWhen(inCurrentMonth, classNetMinor).as("current_net_minor"),
+        currentGrossMinorBySource: {
+          preply: sumWhen(preplyThisMonth, studentClass.chargeMinor).as("current_preply_gross_minor"),
+          private: sumWhen(directThisMonth, studentClass.chargeMinor).as("current_direct_gross_minor"),
+        },
+        currentNetMinorBySource: {
+          preply: sumWhen(preplyThisMonth, classNetMinor).as("current_preply_net_minor"),
+          private: sumWhen(directThisMonth, classNetMinor).as("current_direct_net_minor"),
+        },
+        previousGrossMinor: sumWhen(lt(studentClass.scheduledAt, monthStart), studentClass.chargeMinor)
+          .as("previous_gross_minor"),
       })
       .from(studentClass)
+      .innerJoin(student, and(
+        eq(student.id, studentClass.studentId),
+        eq(student.teacherId, studentClass.teacherId),
+      ))
+      .leftJoin(studentRateHistory, and(
+        inCurrentMonth,
+        eq(studentRateHistory.id, sql`(${classRateId})`),
+      ))
       .where(and(
         classTeacher,
         gte(studentClass.scheduledAt, previousMonthStart),

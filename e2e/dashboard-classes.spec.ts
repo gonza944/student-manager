@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { selectClassTime } from "./helpers/class-scheduler";
 import { verifyTimelineNavigation } from "./helpers/class-timeline";
 
 async function signUpTeacher(page: Page, email: string) {
@@ -156,4 +157,73 @@ test("teachers can manage classes for different students on the dashboard", asyn
   await signUpTeacher(page, `other-timeline-${suffix}@example.test`);
   await expect(empty).toBeVisible();
   await expect(classFor(zoe)).toHaveCount(0);
+});
+
+test("desktop revenue tooltips show gross and net amounts by source", async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await signUpTeacher(page, `revenue-${Date.now()}@example.test`);
+
+  const students = [
+    { name: "Preply revenue student", source: "Preply", rate: "100", time: "9:00 AM" },
+    { name: "Direct revenue student", source: "Direct", rate: "60", time: "11:00 AM" },
+  ];
+  for (const { name, source, rate } of students) {
+    await page.goto("/students/add");
+    await page.getByLabel("Full name").fill(name);
+    await page.getByLabel("Hourly rate (USD)").fill(rate);
+    await page.getByRole("radio", { name: source, exact: true }).click();
+    await page.getByRole("button", { name: "Add student", exact: true }).click();
+    await expect(page).toHaveURL("/students");
+  }
+
+  await page.goto("/");
+  const schedule = page.getByRole("button", { name: "Schedule class", exact: true });
+  const timeline = page.getByRole("list", { name: "Class timeline", exact: true });
+  for (const { name, time } of students) {
+    await schedule.click();
+    await page.getByRole("menuitem", { name, exact: true }).click();
+    const form = page.getByRole("dialog", { name: "Schedule class", exact: true });
+    await selectClassTime(page, form, time);
+    await form.getByRole("button", { name: "Save class", exact: true }).click();
+    await expect(form).toBeHidden();
+    await expect(page).toHaveURL("/#class-timeline");
+
+    const scheduledClass = timeline.getByRole("button").filter({ hasText: name });
+    await scheduledClass.click();
+    await page.getByRole("menuitem", { name: "Mark completed" }).click();
+    await expect(scheduledClass).toContainText("Completed");
+  }
+
+  await page.goto("/");
+  const overview = page.getByRole("region", { name: "Teaching overview" });
+  const tooltip = page.getByRole("tooltip");
+  const totals = [
+    {
+      amount: overview.getByText("$139.09", { exact: true }),
+      breakdown: /^Net after fees\s*Preply\s*\$82\.00\s*Direct\s*\$57\.09$/,
+    },
+    {
+      amount: overview.getByText("$160.00", { exact: true }),
+      breakdown: /^Gross before fees\s*Preply\s*\$100\.00\s*Direct\s*\$60\.00$/,
+    },
+  ];
+
+  for (const { amount, breakdown } of totals) {
+    await amount.hover();
+    await expect(tooltip).toHaveText(breakdown);
+    await page.keyboard.press("Escape");
+    await expect(tooltip).toBeHidden();
+  }
+
+  await overview.getByText("Monthly revenue", { exact: true }).hover();
+  await page.getByRole("button", { name: "Log out", exact: true }).focus();
+  for (const { amount, breakdown } of totals) {
+    await page.keyboard.press("Tab");
+    await expect(amount).toBeFocused();
+    await expect(tooltip).toHaveText(breakdown);
+    await page.keyboard.press("Escape");
+    await expect(tooltip).toBeHidden();
+    await expect(amount).toBeFocused();
+  }
 });

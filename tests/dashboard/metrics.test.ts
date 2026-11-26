@@ -41,7 +41,7 @@ async function loadDashboardQueries() {
   }
 }
 
-test("dashboard totals use the teacher's local calendar, recorded charges, and historical class fees", async (t) => {
+test("dashboard revenue uses the teacher's local calendar, recorded charges, and each class's historical source and fee", async (t) => {
   const { createDb, getTeacherDashboardMetrics } = await loadDashboardQueries();
   const sqlite = new DatabaseSync(":memory:");
   t.after(() => sqlite.close());
@@ -56,28 +56,32 @@ test("dashboard totals use the teacher's local calendar, recorded charges, and h
   } as unknown as D1Database;
 
   sqlite.exec(`
-    CREATE TABLE student (teacher_id TEXT, student_since TEXT);
+    CREATE TABLE student (id TEXT PRIMARY KEY, teacher_id TEXT, student_since TEXT, source TEXT NOT NULL);
     CREATE TABLE student_class (
       teacher_id TEXT, student_id TEXT, scheduled_at INTEGER, status TEXT,
       currency TEXT, charge_minor INTEGER, hourly_rate_snapshot_minor INTEGER
     );
     CREATE TABLE student_rate_history (
-      teacher_id TEXT, student_id TEXT, effective_at INTEGER, fee_bps INTEGER
+      id TEXT PRIMARY KEY, teacher_id TEXT, student_id TEXT, effective_at INTEGER, fee_bps INTEGER, source TEXT
     );
     INSERT INTO student VALUES
-      ('teacher', '2026-12-31'), ('teacher', '2027-01-01'),
-      ('teacher', '2027-02-01'), ('other-teacher', '2027-01-01');
+      ('platform', 'teacher', '2026-12-31', 'private'),
+      ('direct', 'teacher', '2027-01-01', 'private'),
+      ('future', 'teacher', '2027-02-01', 'private'),
+      ('other-direct', 'teacher', '2026-11-01', 'private'),
+      ('other-platform', 'other-teacher', '2027-01-01', 'preply');
   `);
-  const insertRate = sqlite.prepare("INSERT INTO student_rate_history VALUES (?, ?, ?, ?)");
+  const insertRate = sqlite.prepare("INSERT INTO student_rate_history VALUES (?, ?, ?, ?, ?, ?)");
   const rates = [
-    ["teacher", "platform", "2026-12-01T03:00:00.000Z", 2000],
-    ["teacher", "platform", "2027-01-02T03:00:00.000Z", 3000],
-    ["teacher", "platform", "2027-01-02T03:00:00.000Z", 1000],
-    ["other-teacher", "platform", "2027-01-02T03:00:00.000Z", 10000],
-    ["teacher", "direct", "2027-01-02T03:00:00.000Z", 10000],
+    ["initial", "teacher", "platform", "2026-12-01T03:00:00.000Z", 2000, "preply"],
+    ["same-time-preply", "teacher", "platform", "2027-01-02T03:00:00.000Z", 3000, "preply"],
+    ["same-time-direct", "teacher", "platform", "2027-01-02T03:00:00.000Z", 1000, "private"],
+    ["other-teacher-rate", "other-teacher", "platform", "2027-01-02T03:00:00.000Z", 10000, "preply"],
+    ["later-rate", "teacher", "direct", "2027-01-02T03:00:00.000Z", 10000, "preply"],
+    ["other-direct-rate", "teacher", "other-direct", "2026-12-01T03:00:00.000Z", 1000, "private"],
   ] as const;
-  for (const [teacher, student, effectiveAt, feeBps] of rates) {
-    insertRate.run(teacher, student, Date.parse(effectiveAt), feeBps);
+  for (const [id, teacher, student, effectiveAt, feeBps, source] of rates) {
+    insertRate.run(id, teacher, student, Date.parse(effectiveAt), feeBps, source);
   }
 
   const insertClass = sqlite.prepare("INSERT INTO student_class VALUES (?, ?, ?, ?, ?, ?, 99999)");
@@ -90,9 +94,9 @@ test("dashboard totals use the teacher's local calendar, recorded charges, and h
     ["teacher", "2027-01-01T08:00:00.000Z", "scheduled", "USD", 5000],
     ["teacher", "2027-01-02T02:59:59.999Z", "completed", "EUR", 3500, "direct"],
     ["teacher", "2027-01-02T03:00:00.000Z", "completed", "USD", 875],
-    ["teacher", "2027-01-02T04:00:00.000Z", "completed", "USD", 875],
+    ["teacher", "2027-01-02T04:00:00.000Z", "completed", "USD", 875, "other-direct"],
     ["teacher", "2027-02-01T03:00:00.000Z", "completed", "USD", 9999],
-    ["other-teacher", "2027-01-01T10:00:00.000Z", "completed", "USD", 9999],
+    ["other-teacher", "2027-01-01T10:00:00.000Z", "completed", "USD", 9999, "other-platform"],
   ] as const;
   for (const [teacher, scheduledAt, status, currency, charge, student = "platform"] of classes) {
     insertClass.run(teacher, student, Date.parse(scheduledAt), status, currency, charge);
@@ -107,8 +111,22 @@ test("dashboard totals use the teacher's local calendar, recorded charges, and h
     classesToday: 3,
     previousMonthStart: new Date("2026-12-01T03:00:00.000Z"),
     revenue: [
-      { currency: "EUR", currentGrossMinor: 3500, currentNetMinor: 3500, previousGrossMinor: 0 },
-      { currency: "USD", currentGrossMinor: 12950, currentNetMinor: 10534, previousGrossMinor: 4900 },
+      {
+        currency: "EUR",
+        currentGrossMinor: 3500,
+        currentNetMinor: 3500,
+        currentGrossMinorBySource: { preply: 0, private: 3500 },
+        currentNetMinorBySource: { preply: 0, private: 3500 },
+        previousGrossMinor: 0,
+      },
+      {
+        currency: "USD",
+        currentGrossMinor: 12950,
+        currentNetMinor: 10534,
+        currentGrossMinorBySource: { preply: 11200, private: 1750 },
+        currentNetMinorBySource: { preply: 8960, private: 1574 },
+        previousGrossMinor: 4900,
+      },
     ],
   });
   const beforeLocalMidnight = new Date("2027-01-01T02:59:59.999Z");
@@ -117,7 +135,16 @@ test("dashboard totals use the teacher's local calendar, recorded charges, and h
     classesThisMonth: 2,
     classesToday: 1,
     previousMonthStart: new Date("2026-11-01T03:00:00.000Z"),
-    revenue: [{ currency: "USD", currentGrossMinor: 4900, currentNetMinor: 3920, previousGrossMinor: 9999 }],
+    revenue: [
+      {
+        currency: "USD",
+        currentGrossMinor: 4900,
+        currentNetMinor: 3920,
+        currentGrossMinorBySource: { preply: 4900, private: 0 },
+        currentNetMinorBySource: { preply: 3920, private: 0 },
+        previousGrossMinor: 9999,
+      },
+    ],
   });
   assert.deepEqual(await getTeacherDashboardMetrics(db, "no-classes", timeZone, now), {
     newStudentsThisMonth: 0,
