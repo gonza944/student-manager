@@ -59,12 +59,12 @@ function RevenueAmount({
         <TooltipTrigger asChild>
           <span
             tabIndex={0}
-            className="inline-block max-w-full cursor-help rounded-sm underline decoration-dotted decoration-1 decoration-current/50 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="inline-block max-w-full cursor-help rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             {amount}
           </span>
         </TooltipTrigger>
-        <TooltipContent align="start" sideOffset={6} className="shadow-md ring-1 ring-current/20">
+        <TooltipContent align="start" sideOffset={6} className="px-4 shadow-md ring-1 ring-current/20">
           <span className="grid gap-1">
             <span className="font-semibold">{label}</span>
             {breakdown.map((source) => (
